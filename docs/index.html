@@ -3,20 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>U.S. Flag Status</title>
+    <title>Flag Status</title>
     <meta name="description" content="Real-time U.S. flag status monitor">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <div class="status-display">
+        <header>
             <div class="time">NOW</div>
-            
-            <div class="main-status">
+        </header>
+
+        <main>
+            <div class="status-display">
                 <div class="status-label">STATUS</div>
                 <div class="status-value" id="status-text">FULL</div>
             </div>
-            
+
             <div class="details">
                 <div class="detail-row">
                     <div class="detail-label">POSITION</div>
@@ -55,11 +57,12 @@
                     <button class="timeline-button">WEEK</button>
                 </div>
             </div>
-        </div>
+        </main>
 
         <div class="proclamation-panel" id="proclamation-panel">
+            <div class="handle"></div>
             <div class="proclamation-content">
-                <h2>PROCLAMATION</h2>
+                <div class="proclamation-label">PROCLAMATION</div>
                 <p id="proclamation-text">Loading latest proclamation...</p>
                 <div class="proclamation-meta">
                     <span id="proclamation-date">---</span>
