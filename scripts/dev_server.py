@@ -6,7 +6,7 @@ import webbrowser
 from pathlib import Path
 
 # Configuration
-PORT = 8000
+PORT = 8080  # Changed to 8080 to avoid conflicts
 DIRECTORY = str(Path(__file__).parent.parent)  # Project root directory
 
 class Handler(http.server.SimpleHTTPRequestHandler):
