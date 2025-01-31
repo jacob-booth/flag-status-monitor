@@ -1,4 +1,4 @@
-# 🇺🇸 U.S. Flag Status Monitor
+# 🇺🇸 Flag Status Monitor
 
 An automated system that tracks and displays the current U.S. flag status (full-staff or half-staff) based on official government sources. The system updates every 6 hours and provides a visual representation of the current flag position.
 
