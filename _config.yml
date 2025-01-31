@@ -1,10 +1,4 @@
-title: U.S. Flag Status Monitor
-description: Real-time U.S. flag status monitor showing current flag position (full-staff or half-staff)
-theme: jekyll-theme-minimal
-show_downloads: true
+title: Flag Status
+description: Real-time U.S. flag status monitor
 github:
-  is_project_page: true
-  repository_url: https://github.com/jacob-booth/flag-status-monitor
-source: docs
-include: [".html"]
-keep_files: [".html", ".js", ".css", ".json"]
+  is_project_page: false
