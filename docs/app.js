@@ -1,9 +1,22 @@
 // Constants
-const FLAG_STATUS_URL = 'flag_status.json';  // Status file in root directory
+const FLAG_STATUS_URL = 'flag_status.json';
 const REFRESH_INTERVAL = 3600000; // 1 hour in milliseconds
 const ANIMATION_DURATION = 2000; // 2 seconds for flag position transition
-const MAX_TIMELINE_ITEMS = 10; // Maximum number of items to show in timeline
+const MAX_TIMELINE_ITEMS = 10;
 const HISTORICAL_STORAGE_KEY = 'flag_status_history';
+
+// National holidays and observances that affect flag status
+const FLAG_HOLIDAYS = [
+    { date: '2025-01-20', name: 'Martin Luther King Jr. Day', type: 'full-staff' },
+    { date: '2025-02-17', name: 'Presidents Day', type: 'full-staff' },
+    { date: '2025-05-15', name: 'Peace Officers Memorial Day', type: 'half-staff' },
+    { date: '2025-05-26', name: 'Memorial Day', type: 'special' }, // half-staff until noon, then full-staff
+    { date: '2025-07-04', name: 'Independence Day', type: 'full-staff' },
+    { date: '2025-09-01', name: 'Labor Day', type: 'full-staff' },
+    { date: '2025-09-11', name: 'Patriot Day', type: 'half-staff' },
+    { date: '2025-11-11', name: 'Veterans Day', type: 'full-staff' },
+    { date: '2025-12-07', name: 'Pearl Harbor Remembrance Day', type: 'half-staff' }
+];
 
 // DOM Elements
 const flagElement = document.getElementById('flag');
@@ -18,6 +31,7 @@ const timelineElement = document.getElementById('timeline');
 const yearCountElement = document.getElementById('year-count');
 const monthCountElement = document.getElementById('month-count');
 const historyListElement = document.getElementById('history-list');
+const upcomingEventsElement = document.getElementById('upcoming-events');
 
 // State
 let currentStatus = null;
@@ -61,26 +75,78 @@ function formatDuration(startDate, endDate) {
 }
 
 /**
+ * Get upcoming flag events
+ * @returns {Array} Array of upcoming events
+ */
+function getUpcomingEvents() {
+    const now = new Date();
+    const threeMonthsFromNow = new Date(now.getFullYear(), now.getMonth() + 3, now.getDate());
+    
+    return FLAG_HOLIDAYS
+        .filter(event => {
+            const eventDate = new Date(event.date);
+            return eventDate >= now && eventDate <= threeMonthsFromNow;
+        })
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+}
+
+/**
+ * Update the upcoming events display
+ */
+function updateUpcomingEvents() {
+    const events = getUpcomingEvents();
+    const timeline = document.createElement('div');
+    timeline.className = 'event-timeline';
+    
+    events.forEach(event => {
+        const eventDate = new Date(event.date);
+        const timeUntil = Math.ceil((eventDate - new Date()) / (1000 * 60 * 60 * 24));
+        
+        const eventElement = document.createElement('div');
+        eventElement.className = `event-item ${event.type}`;
+        eventElement.innerHTML = `
+            <div class="event-date">${formatDate(event.date)}</div>
+            <div class="event-name">${event.name}</div>
+            <div class="event-countdown">${timeUntil} days away</div>
+            <div class="event-status">
+                ${event.type === 'half-staff' ? 'Half-Staff' : 
+                  event.type === 'special' ? 'Special Protocol' : 'Full-Staff'}
+            </div>
+        `;
+        
+        timeline.appendChild(eventElement);
+    });
+    
+    upcomingEventsElement.innerHTML = '';
+    upcomingEventsElement.appendChild(timeline);
+}
+
+/**
  * Update the timeline visualization
  */
 function updateTimeline() {
-    timelineElement.innerHTML = '';
-    
-    const timelineItems = statusHistory.slice(0, MAX_TIMELINE_ITEMS).map(status => {
-        const date = new Date(status.last_updated);
-        const formattedDate = formatDate(status.last_updated);
-        const isHalfStaff = status.status === 'half-staff';
-        
-        return `
-            <div class="timeline-item ${isHalfStaff ? 'half-staff' : 'full-staff'}">
-                <div class="timeline-content">
-                    <div class="timeline-date">${formattedDate}</div>
-                    <div class="timeline-status">${isHalfStaff ? 'Half-Staff' : 'Full-Staff'}</div>
-                    ${isHalfStaff ? `<div class="timeline-reason">${status.reason}</div>` : ''}
+    const timelineItems = statusHistory
+        .slice(0, MAX_TIMELINE_ITEMS)
+        .map((status, index) => {
+            const isHalfStaff = status.status === 'half-staff';
+            return `
+                <div class="timeline-item ${index % 2 === 0 ? 'left' : 'right'}">
+                    <div class="timeline-content ${isHalfStaff ? 'half-staff' : 'full-staff'}">
+                        <div class="timeline-date">${formatDate(status.last_updated)}</div>
+                        <div class="timeline-status">
+                            ${isHalfStaff ? 'Half-Staff' : 'Full-Staff'}
+                        </div>
+                        ${isHalfStaff ? `
+                            <div class="timeline-reason">${status.reason}</div>
+                            ${status.duration ? `
+                                <div class="timeline-duration">${status.duration}</div>
+                            ` : ''}
+                        ` : ''}
+                    </div>
                 </div>
-            </div>
-        `;
-    }).join('');
+            `;
+        })
+        .join('');
     
     timelineElement.innerHTML = timelineItems;
 }
@@ -106,7 +172,6 @@ function updateHistoricalStats() {
     yearCountElement.textContent = `${yearHalfStaff} half-staff orders`;
     monthCountElement.textContent = `${monthHalfStaff} half-staff orders`;
     
-    // Update history list
     const historyItems = statusHistory
         .filter(status => status.status === 'half-staff')
         .slice(0, 5)
@@ -114,8 +179,12 @@ function updateHistoricalStats() {
             <div class="history-item">
                 <div class="history-date">${formatDate(status.last_updated)}</div>
                 <div class="history-reason">${status.reason}</div>
+                ${status.duration ? `
+                    <div class="history-duration">${status.duration}</div>
+                ` : ''}
             </div>
-        `).join('');
+        `)
+        .join('');
     
     historyListElement.innerHTML = historyItems;
 }
@@ -144,13 +213,9 @@ function loadStatusHistory() {
 async function updateUI(status) {
     if (isTransitioning) return;
     
-    // Don't animate if it's the first update
     const shouldAnimate = currentStatus !== null;
-    
-    // Update state
     currentStatus = status;
     
-    // Add to history if it's a new status
     if (!statusHistory.length || 
         statusHistory[0].last_updated !== status.last_updated ||
         statusHistory[0].status !== status.status) {
@@ -160,7 +225,6 @@ async function updateUI(status) {
         updateHistoricalStats();
     }
     
-    // Update text content
     statusTextElement.textContent = status.status === 'half-staff' ? 'Half-Staff' : 'Full-Staff';
     reasonElement.textContent = status.reason || '';
     
@@ -171,7 +235,7 @@ async function updateUI(status) {
         if (status.proclamation_url) {
             proclamationLinkElement.innerHTML = `
                 <a href="${status.proclamation_url}" target="_blank" rel="noopener noreferrer">
-                    View Presidential Proclamation
+                    <i class="fas fa-external-link-alt"></i> View Presidential Proclamation
                 </a>
             `;
         }
@@ -183,20 +247,17 @@ async function updateUI(status) {
     lastUpdatedElement.textContent = formatDate(status.last_updated);
     sourceElement.textContent = status.source;
     
-    // Update flag position with animation
     if (shouldAnimate) {
         isTransitioning = true;
         flagElement.style.transition = `top ${ANIMATION_DURATION}ms ease-in-out`;
     }
     
-    // Set flag position
     if (status.status === 'half-staff') {
         flagElement.classList.add('half-staff');
     } else {
         flagElement.classList.remove('half-staff');
     }
     
-    // Reset transition state
     if (shouldAnimate) {
         setTimeout(() => {
             isTransitioning = false;
@@ -252,23 +313,19 @@ async function updateFlagStatus() {
  * Initialize the application
  */
 async function init() {
-    // Load historical data
     loadStatusHistory();
     updateTimeline();
     updateHistoricalStats();
+    updateUpcomingEvents();
     
-    // Initial update
     await updateFlagStatus();
     
-    // Set up periodic updates
     setInterval(updateFlagStatus, REFRESH_INTERVAL);
     
-    // Add error handling for flag animation
     flagElement.addEventListener('transitionend', () => {
         isTransitioning = false;
     });
     
-    // Handle visibility changes
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') {
             updateFlagStatus();

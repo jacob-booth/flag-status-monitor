@@ -7,13 +7,15 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" type="image/png" href="assets/favicon.png">
     <meta name="description" content="Real-time U.S. flag status monitor showing current flag position (full-staff or half-staff)">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <header>
-        <h1>🇺🇸 U.S. Flag Status Monitor</h1>
-    </header>
+    <div class="hero">
+        <header>
+            <h1>🇺🇸 U.S. Flag Status Monitor</h1>
+            <p class="subtitle">Real-time monitoring of United States flag display status</p>
+        </header>
 
-    <main>
         <div class="flag-container">
             <div class="pole"></div>
             <div class="flag" id="flag">
@@ -38,74 +40,120 @@
             </div>
         </div>
 
-        <div class="status-info">
+        <div class="current-status">
             <h2>Current Status: <span id="status-text">Loading...</span></h2>
-            <div class="proclamation-details">
-                <h3>Proclamation Details</h3>
-                <p id="reason" class="reason-text"></p>
-                <p id="duration" class="duration-text"></p>
-                <div id="proclamation-link" class="proclamation-link"></div>
-            </div>
-            <p class="last-updated">Last updated: <span id="last-updated">checking...</span></p>
-            <p class="source">Source: <span id="source">checking...</span></p>
+            <div class="last-updated">Last updated: <span id="last-updated">checking...</span></div>
         </div>
+    </div>
 
-        <div class="timeline-section">
-            <h2>Recent Flag Status Timeline</h2>
-            <div id="timeline" class="timeline"></div>
-        </div>
-
-        <div class="info-grid">
-            <div class="info-card">
-                <h3>Flag Etiquette</h3>
-                <div class="etiquette-content">
-                    <h4>Half-Staff Guidelines</h4>
-                    <ul>
-                        <li>By order of the President</li>
-                        <li>Death of a principal figure of the U.S. government</li>
-                        <li>Death of a former President</li>
-                        <li>Death of a state Governor</li>
-                    </ul>
-                    <h4>Timing</h4>
-                    <ul>
-                        <li>Sunrise to sunset on designated days</li>
-                        <li>30 days from the death of a President or former President</li>
-                        <li>10 days from the death of a Vice President</li>
-                        <li>Day of death until interment for Supreme Court Justices</li>
-                    </ul>
+    <main>
+        <section class="proclamation-section" id="proclamation-section">
+            <div class="card proclamation-details">
+                <h3><i class="fas fa-scroll"></i> Proclamation Details</h3>
+                <div class="proclamation-content">
+                    <p id="reason" class="reason-text"></p>
+                    <p id="duration" class="duration-text"></p>
+                    <div id="proclamation-link" class="proclamation-link"></div>
+                    <p class="source">Source: <span id="source">checking...</span></p>
                 </div>
             </div>
+        </section>
 
-            <div class="info-card">
-                <h3>Historical Data</h3>
-                <div id="historical-data">
-                    <div class="stats">
-                        <div class="stat-item">
-                            <h4>This Year</h4>
-                            <p id="year-count">Loading...</p>
-                        </div>
-                        <div class="stat-item">
-                            <h4>Last 30 Days</h4>
-                            <p id="month-count">Loading...</p>
-                        </div>
+        <section class="timeline-section">
+            <div class="card">
+                <h3><i class="fas fa-history"></i> Recent Status Timeline</h3>
+                <div id="timeline" class="timeline"></div>
+            </div>
+        </section>
+
+        <div class="grid-section">
+            <section class="historical-data card">
+                <h3><i class="fas fa-chart-bar"></i> Historical Data</h3>
+                <div class="stats">
+                    <div class="stat-item">
+                        <h4>This Year</h4>
+                        <p id="year-count">Loading...</p>
                     </div>
-                    <div id="history-list"></div>
+                    <div class="stat-item">
+                        <h4>Last 30 Days</h4>
+                        <p id="month-count">Loading...</p>
+                    </div>
+                </div>
+                <div id="history-list" class="history-list"></div>
+            </section>
+
+            <section class="etiquette-section card">
+                <h3><i class="fas fa-book"></i> Flag Etiquette</h3>
+                <div class="etiquette-content">
+                    <div class="etiquette-item">
+                        <h4>Half-Staff Guidelines</h4>
+                        <ul>
+                            <li>By order of the President</li>
+                            <li>Death of a principal figure of the U.S. government</li>
+                            <li>Death of a former President</li>
+                            <li>Death of a state Governor</li>
+                        </ul>
+                    </div>
+                    <div class="etiquette-item">
+                        <h4>Timing</h4>
+                        <ul>
+                            <li>Sunrise to sunset on designated days</li>
+                            <li>30 days from the death of a President</li>
+                            <li>10 days from the death of a Vice President</li>
+                            <li>Day of death until interment for Supreme Court Justices</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <section class="upcoming-events card">
+            <h3><i class="fas fa-calendar"></i> Upcoming Flag Events</h3>
+            <div id="upcoming-events" class="events-list">
+                <div class="event-timeline"></div>
+            </div>
+        </section>
+
+        <section class="resources-section">
+            <div class="card">
+                <h3><i class="fas fa-external-link-alt"></i> Additional Resources</h3>
+                <div class="resources-grid">
+                    <a href="https://www.va.gov/opa/publications/celebrate/flagdisplay.pdf" target="_blank" class="resource-link">
+                        <i class="fas fa-flag"></i>
+                        <span>Official Flag Display Guidelines</span>
+                    </a>
+                    <a href="https://www.govinfo.gov/content/pkg/USCODE-2011-title4/pdf/USCODE-2011-title4-chap1.pdf" target="_blank" class="resource-link">
+                        <i class="fas fa-book-open"></i>
+                        <span>U.S. Flag Code</span>
+                    </a>
+                    <a href="https://www.whitehouse.gov/briefing-room/presidential-actions/" target="_blank" class="resource-link">
+                        <i class="fas fa-scroll"></i>
+                        <span>Presidential Proclamations</span>
+                    </a>
+                    <a href="https://www.legion.org/flag/code" target="_blank" class="resource-link">
+                        <i class="fas fa-info-circle"></i>
+                        <span>American Legion Flag Resources</span>
+                    </a>
                 </div>
             </div>
-        </div>
+        </section>
     </main>
 
     <footer>
-        <p>Data sourced from official U.S. government sources. Updates every 6 hours.</p>
-        <p>
-            <a href="https://github.com/jacob-booth/flag-status-monitor" target="_blank" rel="noopener noreferrer">
-                View on GitHub
-            </a>
-            |
-            <a href="docs/" target="_blank" rel="noopener noreferrer">
-                Documentation
-            </a>
-        </p>
+        <div class="footer-content">
+            <div class="footer-section">
+                <p>Data sourced from official U.S. government sources. Updates every 6 hours.</p>
+                <p class="footer-links">
+                    <a href="https://github.com/jacob-booth/flag-status-monitor" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-github"></i> View on GitHub
+                    </a>
+                    |
+                    <a href="docs/" target="_blank" rel="noopener noreferrer">
+                        <i class="fas fa-book"></i> Documentation
+                    </a>
+                </p>
+            </div>
+        </div>
     </footer>
 
     <div class="loading-overlay" id="loading-overlay">
