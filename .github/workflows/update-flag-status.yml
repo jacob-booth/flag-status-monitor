@@ -1,0 +1,63 @@
+name: Update Flag Status
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Run every 6 hours
+  workflow_dispatch:  # Allow manual triggers
+  
+jobs:
+  update-status:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          
+      - name: Check flag status
+        env:
+          OPM_API_KEY: ${{ secrets.OPM_API_KEY }}
+          THIRD_PARTY_API_KEY: ${{ secrets.THIRD_PARTY_API_KEY }}
+        run: python src/api/check_status.py
+        
+      - name: Move flag status to root
+        run: |
+          mv data/flag_status.json flag_status.json
+          
+      - name: Configure Git
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          
+      - name: Commit and push changes
+        run: |
+          git add flag_status.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update flag status" && git push)
+
+  deploy:
+    needs: update-status
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
