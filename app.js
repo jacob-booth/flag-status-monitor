@@ -1,31 +1,118 @@
 // Constants
-const FLAG_STATUS_URL = 'flag_status.json';  // Status file in root directory
-const REFRESH_INTERVAL = 3600000; // 1 hour in milliseconds
-const ANIMATION_DURATION = 2000; // 2 seconds for flag position transition
+const FLAG_STATUS_URL = 'flag_status.json';
+const WHITE_HOUSE_RSS_PROXY = 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.whitehouse.gov%2Ffeed%2F';
+const REFRESH_INTERVAL = 3600000; // 1 hour
+const ANIMATION_DURATION = 300;
 
 // DOM Elements
-const flagElement = document.getElementById('flag');
 const statusTextElement = document.getElementById('status-text');
-const reasonElement = document.getElementById('reason');
-const lastUpdatedElement = document.getElementById('last-updated');
-const sourceElement = document.getElementById('source');
+const positionValueElement = document.getElementById('position-value');
+const sinceValueElement = document.getElementById('since-value');
+const durationValueElement = document.getElementById('duration-value');
+const sourceValueElement = document.getElementById('source-value');
+const timelineElement = document.getElementById('timeline');
+const proclamationPanel = document.getElementById('proclamation-panel');
+const proclamationText = document.getElementById('proclamation-text');
+const proclamationDate = document.getElementById('proclamation-date');
+const proclamationLink = document.getElementById('proclamation-link');
 const loadingOverlay = document.getElementById('loading-overlay');
 
 // State
 let currentStatus = null;
-let isTransitioning = false;
+let timelineData = [];
+let proclamations = [];
+let isPanelExpanded = false;
 
 /**
- * Format a date string for display
- * @param {string} dateString - ISO date string
- * @returns {string} Formatted date string
+ * Format a date for display
+ * @param {string|Date} date - Date to format
+ * @returns {string} Formatted date
  */
-function formatDate(dateString) {
-    const date = new Date(dateString);
+function formatDate(date) {
+    const d = new Date(date);
     return new Intl.DateTimeFormat('en-US', {
-        dateStyle: 'medium',
-        timeStyle: 'short'
-    }).format(date);
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit'
+    }).format(d);
+}
+
+/**
+ * Format duration for display
+ * @param {string} startDate - Start date string
+ * @param {string} endDate - End date string
+ * @returns {string} Formatted duration
+ */
+function formatDuration(startDate, endDate) {
+    const start = new Date(startDate);
+    const end = endDate ? new Date(endDate) : new Date();
+    const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+    return `${days}D`;
+}
+
+/**
+ * Update the timeline visualization
+ */
+function updateTimeline() {
+    const now = new Date();
+    const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+    
+    // Filter data for the last week
+    const weekData = timelineData.filter(item => 
+        new Date(item.timestamp) >= weekAgo
+    );
+
+    // Calculate timeline position
+    const totalTime = now - weekAgo;
+    const currentPosition = ((now - weekAgo) / totalTime) * 100;
+    
+    const timelineLine = timelineElement.querySelector('.timeline-line');
+    const timelineMarker = timelineElement.querySelector('.timeline-marker');
+    
+    timelineLine.style.width = `${currentPosition}%`;
+    timelineMarker.style.left = `${currentPosition}%`;
+}
+
+/**
+ * Toggle proclamation panel
+ */
+function toggleProclamationPanel() {
+    isPanelExpanded = !isPanelExpanded;
+    proclamationPanel.classList.toggle('expanded', isPanelExpanded);
+}
+
+/**
+ * Fetch and parse White House RSS feed
+ */
+async function fetchWhiteHouseProclamations() {
+    try {
+        const response = await fetch(WHITE_HOUSE_RSS_PROXY);
+        const data = await response.json();
+        
+        // Filter for proclamations related to flag status
+        proclamations = data.items
+            .filter(item => 
+                item.title.toLowerCase().includes('flag') ||
+                item.title.toLowerCase().includes('proclamation')
+            )
+            .map(item => ({
+                title: item.title,
+                content: item.content,
+                link: item.link,
+                date: new Date(item.pubDate)
+            }));
+
+        // Update UI with latest proclamation if available
+        if (proclamations.length > 0) {
+            const latest = proclamations[0];
+            proclamationText.textContent = latest.title;
+            proclamationDate.textContent = formatDate(latest.date);
+            proclamationLink.href = latest.link;
+        }
+    } catch (error) {
+        console.error('Error fetching proclamations:', error);
+    }
 }
 
 /**
@@ -33,63 +120,48 @@ function formatDate(dateString) {
  * @param {Object} status - Flag status data
  */
 async function updateUI(status) {
-    if (isTransitioning) return;
-    
-    // Don't animate if it's the first update
-    const shouldAnimate = currentStatus !== null;
-    
-    // Update state
     currentStatus = status;
     
-    // Update text content
-    statusTextElement.textContent = status.status === 'half-staff' ? 'Half-Staff' : 'Full-Staff';
-    reasonElement.textContent = status.reason || '';
-    lastUpdatedElement.textContent = formatDate(status.last_updated);
-    sourceElement.textContent = status.source;
+    // Update main status
+    statusTextElement.textContent = status.status === 'half-staff' ? 'HALF' : 'FULL';
+    statusTextElement.classList.toggle('half', status.status === 'half-staff');
     
-    // Update flag position with animation
-    if (shouldAnimate) {
-        isTransitioning = true;
-        flagElement.style.transition = `top ${ANIMATION_DURATION}ms ease-in-out`;
-    }
+    // Update details
+    positionValueElement.textContent = status.status === 'half-staff' ? 'HALF-STAFF' : 'FULL-STAFF';
+    sinceValueElement.textContent = formatDate(status.last_updated);
+    durationValueElement.textContent = status.duration || 
+        formatDuration(status.start_date, status.end_date);
+    sourceValueElement.textContent = status.source;
     
-    // Set flag position
-    if (status.status === 'half-staff') {
-        flagElement.classList.add('half-staff');
-    } else {
-        flagElement.classList.remove('half-staff');
-    }
+    // Add to timeline data
+    timelineData.push({
+        status: status.status,
+        timestamp: status.last_updated
+    });
     
-    // Reset transition state
-    if (shouldAnimate) {
-        setTimeout(() => {
-            isTransitioning = false;
-            flagElement.style.transition = '';
-        }, ANIMATION_DURATION);
-    }
+    // Update timeline
+    updateTimeline();
 }
 
 /**
- * Show error message to user
- * @param {string} message - Error message to display
+ * Show error message
+ * @param {string} message - Error message
  */
 function showError(message) {
-    statusTextElement.textContent = 'Error';
-    reasonElement.textContent = message;
-    lastUpdatedElement.textContent = 'Unable to update';
-    sourceElement.textContent = 'Error';
+    statusTextElement.textContent = 'ERROR';
+    positionValueElement.textContent = '---';
+    sinceValueElement.textContent = '---';
+    durationValueElement.textContent = '---';
+    sourceValueElement.textContent = message;
 }
 
 /**
  * Fetch current flag status
- * @returns {Promise<Object>} Flag status data
  */
 async function fetchFlagStatus() {
     try {
         const response = await fetch(FLAG_STATUS_URL);
-        if (!response.ok) {
-            throw new Error('Failed to fetch flag status');
-        }
+        if (!response.ok) throw new Error('Failed to fetch flag status');
         return await response.json();
     } catch (error) {
         console.error('Error fetching flag status:', error);
@@ -106,7 +178,7 @@ async function updateFlagStatus() {
         const status = await fetchFlagStatus();
         await updateUI(status);
     } catch (error) {
-        showError('Unable to fetch flag status. Please try again later.');
+        showError('Unable to fetch status');
     } finally {
         loadingOverlay.style.display = 'none';
     }
@@ -116,27 +188,41 @@ async function updateFlagStatus() {
  * Initialize the application
  */
 async function init() {
-    // Initial update
-    await updateFlagStatus();
+    // Set up proclamation panel interaction
+    proclamationPanel.addEventListener('click', toggleProclamationPanel);
+    
+    // Set up timeline buttons
+    document.querySelectorAll('.timeline-button').forEach(button => {
+        button.addEventListener('click', () => {
+            document.querySelectorAll('.timeline-button').forEach(b => 
+                b.classList.remove('active')
+            );
+            button.classList.add('active');
+            updateTimeline();
+        });
+    });
+    
+    // Initial updates
+    await Promise.all([
+        updateFlagStatus(),
+        fetchWhiteHouseProclamations()
+    ]);
     
     // Set up periodic updates
     setInterval(updateFlagStatus, REFRESH_INTERVAL);
-    
-    // Add error handling for flag animation
-    flagElement.addEventListener('transitionend', () => {
-        isTransitioning = false;
-    });
+    setInterval(fetchWhiteHouseProclamations, REFRESH_INTERVAL);
     
     // Handle visibility changes
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') {
             updateFlagStatus();
+            fetchWhiteHouseProclamations();
         }
     });
 }
 
 // Start the application
 init().catch(error => {
-    console.error('Failed to initialize application:', error);
-    showError('Failed to initialize application. Please refresh the page.');
+    console.error('Failed to initialize:', error);
+    showError('Failed to initialize');
 });

@@ -1,0 +1,26 @@
+{
+    "name": "U.S. Flag Status Monitor",
+    "short_name": "Flag Status",
+    "description": "Real-time U.S. flag status monitor showing current flag position (full-staff or half-staff)",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#f5f5f5",
+    "theme_color": "#3C3B6E",
+    "icons": [
+        {
+            "src": "favicon-16x16.png",
+            "sizes": "16x16",
+            "type": "image/png"
+        },
+        {
+            "src": "favicon-32x32.png",
+            "sizes": "32x32",
+            "type": "image/png"
+        },
+        {
+            "src": "apple-touch-icon.png",
+            "sizes": "180x180",
+            "type": "image/png"
+        }
+    ]
+}
