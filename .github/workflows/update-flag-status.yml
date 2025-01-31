@@ -1,9 +1,11 @@
-name: Update Flag Status
+name: Update Flag Status and Deploy
 
 on:
   schedule:
     - cron: '0 */6 * * *'  # Run every 6 hours
   workflow_dispatch:  # Allow manual triggers
+  push:
+    branches: [ main ]  # Run on pushes to main
   
 jobs:
   update-status:
@@ -11,6 +13,7 @@ jobs:
     permissions:
       contents: write
       pages: write
+      id-token: write
     
     steps:
       - name: Checkout repository
@@ -31,11 +34,7 @@ jobs:
           OPM_API_KEY: ${{ secrets.OPM_API_KEY }}
           THIRD_PARTY_API_KEY: ${{ secrets.THIRD_PARTY_API_KEY }}
         run: python src/api/check_status.py
-        
-      - name: Move flag status to root
-        run: |
-          mv data/flag_status.json flag_status.json
-          
+
       - name: Configure Git
         run: |
           git config --global user.name 'GitHub Action'
@@ -46,18 +45,16 @@ jobs:
           git add flag_status.json
           git diff --quiet && git diff --staged --quiet || (git commit -m "Update flag status" && git push)
 
-  deploy:
-    needs: update-status
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    
-    steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: '.'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
