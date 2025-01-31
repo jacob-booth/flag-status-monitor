@@ -4,6 +4,9 @@
     --flag-red: #B22234;
     --flag-white: #FFFFFF;
     --flag-blue: #3C3B6E;
+    --card-bg: #fff;
+    --border-radius: 8px;
+    --shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 * {
@@ -23,10 +26,10 @@ body {
 }
 
 header {
-    background-color: #fff;
+    background-color: var(--card-bg);
     padding: 1rem;
     text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow);
 }
 
 main {
@@ -36,6 +39,9 @@ main {
     flex-direction: column;
     align-items: center;
     gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 /* Flag container and pole */
@@ -64,10 +70,6 @@ main {
     height: 131.25px; /* Maintains 1.9:1 ratio */
     transition: top 2s ease-in-out;
     transform-origin: left center;
-}
-
-/* Default position (full-staff) */
-.flag {
     top: 0;
 }
 
@@ -124,22 +126,145 @@ main {
 /* Status info styles */
 .status-info {
     text-align: center;
-    background-color: #fff;
+    background-color: var(--card-bg);
     padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
     width: 100%;
-    max-width: 600px;
+    max-width: 800px;
 }
 
 .status-info h2 {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
     color: #2c3e50;
 }
 
-.status-info p {
+.proclamation-details {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin: 1.5rem 0;
+    text-align: left;
+}
+
+.proclamation-details h3 {
+    color: var(--flag-blue);
+    margin-bottom: 1rem;
+}
+
+.reason-text {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.duration-text {
+    color: #666;
+    font-style: italic;
+}
+
+.proclamation-link {
+    margin-top: 1rem;
+}
+
+.proclamation-link a {
+    color: var(--flag-blue);
+    text-decoration: none;
+}
+
+.proclamation-link a:hover {
+    text-decoration: underline;
+}
+
+/* Timeline section */
+.timeline-section {
+    width: 100%;
+    max-width: 800px;
+    background-color: var(--card-bg);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+.timeline {
+    margin-top: 1.5rem;
+    position: relative;
+    padding: 20px 0;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--flag-blue);
+    opacity: 0.3;
+}
+
+/* Info Grid */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    width: 100%;
+    max-width: 800px;
+}
+
+.info-card {
+    background-color: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+.info-card h3 {
+    color: var(--flag-blue);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #eee;
+}
+
+.etiquette-content h4 {
+    color: #2c3e50;
+    margin: 1rem 0 0.5rem;
+}
+
+.etiquette-content ul {
+    list-style-position: inside;
+    margin-left: 1rem;
+}
+
+.etiquette-content li {
     margin: 0.5rem 0;
     color: #666;
+}
+
+/* Historical Data */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: var(--border-radius);
+}
+
+.stat-item h4 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+#history-list {
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 10px;
 }
 
 /* Loading overlay */
@@ -176,8 +301,9 @@ main {
 footer {
     text-align: center;
     padding: 2rem;
-    background-color: #fff;
+    background-color: var(--card-bg);
     box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+    margin-top: 2rem;
 }
 
 footer a {
@@ -210,8 +336,16 @@ footer a:hover {
         height: 400px;
     }
 
-    .status-info {
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .status-info, .timeline-section {
         padding: 1rem;
+    }
+
+    .stats {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -244,5 +378,9 @@ footer a:hover {
 
     .status-info h2 {
         font-size: 1.2rem;
+    }
+
+    .proclamation-details {
+        padding: 1rem;
     }
 }

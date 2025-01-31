@@ -40,9 +40,58 @@
 
         <div class="status-info">
             <h2>Current Status: <span id="status-text">Loading...</span></h2>
-            <p id="reason"></p>
+            <div class="proclamation-details">
+                <h3>Proclamation Details</h3>
+                <p id="reason" class="reason-text"></p>
+                <p id="duration" class="duration-text"></p>
+                <div id="proclamation-link" class="proclamation-link"></div>
+            </div>
             <p class="last-updated">Last updated: <span id="last-updated">checking...</span></p>
             <p class="source">Source: <span id="source">checking...</span></p>
+        </div>
+
+        <div class="timeline-section">
+            <h2>Recent Flag Status Timeline</h2>
+            <div id="timeline" class="timeline"></div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>Flag Etiquette</h3>
+                <div class="etiquette-content">
+                    <h4>Half-Staff Guidelines</h4>
+                    <ul>
+                        <li>By order of the President</li>
+                        <li>Death of a principal figure of the U.S. government</li>
+                        <li>Death of a former President</li>
+                        <li>Death of a state Governor</li>
+                    </ul>
+                    <h4>Timing</h4>
+                    <ul>
+                        <li>Sunrise to sunset on designated days</li>
+                        <li>30 days from the death of a President or former President</li>
+                        <li>10 days from the death of a Vice President</li>
+                        <li>Day of death until interment for Supreme Court Justices</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3>Historical Data</h3>
+                <div id="historical-data">
+                    <div class="stats">
+                        <div class="stat-item">
+                            <h4>This Year</h4>
+                            <p id="year-count">Loading...</p>
+                        </div>
+                        <div class="stat-item">
+                            <h4>Last 30 Days</h4>
+                            <p id="month-count">Loading...</p>
+                        </div>
+                    </div>
+                    <div id="history-list"></div>
+                </div>
+            </div>
         </div>
     </main>
 
