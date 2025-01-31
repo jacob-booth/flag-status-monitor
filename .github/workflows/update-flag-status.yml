@@ -5,7 +5,7 @@ on:
     - cron: '0 */6 * * *'  # Run every 6 hours
   workflow_dispatch:  # Allow manual triggers
   push:
-    branches: [ main ]  # Run on pushes to main
+    branches: [ gh-pages ]  # Run on pushes to gh-pages
   
 jobs:
   update-status:
