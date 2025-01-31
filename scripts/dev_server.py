@@ -21,26 +21,29 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         super().end_headers()
 
 def main():
-    # Change to project root directory
-    os.chdir(DIRECTORY)
-    
-    # Create data directory if it doesn't exist
-    Path('data').mkdir(exist_ok=True)
-    
-    print(f"Starting development server at http://localhost:{PORT}")
-    print(f"Serving files from: {DIRECTORY}")
-    print("Press Ctrl+C to stop the server")
-    
-    # Start the server
-    with socketserver.TCPServer(("", PORT), Handler) as httpd:
-        # Open browser automatically
-        webbrowser.open(f"http://localhost:{PORT}/src/frontend/index.html")
+    """Start the development server."""
+    try:
+        # Change to project root directory
+        os.chdir(DIRECTORY)
         
-        try:
-            httpd.serve_forever()
-        except KeyboardInterrupt:
-            print("\nShutting down server...")
-            httpd.shutdown()
+        print(f"Starting development server at http://localhost:{PORT}")
+        print(f"Serving files from: {DIRECTORY}")
+        print("Press Ctrl+C to stop the server")
+        
+        # Start the server
+        with socketserver.TCPServer(("", PORT), Handler) as httpd:
+            # Open browser automatically
+            webbrowser.open(f"http://localhost:{PORT}/index.html")
+            
+            try:
+                httpd.serve_forever()
+            except KeyboardInterrupt:
+                print("\nShutting down server...")
+                httpd.shutdown()
+
+    except Exception as e:
+        print(f"Error starting server: {e}")
+        raise
 
 if __name__ == '__main__':
     main()
