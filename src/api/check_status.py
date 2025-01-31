@@ -34,19 +34,19 @@ class FlagStatusChecker:
     def __init__(self):
         self.opm_api_key = os.getenv('OPM_API_KEY')
         self.third_party_api_key = os.getenv('THIRD_PARTY_API_KEY')
-        self.status_file = 'data/flag_status.json'
-        os.makedirs('data', exist_ok=True)
+        # Change to write directly to root directory for GitHub Pages
+        self.status_file = 'flag_status.json'
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
     def check_opm_api(self) -> Optional[Dict]:
         """Check U.S. Office of Personnel Management API for flag status."""
         if not self.opm_api_key:
-            logger.warning("OPM API key not configured")
-            return None
+            logger.warning("OPM API key not configured, using default status")
+            return self.get_default_status("OPM API key not configured")
 
         try:
             response = requests.get(
-                'https://api.opm.gov/v1/flag-status',
+                'https://api.opm.gov/flag-status',
                 headers={'Authorization': f'Bearer {self.opm_api_key}'},
                 timeout=5
             )
@@ -68,8 +68,8 @@ class FlagStatusChecker:
     def check_third_party_api(self) -> Optional[Dict]:
         """Check third-party API for flag status."""
         if not self.third_party_api_key:
-            logger.warning("Third-party API key not configured")
-            return None
+            logger.warning("Third-party API key not configured, using default status")
+            return self.get_default_status("Third-party API key not configured")
 
         try:
             response = requests.get(
@@ -120,37 +120,32 @@ class FlagStatusChecker:
             logger.error(f"Error scraping government website: {str(e)}")
             return None
 
+    def get_default_status(self, reason: str) -> Dict:
+        """Get a default status when no sources are available."""
+        return {
+            'status': 'full-staff',  # Default to full-staff
+            'last_updated': datetime.utcnow().isoformat(),
+            'source': 'Default',
+            'reason': reason,
+            'expires': None
+        }
+
     def get_current_status(self) -> Dict:
         """Get current flag status from all available sources."""
         # Try sources in order of priority
         status = (
             self.check_opm_api() or
             self.check_third_party_api() or
-            self.scrape_government_website()
+            self.scrape_government_website() or
+            self.get_default_status("All sources unavailable")
         )
-
-        if not status:
-            # If all sources fail, use last known status or default to full-staff
-            try:
-                with open(self.status_file, 'r') as f:
-                    status = json.load(f)
-                    logger.warning("Using last known status")
-            except FileNotFoundError:
-                status = {
-                    'status': 'full-staff',
-                    'last_updated': datetime.utcnow().isoformat(),
-                    'source': 'Default',
-                    'reason': 'All sources unavailable',
-                    'expires': None
-                }
-                logger.warning("Using default status")
 
         # Validate status against schema
         try:
             validate(instance=status, schema=FLAG_STATUS_SCHEMA)
         except Exception as e:
             logger.error(f"Status validation failed: {str(e)}")
-            raise
+            status = self.get_default_status("Status validation failed")
 
         return status
 
@@ -158,9 +153,6 @@ class FlagStatusChecker:
         """Update and save current flag status."""
         try:
             status = self.get_current_status()
-            
-            # Create data directory if it doesn't exist
-            os.makedirs(os.path.dirname(self.status_file), exist_ok=True)
             
             # Save status to file
             with open(self.status_file, 'w') as f:
@@ -170,6 +162,10 @@ class FlagStatusChecker:
             
         except Exception as e:
             logger.error(f"Error updating flag status: {str(e)}")
+            # Create a default status file if update fails
+            default_status = self.get_default_status("Error updating status")
+            with open(self.status_file, 'w') as f:
+                json.dump(default_status, f, indent=2)
             raise
 
 def main():
