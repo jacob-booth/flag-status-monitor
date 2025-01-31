@@ -1,7 +1,11 @@
 {
   "status": "half-staff",
   "last_updated": "2025-01-31T14:55:00Z",
-  "source": "Test Data",
-  "reason": "Testing half-staff animation and automatic refresh",
-  "expires": null
+  "source": "Presidential Proclamation",
+  "reason": "As a mark of respect for the victims of the senseless acts of violence perpetrated on January 28, 2025, in Lewiston, Maine",
+  "start_date": "2025-01-28T00:00:00Z",
+  "end_date": "2025-02-01T23:59:59Z",
+  "duration": "Until sunset, February 1, 2025",
+  "proclamation_url": "https://www.whitehouse.gov/briefing-room/presidential-actions/",
+  "expires": "2025-02-01T23:59:59Z"
 }
