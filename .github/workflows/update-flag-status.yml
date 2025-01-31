@@ -45,10 +45,9 @@ jobs:
           git add flag_status.json
           git diff --quiet && git diff --staged --quiet || (git commit -m "Update flag status" && git push)
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
-        with:
-          path: docs
-
       - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v2
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          enable_jekyll: false
