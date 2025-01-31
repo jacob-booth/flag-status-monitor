@@ -17,6 +17,9 @@ const proclamationDate = document.getElementById('proclamation-date');
 const proclamationLink = document.getElementById('proclamation-link');
 const loadingOverlay = document.getElementById('loading-overlay');
 
+// Set page title
+document.title = '🇺🇸 Flag Status Monitor';
+
 // State
 let currentStatus = null;
 let timelineData = [];
