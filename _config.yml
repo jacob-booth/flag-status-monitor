@@ -5,3 +5,6 @@ show_downloads: true
 github:
   is_project_page: true
   repository_url: https://github.com/jacob-booth/flag-status-monitor
+source: docs
+include: [".html"]
+keep_files: [".html", ".js", ".css", ".json"]
