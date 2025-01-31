@@ -1,8 +1,0 @@
-remote_theme: null
-theme: null
-title: null
-defaults:
-  - scope:
-      path: ""
-    values:
-      layout: null
