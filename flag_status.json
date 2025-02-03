@@ -1,7 +1,7 @@
 {
-  "status": "half-staff",
-  "last_updated": "2025-01-31T14:55:00Z",
-  "source": "Test Data",
-  "reason": "Testing half-staff animation and automatic refresh",
+  "status": "full-staff",
+  "last_updated": "2025-02-03T20:47:19.646016",
+  "source": "Default",
+  "reason": "Status validation failed",
   "expires": null
 }
