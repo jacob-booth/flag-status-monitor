@@ -61,14 +61,19 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.1'
-          bundler-cache: true
           working-directory: docs
+
+      - name: Install Jekyll
+        working-directory: docs
+        run: |
+          gem install bundler
+          bundle install
 
       - name: Build site
         working-directory: docs
-        run: |
-          bundle install
-          bundle exec jekyll build
+        env:
+          JEKYLL_ENV: production
+        run: bundle exec jekyll build --baseurl "/flag-status-monitor"
           
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
