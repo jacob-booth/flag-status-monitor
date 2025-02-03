@@ -52,9 +52,13 @@ jobs:
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
           
+      - name: Update docs directory
+        run: |
+          cp flag_status.json docs/flag_status.json
+          
       - name: Commit and push changes
         run: |
-          git add flag_status.json
+          git add flag_status.json docs/flag_status.json
           git diff --quiet && git diff --staged --quiet || (git commit -m "Update flag status" && git push)
 
       - name: Setup Pages
