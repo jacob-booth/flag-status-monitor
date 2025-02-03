@@ -4,6 +4,7 @@ import logging
 import os
 from datetime import datetime
 from typing import Dict, Optional
+import xml.etree.ElementTree as ET
 
 import requests
 from bs4 import BeautifulSoup
@@ -32,7 +33,6 @@ FLAG_STATUS_SCHEMA = {
 
 class FlagStatusChecker:
     def __init__(self):
-        self.opm_api_key = os.getenv('OPM_API_KEY')
         self.third_party_api_key = os.getenv('THIRD_PARTY_API_KEY')
         # Change to write directly to root directory for GitHub Pages
         self.status_file = 'flag_status.json'
@@ -40,25 +40,32 @@ class FlagStatusChecker:
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
     def check_opm_api(self) -> Optional[Dict]:
         """Check U.S. Office of Personnel Management API for flag status."""
-        if not self.opm_api_key:
-            logger.warning("OPM API key not configured, using default status")
-            return self.get_default_status("OPM API key not configured")
-
         try:
             response = requests.get(
-                'https://api.opm.gov/flag-status',
-                headers={'Authorization': f'Bearer {self.opm_api_key}'},
+                'https://www.opm.gov/xml/operatingstatus.xml',
                 timeout=5
             )
             response.raise_for_status()
-            data = response.json()
+            
+            # Parse XML response
+            root = ET.fromstring(response.content)
+            
+            # Extract relevant information
+            status_type = root.find('StatusType').text
+            status_title = root.find('StatusTitle').text
+            date_posted = root.find('DateStatusPosted').text
+            message = root.find('LongStatusMessage').text
+            
+            # Map OPM status to flag status
+            # This is a simplified mapping - you might want to adjust based on actual OPM statuses
+            is_half_staff = 'closed' in status_type.lower() or 'emergency' in status_type.lower()
             
             return {
-                'status': 'half-staff' if data.get('half_staff', False) else 'full-staff',
-                'last_updated': datetime.utcnow().isoformat(),
+                'status': 'half-staff' if is_half_staff else 'full-staff',
+                'last_updated': datetime.fromisoformat(date_posted).isoformat(),
                 'source': 'OPM API',
-                'reason': data.get('reason', ''),
-                'expires': data.get('expiration_date')
+                'reason': message,
+                'expires': None  # OPM XML doesn't provide expiration date
             }
         except Exception as e:
             logger.error(f"Error checking OPM API: {str(e)}")
