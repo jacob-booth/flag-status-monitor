@@ -71,7 +71,11 @@ jobs:
           JEKYLL_ENV: production
         run: |
           bundle install
-          bundle exec jekyll build
+          bundle exec jekyll build --trace
+          cp -r assets _site/assets || true
+          cp -r *.js _site/ || true
+          cp -r *.css _site/ || true
+          cp flag_status.json _site/ || true
           
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
