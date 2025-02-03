@@ -55,19 +55,25 @@ jobs:
           git diff --quiet && git diff --staged --quiet || (git commit -m "Update flag status" && git push)
 
       - name: Setup Pages
-        id: pages
         uses: actions/configure-pages@v4
 
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
         with:
-          source: ./docs
-          destination: ./_site
+          ruby-version: '3.1'
+          bundler-cache: true
+          working-directory: docs
+
+      - name: Build site
+        working-directory: docs
+        run: |
+          bundle install
+          bundle exec jekyll build
           
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./_site
+          path: docs/_site
 
       - name: Deploy to GitHub Pages
         id: deployment
