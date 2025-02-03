@@ -18,7 +18,7 @@ class FlagStatusChecker:
         self.status_file = 'flag_status.json'
         self.docs_status_file = 'docs/flag_status.json'
 
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+    @retry(stop=after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
     def check_whitehouse_proclamations(self):
         """Check White House proclamations for flag status."""
         try:
@@ -39,35 +39,24 @@ class FlagStatusChecker:
             logger.info(f"Successfully parsed White House page HTML")
             
             # Look for recent proclamations
-            # First try the main content area
-            main_content = soup.find('main', {'id': 'main-content'})
-            if not main_content:
-                main_content = soup
-            
-            # Find all links that might be proclamations
-            proclamations = main_content.find_all(['h2', 'h3'], class_=lambda x: x is None or 'screen-reader' not in x)
-            logger.info(f"Found {len(proclamations)} potential proclamations to analyze")
+            proclamations = soup.find_all(['article', 'div'], class_=['news-item', 'presidential-action'])
+            logger.info(f"Found {len(proclamations)} proclamations to analyze")
             
             for proc in proclamations:
                 try:
-                    # Get the title and clean it up
-                    title = proc.get_text(strip=True).lower()
+                    # Get the title from the heading
+                    title_elem = proc.find(['h2', 'h3', 'h4'])
+                    if not title_elem:
+                        continue
+                        
+                    title = title_elem.get_text(strip=True).lower()
                     logger.info(f"Analyzing proclamation: {title}")
                     
                     # Look for flag-related keywords in title
                     if any(term in title for term in ['flag', 'honor', 'respect', 'memory', 'proclamation', 'death']):
-                        # Find the closest link
-                        link_elem = proc.find_parent('a') or proc.find('a')
+                        # Get the link to the full proclamation
+                        link_elem = title_elem.find_parent('a') or proc.find('a')
                         if not link_elem:
-                            # Try finding the next sibling or parent that contains a link
-                            link_elem = (
-                                proc.find_next_sibling('a') or 
-                                proc.find_next('a') or 
-                                proc.find_parent().find('a')
-                            )
-                        
-                        if not link_elem:
-                            logger.warning(f"Could not find link for proclamation: {title}")
                             continue
                             
                         link = link_elem.get('href', '')
@@ -92,13 +81,7 @@ class FlagStatusChecker:
                         proc_response.raise_for_status()
                         
                         proc_soup = BeautifulSoup(proc_response.text, 'html.parser')
-                        
-                        # Try different content areas
-                        content = (
-                            proc_soup.find('div', class_='body-content') or
-                            proc_soup.find('article') or
-                            proc_soup.find('main', {'id': 'main-content'})
-                        )
+                        content = proc_soup.find(['main', 'article', 'div'], {'id': 'main-content'}) or proc_soup
                         
                         if content:
                             content_text = content.get_text(' ', strip=True).lower()
@@ -110,7 +93,7 @@ class FlagStatusChecker:
                                     'status': 'half-staff',
                                     'last_updated': datetime.now(timezone.utc).isoformat(),
                                     'source': 'PRESIDENTIAL PROCLAMATION',
-                                    'reason': proc.get_text(strip=True),
+                                    'reason': title_elem.get_text(strip=True),
                                     'proclamation_url': link
                                 }
                                 
