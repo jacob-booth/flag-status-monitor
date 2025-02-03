@@ -42,7 +42,7 @@ body {
 .flag-container {
     position: relative;
     width: 300px;
-    height: 200px;
+    height: 158px; /* Proper flag ratio 1:1.9 */
     margin: 20px auto;
     perspective: 1000px;
 }
@@ -56,32 +56,34 @@ body {
     transition: transform 0.5s ease;
     animation: wave 8s infinite ease-in-out;
     box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-    background: linear-gradient(
+    background: repeating-linear-gradient(
         180deg,
+        var(--flag-red) 0%,
         var(--flag-red) 7.69%,
-        #ffffff 7.69%,
-        #ffffff 15.38%,
+        white 7.69%,
+        white 15.38%,
         var(--flag-red) 15.38%,
         var(--flag-red) 23.07%,
-        #ffffff 23.07%,
-        #ffffff 30.76%,
+        white 23.07%,
+        white 30.76%,
         var(--flag-red) 30.76%,
         var(--flag-red) 38.45%,
-        #ffffff 38.45%,
-        #ffffff 46.14%,
+        white 38.45%,
+        white 46.14%,
         var(--flag-red) 46.14%,
         var(--flag-red) 53.83%,
-        #ffffff 53.83%,
-        #ffffff 61.52%,
+        white 53.83%,
+        white 61.52%,
         var(--flag-red) 61.52%,
         var(--flag-red) 69.21%,
-        #ffffff 69.21%,
-        #ffffff 76.9%,
+        white 69.21%,
+        white 76.9%,
         var(--flag-red) 76.9%,
         var(--flag-red) 84.59%,
-        #ffffff 84.59%,
-        #ffffff 92.28%,
-        var(--flag-red) 92.28%
+        white 84.59%,
+        white 92.28%,
+        var(--flag-red) 92.28%,
+        var(--flag-red) 100%
     );
 }
 
@@ -91,7 +93,7 @@ body {
     left: 0;
     top: 0;
     width: 40%;
-    height: 46.15%;
+    height: 53.85%;
     background: var(--flag-blue);
     z-index: 2;
     box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
@@ -100,10 +102,10 @@ body {
 .stars {
     position: absolute;
     width: 40%;
-    height: 46.15%;
+    height: 53.85%;
     display: grid;
     grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: repeat(5, 1fr);
+    grid-template-rows: repeat(9, 1fr);
     padding: 8px;
     z-index: 3;
 }
@@ -116,6 +118,14 @@ body {
     align-items: center;
     justify-content: center;
     animation: twinkle 4s infinite ease-in-out;
+}
+
+/* Hide the 6th star in rows that should only have 5 stars */
+.stars .star:nth-child(11),
+.stars .star:nth-child(23),
+.stars .star:nth-child(35),
+.stars .star:nth-child(47) {
+    display: none;
 }
 
 .star::before {
