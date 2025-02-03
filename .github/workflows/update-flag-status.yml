@@ -47,11 +47,14 @@ jobs:
       - name: Update docs directory
         run: |
           cp flag_status.json docs/flag_status.json
+          cp app.js docs/app.js || true
+          cp styles.css docs/styles.css || true
+          cp -r assets/* docs/assets/ || true
           
       - name: Commit and push changes
         run: |
-          git add flag_status.json docs/flag_status.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Update flag status" && git push)
+          git add flag_status.json docs/flag_status.json docs/app.js docs/styles.css docs/assets
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update flag status and static assets" && git push)
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
