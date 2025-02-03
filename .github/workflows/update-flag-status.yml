@@ -42,9 +42,6 @@ jobs:
           pip install -r requirements.txt
           
       - name: Check flag status
-        env:
-          OPM_API_KEY: ${{ secrets.OPM_API_KEY }}
-          THIRD_PARTY_API_KEY: ${{ secrets.THIRD_PARTY_API_KEY }}
         run: python src/api/check_status.py
 
       - name: Configure Git

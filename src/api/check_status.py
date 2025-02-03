@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 import json
 import logging
-import os
-from datetime import datetime
-from typing import Dict, Optional
-
+from datetime import datetime, timezone
 import requests
 from bs4 import BeautifulSoup
-from jsonschema import validate
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 # Configure logging
@@ -17,155 +13,89 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Schema for flag status data
-FLAG_STATUS_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "status": {"type": "string", "enum": ["full-staff", "half-staff"]},
-        "last_updated": {"type": "string", "format": "date-time"},
-        "source": {"type": "string"},
-        "reason": {"type": "string"},
-        "expires": {"type": "string", "format": "date-time", "nullable": True}
-    },
-    "required": ["status", "last_updated", "source"]
-}
-
 class FlagStatusChecker:
     def __init__(self):
-        self.opm_api_key = os.getenv('OPM_API_KEY')
-        self.third_party_api_key = os.getenv('THIRD_PARTY_API_KEY')
-        # Change to write directly to root directory for GitHub Pages
         self.status_file = 'flag_status.json'
+        self.docs_status_file = 'docs/flag_status.json'
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
-    def check_opm_api(self) -> Optional[Dict]:
-        """Check U.S. Office of Personnel Management API for flag status."""
-        if not self.opm_api_key:
-            logger.warning("OPM API key not configured, using default status")
-            return self.get_default_status("OPM API key not configured")
-
+    def check_whitehouse_proclamations(self):
+        """Check White House proclamations for flag status."""
         try:
+            # White House presidential actions page
             response = requests.get(
-                'https://api.opm.gov/flag-status',
-                headers={'Authorization': f'Bearer {self.opm_api_key}'},
-                timeout=5
-            )
-            response.raise_for_status()
-            data = response.json()
-            
-            return {
-                'status': 'half-staff' if data.get('half_staff', False) else 'full-staff',
-                'last_updated': datetime.utcnow().isoformat(),
-                'source': 'OPM API',
-                'reason': data.get('reason', ''),
-                'expires': data.get('expiration_date')
-            }
-        except Exception as e:
-            logger.error(f"Error checking OPM API: {str(e)}")
-            return None
-
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
-    def check_third_party_api(self) -> Optional[Dict]:
-        """Check third-party API for flag status."""
-        if not self.third_party_api_key:
-            logger.warning("Third-party API key not configured, using default status")
-            return self.get_default_status("Third-party API key not configured")
-
-        try:
-            response = requests.get(
-                'https://api.flagstatus.example.com/v1/status',  # Example URL
-                headers={'X-API-Key': self.third_party_api_key},
-                timeout=5
-            )
-            response.raise_for_status()
-            data = response.json()
-            
-            return {
-                'status': data.get('status', 'full-staff'),
-                'last_updated': datetime.utcnow().isoformat(),
-                'source': 'Third-party API',
-                'reason': data.get('description', ''),
-                'expires': data.get('valid_until')
-            }
-        except Exception as e:
-            logger.error(f"Error checking third-party API: {str(e)}")
-            return None
-
-    def scrape_government_website(self) -> Optional[Dict]:
-        """Scrape government website for flag status (fallback method)."""
-        try:
-            response = requests.get(
-                'https://www.usa.gov/flag-status',  # Example URL
-                timeout=5
+                'https://www.whitehouse.gov/presidential-actions/',
+                timeout=10,
+                headers={'User-Agent': 'Mozilla/5.0'}
             )
             response.raise_for_status()
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Example scraping logic - would need to be adapted to actual website structure
-            status_element = soup.find('div', {'class': 'flag-status'})
-            if not status_element:
-                return None
-                
-            status_text = status_element.text.lower()
-            is_half_staff = 'half-staff' in status_text or 'half staff' in status_text
+            # Look for recent proclamations about flags
+            proclamations = soup.find_all('article')
+            for proc in proclamations:
+                title = proc.find('h2').text.lower()
+                if any(term in title for term in ['flag', 'honor', 'respect', 'memory']):
+                    link = proc.find('a')['href']
+                    date = proc.find(class_='posted-on').text.strip()
+                    
+                    # Get proclamation details
+                    proc_response = requests.get(link, timeout=10, headers={'User-Agent': 'Mozilla/5.0'})
+                    proc_soup = BeautifulSoup(proc_response.text, 'html.parser')
+                    content = proc_soup.find(class_='entry-content').text.lower()
+                    
+                    if 'half-staff' in content or 'half staff' in content:
+                        # Extract duration if available
+                        status_data = {
+                            'status': 'half-staff',
+                            'last_updated': datetime.now(timezone.utc).isoformat(),
+                            'source': 'PRESIDENTIAL PROCLAMATION',
+                            'reason': title,
+                            'proclamation_url': link
+                        }
+                        
+                        # Look for duration/expiration
+                        if 'until sunset' in content or 'until sundown' in content:
+                            # Extract date logic here
+                            status_data['expires'] = None  # Set based on extracted date
+                            
+                        return status_data
             
+            # If no half-staff proclamations found, assume full-staff
             return {
-                'status': 'half-staff' if is_half_staff else 'full-staff',
-                'last_updated': datetime.utcnow().isoformat(),
-                'source': 'Government Website Scraping',
-                'reason': status_element.get('data-reason', ''),
+                'status': 'full-staff',
+                'last_updated': datetime.now(timezone.utc).isoformat(),
+                'source': 'White House Proclamations',
+                'reason': 'No active half-staff proclamations found',
                 'expires': None
             }
+            
         except Exception as e:
-            logger.error(f"Error scraping government website: {str(e)}")
+            logger.error(f"Error checking White House proclamations: {str(e)}")
             return None
-
-    def get_default_status(self, reason: str) -> Dict:
-        """Get a default status when no sources are available."""
-        return {
-            'status': 'full-staff',  # Default to full-staff
-            'last_updated': datetime.utcnow().isoformat(),
-            'source': 'Default',
-            'reason': reason,
-            'expires': None
-        }
-
-    def get_current_status(self) -> Dict:
-        """Get current flag status from all available sources."""
-        # Try sources in order of priority
-        status = (
-            self.check_opm_api() or
-            self.check_third_party_api() or
-            self.scrape_government_website() or
-            self.get_default_status("All sources unavailable")
-        )
-
-        # Validate status against schema
-        try:
-            validate(instance=status, schema=FLAG_STATUS_SCHEMA)
-        except Exception as e:
-            logger.error(f"Status validation failed: {str(e)}")
-            status = self.get_default_status("Status validation failed")
-
-        return status
 
     def update_status(self):
         """Update and save current flag status."""
         try:
-            status = self.get_current_status()
+            status = self.check_whitehouse_proclamations()
+            if not status:
+                status = {
+                    'status': 'full-staff',
+                    'last_updated': datetime.now(timezone.utc).isoformat(),
+                    'source': 'Default',
+                    'reason': 'Unable to fetch current status',
+                    'expires': None
+                }
             
-            # Save status to file
-            with open(self.status_file, 'w') as f:
-                json.dump(status, f, indent=2)
+            # Save to both locations
+            for file_path in [self.status_file, self.docs_status_file]:
+                with open(file_path, 'w') as f:
+                    json.dump(status, f, indent=2)
             
             logger.info(f"Flag status updated: {status['status']} (Source: {status['source']})")
             
         except Exception as e:
             logger.error(f"Error updating flag status: {str(e)}")
-            # Create a default status file if update fails
-            default_status = self.get_default_status("Error updating status")
-            with open(self.status_file, 'w') as f:
-                json.dump(default_status, f, indent=2)
             raise
 
 def main():
