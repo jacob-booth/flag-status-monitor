@@ -36,6 +36,60 @@ body {
     gap: calc(var(--spacing-unit) * 4);
 }
 
+/* Flag Styles */
+.flag {
+    width: 200px;
+    height: 120px;
+    background: linear-gradient(
+        to bottom,
+        #cc0000 7.7%,
+        #ffffff 7.7%,
+        #ffffff 15.4%,
+        #cc0000 15.4%,
+        #cc0000 23.1%,
+        #ffffff 23.1%,
+        #ffffff 30.8%,
+        #cc0000 30.8%,
+        #cc0000 38.5%,
+        #ffffff 38.5%,
+        #ffffff 46.2%,
+        #cc0000 46.2%,
+        #cc0000 53.9%,
+        #ffffff 53.9%,
+        #ffffff 61.6%,
+        #cc0000 61.6%,
+        #cc0000 69.3%,
+        #ffffff 69.3%,
+        #ffffff 77%,
+        #cc0000 77%,
+        #cc0000 84.7%,
+        #ffffff 84.7%,
+        #ffffff 92.4%,
+        #cc0000 92.4%
+    );
+    position: relative;
+    transform-origin: left center;
+    transition: transform 0.5s ease;
+}
+
+.flag::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 40%;
+    height: 46.2%;
+    background: #002868;
+}
+
+.flag.half-staff {
+    transform: translateY(50%);
+}
+
+.flag.full-staff {
+    transform: translateY(0);
+}
+
 /* Time Display */
 .time {
     font-family: var(--font-mono);

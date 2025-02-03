@@ -16,6 +16,7 @@ const proclamationText = document.getElementById('proclamation-text');
 const proclamationDate = document.getElementById('proclamation-date');
 const proclamationLink = document.getElementById('proclamation-link');
 const loadingOverlay = document.getElementById('loading-overlay');
+const flagElement = document.querySelector('.flag');
 
 // State
 let currentStatus = null;
@@ -126,6 +127,12 @@ async function updateUI(status) {
     statusTextElement.textContent = status.status === 'half-staff' ? 'HALF' : 'FULL';
     statusTextElement.classList.toggle('half', status.status === 'half-staff');
     
+    // Update flag position
+    if (flagElement) {
+        flagElement.classList.remove('half-staff', 'full-staff');
+        flagElement.classList.add(status.status);
+    }
+    
     // Update details
     positionValueElement.textContent = status.status === 'half-staff' ? 'HALF-STAFF' : 'FULL-STAFF';
     sinceValueElement.textContent = formatDate(status.last_updated);
@@ -156,11 +163,12 @@ function showError(message) {
 }
 
 /**
- * Fetch current flag status
+ * Fetch current flag status with cache busting
  */
 async function fetchFlagStatus() {
     try {
-        const response = await fetch(FLAG_STATUS_URL);
+        const timestamp = new Date().getTime();
+        const response = await fetch(`${FLAG_STATUS_URL}?t=${timestamp}`);
         if (!response.ok) throw new Error('Failed to fetch flag status');
         return await response.json();
     } catch (error) {
