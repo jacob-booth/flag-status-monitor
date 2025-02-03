@@ -1,0 +1,17 @@
+title: U.S. Flag Status Monitor
+description: Monitor the current U.S. flag status based on White House proclamations
+baseurl: "/flag-status-monitor"
+url: "https://jacob-booth.github.io"
+
+# Build settings
+markdown: kramdown
+theme: jekyll-theme-minimal
+plugins:
+  - jekyll-feed
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
