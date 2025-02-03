@@ -4,6 +4,13 @@ on:
   schedule:
     - cron: '0 */6 * * *'  # Runs every 6 hours (UTC)
   workflow_dispatch:  # Allows manual trigger if needed
+  push:
+    branches: [ main ]  # Also run on pushes to main
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
 
 jobs:
   update:
@@ -43,8 +50,14 @@ jobs:
           git commit -m "Automated update at $(date)" || exit 0
           git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs  # Deploy the docs directory
+          path: docs
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
