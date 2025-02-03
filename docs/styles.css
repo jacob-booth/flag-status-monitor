@@ -13,6 +13,7 @@
     --flag-red: #B22234;
     --flag-white: #FFFFFF;
     --flag-blue: #3C3B6E;
+    --star-size: 3px;
 }
 
 * {
@@ -79,64 +80,64 @@ body {
     z-index: 1;
     background-image: 
         /* Row 1: 6 stars */
-        radial-gradient(circle at 8.33% 5.55%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 25% 5.55%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 41.67% 5.55%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 58.33% 5.55%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 75% 5.55%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 91.67% 5.55%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
+        radial-gradient(circle at 8.33% 5.55%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 25% 5.55%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 41.67% 5.55%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 58.33% 5.55%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 75% 5.55%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 91.67% 5.55%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
         /* Row 2: 5 stars */
-        radial-gradient(circle at 16.67% 16.67%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 33.33% 16.67%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 50% 16.67%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 66.67% 16.67%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 83.33% 16.67%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
+        radial-gradient(circle at 16.67% 16.67%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 33.33% 16.67%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 50% 16.67%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 66.67% 16.67%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 83.33% 16.67%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
         /* Row 3: 6 stars */
-        radial-gradient(circle at 8.33% 27.78%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 25% 27.78%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 41.67% 27.78%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 58.33% 27.78%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 75% 27.78%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 91.67% 27.78%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
+        radial-gradient(circle at 8.33% 27.78%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 25% 27.78%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 41.67% 27.78%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 58.33% 27.78%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 75% 27.78%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 91.67% 27.78%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
         /* Row 4: 5 stars */
-        radial-gradient(circle at 16.67% 38.89%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 33.33% 38.89%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 50% 38.89%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 66.67% 38.89%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 83.33% 38.89%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
+        radial-gradient(circle at 16.67% 38.89%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 33.33% 38.89%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 50% 38.89%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 66.67% 38.89%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 83.33% 38.89%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
         /* Row 5: 6 stars */
-        radial-gradient(circle at 8.33% 50%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 25% 50%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 41.67% 50%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 58.33% 50%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 75% 50%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 91.67% 50%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
+        radial-gradient(circle at 8.33% 50%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 25% 50%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 41.67% 50%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 58.33% 50%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 75% 50%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 91.67% 50%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
         /* Row 6: 5 stars */
-        radial-gradient(circle at 16.67% 61.11%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 33.33% 61.11%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 50% 61.11%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 66.67% 61.11%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 83.33% 61.11%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
+        radial-gradient(circle at 16.67% 61.11%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 33.33% 61.11%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 50% 61.11%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 66.67% 61.11%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 83.33% 61.11%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
         /* Row 7: 6 stars */
-        radial-gradient(circle at 8.33% 72.22%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 25% 72.22%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 41.67% 72.22%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 58.33% 72.22%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 75% 72.22%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 91.67% 72.22%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
+        radial-gradient(circle at 8.33% 72.22%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 25% 72.22%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 41.67% 72.22%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 58.33% 72.22%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 75% 72.22%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 91.67% 72.22%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
         /* Row 8: 5 stars */
-        radial-gradient(circle at 16.67% 83.33%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 33.33% 83.33%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 50% 83.33%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 66.67% 83.33%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 83.33% 83.33%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
+        radial-gradient(circle at 16.67% 83.33%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 33.33% 83.33%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 50% 83.33%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 66.67% 83.33%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 83.33% 83.33%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
         /* Row 9: 6 stars */
-        radial-gradient(circle at 8.33% 94.44%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 25% 94.44%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 41.67% 94.44%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 58.33% 94.44%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 75% 94.44%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px),
-        radial-gradient(circle at 91.67% 94.44%, var(--flag-white) 0, var(--flag-white) 2px, transparent 2.5px);
+        radial-gradient(circle at 8.33% 94.44%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 25% 94.44%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 41.67% 94.44%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 58.33% 94.44%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 75% 94.44%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px)),
+        radial-gradient(circle at 91.67% 94.44%, var(--flag-white) 0, var(--flag-white) var(--star-size), transparent calc(var(--star-size) + 0.5px));
     background-repeat: no-repeat;
 }
 
@@ -427,66 +428,7 @@ body {
         font-size: 10px;
     }
 
-    .union {
-        background-image: 
-            /* Row 1: 6 stars */
-            radial-gradient(circle at 8.33% 5.55%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 25% 5.55%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 41.67% 5.55%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 58.33% 5.55%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 75% 5.55%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 91.67% 5.55%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            /* Row 2: 5 stars */
-            radial-gradient(circle at 16.67% 16.67%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 33.33% 16.67%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 50% 16.67%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 66.67% 16.67%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 83.33% 16.67%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            /* Row 3: 6 stars */
-            radial-gradient(circle at 8.33% 27.78%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 25% 27.78%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 41.67% 27.78%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 58.33% 27.78%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 75% 27.78%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 91.67% 27.78%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            /* Row 4: 5 stars */
-            radial-gradient(circle at 16.67% 38.89%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 33.33% 38.89%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 50% 38.89%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 66.67% 38.89%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 83.33% 38.89%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            /* Row 5: 6 stars */
-            radial-gradient(circle at 8.33% 50%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 25% 50%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 41.67% 50%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 58.33% 50%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 75% 50%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 91.67% 50%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            /* Row 6: 5 stars */
-            radial-gradient(circle at 16.67% 61.11%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 33.33% 61.11%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 50% 61.11%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 66.67% 61.11%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 83.33% 61.11%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            /* Row 7: 6 stars */
-            radial-gradient(circle at 8.33% 72.22%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 25% 72.22%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 41.67% 72.22%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 58.33% 72.22%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 75% 72.22%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 91.67% 72.22%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            /* Row 8: 5 stars */
-            radial-gradient(circle at 16.67% 83.33%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 33.33% 83.33%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 50% 83.33%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 66.67% 83.33%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 83.33% 83.33%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            /* Row 9: 6 stars */
-            radial-gradient(circle at 8.33% 94.44%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 25% 94.44%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 41.67% 94.44%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 58.33% 94.44%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 75% 94.44%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px),
-            radial-gradient(circle at 91.67% 94.44%, var(--flag-white) 0, var(--flag-white) 1.5px, transparent 2px);
+    :root {
+        --star-size: 2px;
     }
 }
