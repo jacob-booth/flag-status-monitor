@@ -11,6 +11,13 @@ plugins:
   - jekyll-feed
   - jekyll-seo-tag
 
+# Include files
+include:
+  - "*.js"
+  - "*.css"
+  - "*.json"
+  - "assets"
+
 # Exclude from processing
 exclude:
   - Gemfile
@@ -29,3 +36,10 @@ kramdown:
 encoding: utf-8
 sass:
   style: compressed
+
+# Keep files
+keep_files:
+  - assets
+  - "*.js"
+  - "*.css"
+  - "*.json"
