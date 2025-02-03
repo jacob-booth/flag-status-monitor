@@ -30,6 +30,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: gh-pages  # Explicitly checkout gh-pages branch
       
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -56,7 +58,7 @@ jobs:
       - name: Commit and push changes
         run: |
           git add flag_status.json docs/flag_status.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Update flag status" && git push)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update flag status" && git push origin gh-pages)
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
