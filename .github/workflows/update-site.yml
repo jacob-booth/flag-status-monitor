@@ -13,14 +13,11 @@ permissions:
   id-token: write
 
 jobs:
-  update:
+  build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          persist-credentials: false
 
       - name: Set Up Python
         uses: actions/setup-python@v5
@@ -32,7 +29,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Set Up Node.js (Optional, for Static Site Generators)
+      - name: Set Up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -41,14 +38,11 @@ jobs:
         run: |
           echo "Updating site at $(date)" > docs/last_updated.txt
           python src/api/check_status.py
-          git add docs/last_updated.txt docs/flag_status.json
-
-      - name: Commit and Push Changes
-        run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions@github.com"
+          git add docs/last_updated.txt docs/flag_status.json
           git commit -m "Automated update at $(date)" || exit 0
-          git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
+          git push
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -58,6 +52,15 @@ jobs:
         with:
           path: docs
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
