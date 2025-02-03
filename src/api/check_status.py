@@ -26,28 +26,48 @@ class FlagStatusChecker:
             response = requests.get(
                 'https://www.whitehouse.gov/briefing-room/presidential-actions/',
                 timeout=10,
-                headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
+                headers={
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.5',
+                }
             )
             response.raise_for_status()
             logger.info(f"Successfully fetched White House page, status code: {response.status_code}")
             
-            soup = BeautifulSoup(response.text, 'lxml')
+            soup = BeautifulSoup(response.text, 'html.parser')
+            logger.info(f"Successfully parsed White House page HTML")
             
             # Look for recent proclamations about flags
-            proclamations = soup.find_all('article', class_='news-item')
+            proclamations = soup.find_all(['article', 'div'], class_=['news-item', 'presidential-action'])
             logger.info(f"Found {len(proclamations)} proclamations to analyze")
             
             for proc in proclamations:
                 try:
-                    title_elem = proc.find(['h2', 'h3'])
+                    # Try different possible title elements
+                    title_elem = (
+                        proc.find(['h2', 'h3', 'h4']) or 
+                        proc.find(class_=['title', 'action-title']) or
+                        proc.find('a')
+                    )
+                    
                     if not title_elem:
                         continue
                         
-                    title = title_elem.text.strip().lower()
+                    title = title_elem.get_text(strip=True).lower()
                     logger.info(f"Analyzing proclamation: {title}")
                     
-                    if any(term in title for term in ['flag', 'honor', 'respect', 'memory', 'proclamation']):
-                        link = proc.find('a')['href']
+                    # Look for flag-related keywords in title
+                    if any(term in title for term in ['flag', 'honor', 'respect', 'memory', 'proclamation', 'death']):
+                        # Get the link to the full proclamation
+                        link_elem = proc.find('a')
+                        if not link_elem:
+                            continue
+                            
+                        link = link_elem.get('href', '')
+                        if not link:
+                            continue
+                            
                         if not link.startswith('http'):
                             link = f"https://www.whitehouse.gov{link}"
                             
@@ -57,39 +77,40 @@ class FlagStatusChecker:
                         proc_response = requests.get(
                             link, 
                             timeout=10, 
-                            headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
+                            headers={
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                                'Accept-Language': 'en-US,en;q=0.5',
+                            }
                         )
                         proc_response.raise_for_status()
                         
-                        proc_soup = BeautifulSoup(proc_response.text, 'lxml')
-                        content = proc_soup.find(['article', 'div'], class_=['body-content', 'entry-content'])
+                        proc_soup = BeautifulSoup(proc_response.text, 'html.parser')
+                        content = proc_soup.get_text(' ', strip=True).lower()
                         
-                        if content:
-                            content_text = content.text.lower()
-                            if 'half-staff' in content_text or 'half staff' in content_text:
-                                logger.info("Found half-staff proclamation")
+                        if 'half-staff' in content or 'half staff' in content:
+                            logger.info("Found half-staff proclamation")
+                            
+                            # Extract duration if available
+                            status_data = {
+                                'status': 'half-staff',
+                                'last_updated': datetime.now(timezone.utc).isoformat(),
+                                'source': 'PRESIDENTIAL PROCLAMATION',
+                                'reason': title_elem.get_text(strip=True),
+                                'proclamation_url': link
+                            }
+                            
+                            # Look for duration/expiration
+                            if 'until sunset' in content or 'until sundown' in content:
+                                logger.info("Found duration information")
+                                status_data['expires'] = None  # We'll leave this as None for now
                                 
-                                # Extract duration if available
-                                status_data = {
-                                    'status': 'half-staff',
-                                    'last_updated': datetime.now(timezone.utc).isoformat(),
-                                    'source': 'PRESIDENTIAL PROCLAMATION',
-                                    'reason': title_elem.text.strip(),
-                                    'proclamation_url': link
-                                }
-                                
-                                # Look for duration/expiration
-                                if 'until sunset' in content_text or 'until sundown' in content_text:
-                                    # For now, we'll leave expires as None but log that we found duration info
-                                    logger.info("Found duration information in proclamation")
-                                    status_data['expires'] = None
-                                
-                                return status_data
+                            return status_data
                 except Exception as proc_error:
                     logger.error(f"Error processing proclamation: {str(proc_error)}")
                     continue
             
-            logger.info("No active half-staff proclamations found, setting status to full-staff")
+            logger.info("No half-staff proclamations found, setting status to full-staff")
             # If no half-staff proclamations found, assume full-staff
             return {
                 'status': 'full-staff',
