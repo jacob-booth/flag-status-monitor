@@ -1,6 +1,4 @@
 requests==2.31.0
 beautifulsoup4==4.12.2
-python-dotenv==1.0.0
-jsonschema==4.20.0
+lxml==4.9.3
 tenacity==8.2.3
-aiohttp==3.9.1
