@@ -23,7 +23,7 @@ class TimelineController {
         // Timeline view buttons
         this.buttons.forEach(button => {
             button.addEventListener('click', (e) => {
-                const view = e.target.textContent.toLowerCase();
+                const view = e.target.dataset.view;
                 this.setView(view);
                 audioController.playHoverSound();
             });
@@ -71,7 +71,7 @@ class TimelineController {
     setView(view) {
         this.currentView = view;
         this.buttons.forEach(btn => {
-            btn.classList.toggle('active', btn.textContent.toLowerCase() === view);
+            btn.classList.toggle('active', btn.dataset.view === view);
         });
         this.updateTimelineDisplay();
     }

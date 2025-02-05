@@ -83,27 +83,12 @@ const HOVER_FACTS = [
     "The flag on the moon is now white due to solar radiation"
 ];
 
-// Audio clips metadata
-const AUDIO_CLIPS = {
-    anthem: {
-        title: "The Star-Spangled Banner",
-        duration: "1:30",
-        path: "audio/anthem.mp3"
-    },
-    flagHistory: {
-        title: "History of the American Flag",
-        duration: "2:00",
-        path: "audio/history.mp3"
-    }
-};
-
 // Export all data
 export {
     FLAG_FACTS,
     FLAG_EVENTS,
     MONTHLY_THEMES,
-    HOVER_FACTS,
-    AUDIO_CLIPS
+    HOVER_FACTS
 };
 
 // Utility functions for working with flag data
