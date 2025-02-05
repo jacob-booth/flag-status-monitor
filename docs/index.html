@@ -104,13 +104,18 @@
 
     <!-- Audio Resources -->
     <audio id="anthem" preload="none">
-        <source src="audio/anthem.mp3" type="audio/mpeg">
+        <source src="data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAASAAAeMwAUFBQUFCIiIiIiIjAwMDAwPz8/Pz8/TU1NTU1NW1tbW1tbamtra2tra3l5eXl5iYmJiYmJmZmZmZmZqampqampu7u7u7u7xMTExMTE0tLS0tLS4ODg4ODg7+/v7+/v//////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAQKAAAAAAAAHjOZTf9C" type="audio/mpeg">
     </audio>
 
     <!-- JavaScript Modules -->
-    <script type="module" src="js/flag-data.js"></script>
-    <script type="module" src="js/audio-controller.js"></script>
-    <script type="module" src="js/timeline.js"></script>
-    <script type="module" src="app.js"></script>
+    <script type="module">
+        // Import modules with relative paths
+        import { FLAG_FACTS, FLAG_EVENTS, getRandomFact, getThemeForMonth } from './js/flag-data.js';
+        import { audioController } from './js/audio-controller.js';
+        import { timelineController } from './js/timeline.js';
+        
+        // Initialize app
+        import './app.js';
+    </script>
 </body>
 </html>

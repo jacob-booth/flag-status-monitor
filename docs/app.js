@@ -1,3 +1,4 @@
+// Import modules
 import { FLAG_FACTS, FLAG_EVENTS, getRandomFact, getThemeForMonth } from './js/flag-data.js';
 import { audioController } from './js/audio-controller.js';
 import { timelineController } from './js/timeline.js';
@@ -57,12 +58,14 @@ function formatDuration(startDate, endDate) {
  */
 function updateFunFact() {
     const fact = getRandomFact();
-    currentFactElement.textContent = fact;
-    currentFactElement.style.opacity = 0;
-    requestAnimationFrame(() => {
-        currentFactElement.style.transition = 'opacity 0.5s ease';
-        currentFactElement.style.opacity = 1;
-    });
+    if (currentFactElement) {
+        currentFactElement.textContent = fact;
+        currentFactElement.style.opacity = 0;
+        requestAnimationFrame(() => {
+            currentFactElement.style.transition = 'opacity 0.5s ease';
+            currentFactElement.style.opacity = 1;
+        });
+    }
 }
 
 /**
@@ -71,21 +74,30 @@ function updateFunFact() {
 function updateThemeDisplay() {
     const currentMonth = new Date().getMonth() + 1;
     const theme = getThemeForMonth(currentMonth.toString());
-    currentThemeElement.textContent = theme;
+    if (currentThemeElement) {
+        currentThemeElement.textContent = theme;
+    }
 }
 
 /**
  * Toggle anthem playback
  */
 async function toggleAnthem() {
-    if (isAnthemPlaying) {
-        await audioController.stop();
+    try {
+        if (isAnthemPlaying) {
+            await audioController.stop();
+            anthemToggle.innerHTML = '<span class="icon">♪</span>';
+        } else {
+            await audioController.playAnthem();
+            anthemToggle.innerHTML = '<span class="icon">⏹</span>';
+        }
+        isAnthemPlaying = !isAnthemPlaying;
+    } catch (error) {
+        console.error('Error toggling anthem:', error);
+        // Reset state if there's an error
+        isAnthemPlaying = false;
         anthemToggle.innerHTML = '<span class="icon">♪</span>';
-    } else {
-        await audioController.playAnthem();
-        anthemToggle.innerHTML = '<span class="icon">⏹</span>';
     }
-    isAnthemPlaying = !isAnthemPlaying;
 }
 
 /**
@@ -95,8 +107,10 @@ async function updateUI(status) {
     currentStatus = status;
     
     // Update main status
-    statusTextElement.textContent = status.status === 'half-staff' ? 'HALF' : 'FULL';
-    statusTextElement.classList.toggle('half', status.status === 'half-staff');
+    if (statusTextElement) {
+        statusTextElement.textContent = status.status === 'half-staff' ? 'HALF' : 'FULL';
+        statusTextElement.classList.toggle('half', status.status === 'half-staff');
+    }
     
     // Update flag position
     if (flagElement) {
@@ -105,22 +119,30 @@ async function updateUI(status) {
     }
     
     // Update details
-    positionValueElement.textContent = status.status === 'half-staff' ? 'HALF-STAFF' : 'FULL-STAFF';
-    sinceValueElement.textContent = formatDate(status.last_updated);
-    durationValueElement.textContent = status.duration || 
-        formatDuration(status.start_date, status.end_date);
-    sourceValueElement.textContent = status.source;
+    if (positionValueElement) {
+        positionValueElement.textContent = status.status === 'half-staff' ? 'HALF-STAFF' : 'FULL-STAFF';
+    }
+    if (sinceValueElement) {
+        sinceValueElement.textContent = formatDate(status.last_updated);
+    }
+    if (durationValueElement) {
+        durationValueElement.textContent = status.duration || 
+            formatDuration(status.start_date, status.end_date);
+    }
+    if (sourceValueElement) {
+        sourceValueElement.textContent = status.source;
+    }
 }
 
 /**
  * Show error message
  */
 function showError(message) {
-    statusTextElement.textContent = 'ERROR';
-    positionValueElement.textContent = '---';
-    sinceValueElement.textContent = '---';
-    durationValueElement.textContent = '---';
-    sourceValueElement.textContent = message;
+    if (statusTextElement) statusTextElement.textContent = 'ERROR';
+    if (positionValueElement) positionValueElement.textContent = '---';
+    if (sinceValueElement) sinceValueElement.textContent = '---';
+    if (durationValueElement) durationValueElement.textContent = '---';
+    if (sourceValueElement) sourceValueElement.textContent = message;
 }
 
 /**
@@ -160,7 +182,7 @@ async function fetchWhiteHouseProclamations() {
             }));
 
         // Update UI with latest proclamation if available
-        if (proclamations.length > 0) {
+        if (proclamations.length > 0 && proclamationText && proclamationDate && proclamationLink) {
             const latest = proclamations[0];
             proclamationText.textContent = latest.title;
             proclamationDate.textContent = formatDate(latest.date);
@@ -176,13 +198,13 @@ async function fetchWhiteHouseProclamations() {
  */
 async function updateFlagStatus() {
     try {
-        loadingOverlay.style.display = 'flex';
+        if (loadingOverlay) loadingOverlay.style.display = 'flex';
         const status = await fetchFlagStatus();
         await updateUI(status);
     } catch (error) {
         showError('Unable to fetch status');
     } finally {
-        loadingOverlay.style.display = 'none';
+        if (loadingOverlay) loadingOverlay.style.display = 'none';
     }
 }
 
@@ -190,44 +212,54 @@ async function updateFlagStatus() {
  * Initialize the application
  */
 async function init() {
-    // Set up audio controls
-    anthemToggle.addEventListener('click', toggleAnthem);
-    volumeSlider.addEventListener('input', (e) => {
-        audioController.setVolume(e.target.value / 100);
-    });
-
-    // Set up fun facts
-    updateFunFact();
-    nextFactButton.addEventListener('click', updateFunFact);
-    
-    // Set up theme display
-    updateThemeDisplay();
-    
-    // Set up proclamation panel interaction
-    proclamationPanel.addEventListener('click', () => {
-        proclamationPanel.classList.toggle('expanded');
-    });
-    
-    // Initial updates
-    await Promise.all([
-        updateFlagStatus(),
-        fetchWhiteHouseProclamations(),
-        audioController.loadSound('anthem', 'audio/anthem.mp3')
-    ]);
-    
-    // Set up periodic updates
-    setInterval(updateFlagStatus, REFRESH_INTERVAL);
-    setInterval(fetchWhiteHouseProclamations, REFRESH_INTERVAL);
-    setInterval(updateFunFact, REFRESH_INTERVAL);
-    
-    // Handle visibility changes
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-            updateFlagStatus();
-            fetchWhiteHouseProclamations();
-            updateThemeDisplay();
+    try {
+        // Set up audio controls
+        if (anthemToggle && volumeSlider) {
+            anthemToggle.addEventListener('click', toggleAnthem);
+            volumeSlider.addEventListener('input', (e) => {
+                audioController.setVolume(e.target.value / 100);
+            });
         }
-    });
+
+        // Set up fun facts
+        if (nextFactButton) {
+            updateFunFact();
+            nextFactButton.addEventListener('click', updateFunFact);
+        }
+        
+        // Set up theme display
+        updateThemeDisplay();
+        
+        // Set up proclamation panel interaction
+        if (proclamationPanel) {
+            proclamationPanel.addEventListener('click', () => {
+                proclamationPanel.classList.toggle('expanded');
+            });
+        }
+        
+        // Initial updates
+        await Promise.all([
+            updateFlagStatus(),
+            fetchWhiteHouseProclamations()
+        ]);
+        
+        // Set up periodic updates
+        setInterval(updateFlagStatus, REFRESH_INTERVAL);
+        setInterval(fetchWhiteHouseProclamations, REFRESH_INTERVAL);
+        setInterval(updateFunFact, REFRESH_INTERVAL);
+        
+        // Handle visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                updateFlagStatus();
+                fetchWhiteHouseProclamations();
+                updateThemeDisplay();
+            }
+        });
+    } catch (error) {
+        console.error('Error during initialization:', error);
+        showError('Failed to initialize');
+    }
 }
 
 // Start the application
