@@ -160,11 +160,27 @@ async function fetchFlagStatus() {
     try {
         const timestamp = new Date().getTime();
         const response = await fetch(`${FLAG_STATUS_URL}?t=${timestamp}`);
-        if (!response.ok) throw new Error('Failed to fetch flag status');
+        if (!response.ok) {
+            // Return default status if file doesn't exist
+            return {
+                status: 'full-staff',
+                last_updated: new Date().toISOString(),
+                source: 'Default',
+                reason: 'Initial status',
+                expires: null
+            };
+        }
         return await response.json();
     } catch (error) {
         console.error('Error fetching flag status:', error);
-        throw error;
+        // Return default status on error
+        return {
+            status: 'full-staff',
+            last_updated: new Date().toISOString(),
+            source: 'Default',
+            reason: 'Error fetching status',
+            expires: null
+        };
     }
 }
 
