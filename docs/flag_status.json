@@ -1,21 +1,7 @@
 {
   "status": "full-staff",
-  "last_updated": "2025-02-03T20:47:00Z",
+  "last_updated": "2025-02-05T19:19:59.033884",
   "source": "Default",
-  "reason": "No active half-staff proclamations found",
-  "timeline": [
-    {
-      "status": "full-staff",
-      "timestamp": "2025-01-27T00:00:00Z"
-    },
-    {
-      "status": "half-staff",
-      "timestamp": "2025-01-28T00:00:00Z"
-    },
-    {
-      "status": "full-staff",
-      "timestamp": "2025-02-02T00:00:00Z"
-    }
-  ],
+  "reason": "Status validation failed",
   "expires": null
 }
