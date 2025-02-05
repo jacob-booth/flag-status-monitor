@@ -193,7 +193,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .timeline {
     position: relative;
     height: 60px;
-    background-color: rgba(var(--flag-blue), 0.1);
+    background-color: rgba(60, 59, 110, 0.1);
     margin: calc(var(--spacing-unit) * 3) 0;
     border-radius: 30px;
     overflow: hidden;
@@ -274,7 +274,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 /* Historical Events */
 .historical-events {
-    background: rgba(var(--flag-blue), 0.05);
+    background: rgba(60, 59, 110, 0.05);
     border-radius: 12px;
     padding: 20px;
     margin: calc(var(--spacing-unit) * 2) 0;
