@@ -172,12 +172,22 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 .timeline-header {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 8px;
     margin-bottom: calc(var(--spacing-unit) * 2);
     font-family: var(--font-mono);
     font-size: 12px;
     color: var(--text-muted);
     letter-spacing: 0.5px;
+}
+
+.timeline-theme {
+    color: var(--flag-red);
+    font-weight: bold;
+}
+
+.timeline-date {
+    color: var(--text-color);
 }
 
 .timeline {
@@ -193,6 +203,19 @@ input[type="range"]::-webkit-slider-thumb:hover {
     display: flex;
     justify-content: space-between;
     padding: 10px;
+    height: 100%;
+}
+
+.day-label {
+    font-size: 10px;
+    opacity: 0.7;
+    text-transform: uppercase;
+}
+
+.day-number {
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 2px;
 }
 
 .timeline-day {
@@ -200,6 +223,10 @@ input[type="range"]::-webkit-slider-thumb:hover {
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 8px;
 }
 
 .timeline-day:hover {
