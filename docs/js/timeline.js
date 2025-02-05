@@ -25,7 +25,6 @@ class TimelineController {
             button.addEventListener('click', (e) => {
                 const view = e.target.dataset.view;
                 this.setView(view);
-                audioController.playHoverSound();
             });
 
             // Show random fact on hover
@@ -43,7 +42,6 @@ class TimelineController {
             const dayElement = e.target.closest('.timeline-day');
             if (dayElement) {
                 this.selectDate(new Date(dayElement.dataset.date));
-                audioController.playHoverSound();
             }
         });
     }
