@@ -35,7 +35,7 @@ class FlagStatusChecker:
     def __init__(self):
         self.third_party_api_key = os.getenv('THIRD_PARTY_API_KEY')
         # Change to write directly to root directory for GitHub Pages
-        self.status_file = 'flag_status.json'
+        self.status_file = 'docs/flag_status.json'
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
     def check_opm_api(self) -> Optional[Dict]:
