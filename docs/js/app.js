@@ -1,10 +1,10 @@
 // Import modules
-import { FLAG_FACTS, FLAG_EVENTS, getRandomFact, getThemeForMonth } from './js/flag-data.js';
-import { audioController } from './js/audio-controller.js';
-import { timelineController } from './js/timeline.js';
+import { FLAG_FACTS, FLAG_EVENTS, getRandomFact, getThemeForMonth } from './flag-data.js';
+import { audioController } from './audio-controller.js';
+import { timelineController } from './timeline.js';
 
 // Constants
-const FLAG_STATUS_URL = 'flag_status.json';
+const FLAG_STATUS_URL = '../flag_status.json';
 const WHITE_HOUSE_RSS_PROXY = 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.whitehouse.gov%2Ffeed%2F';
 const REFRESH_INTERVAL = 3600000; // 1 hour
 
