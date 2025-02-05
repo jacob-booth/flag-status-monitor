@@ -201,15 +201,10 @@ function updateProclamations() {
  * Update flag status and handle errors
  */
 async function updateFlagStatus() {
-    try {
-        if (loadingOverlay) loadingOverlay.style.display = 'flex';
-        const status = await fetchFlagStatus();
-        await updateUI(status);
-    } catch (error) {
-        showError('Unable to fetch status');
-    } finally {
-        if (loadingOverlay) loadingOverlay.style.display = 'none';
-    }
+    if (loadingOverlay) loadingOverlay.style.display = 'flex';
+    const status = await fetchFlagStatus();
+    await updateUI(status);
+    if (loadingOverlay) loadingOverlay.style.display = 'none';
 }
 
 /**
