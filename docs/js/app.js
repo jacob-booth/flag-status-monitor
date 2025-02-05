@@ -166,20 +166,25 @@ async function fetchFlagStatus() {
 async function fetchWhiteHouseProclamations() {
     try {
         const response = await fetch(WHITE_HOUSE_RSS_PROXY);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
         
         // Filter for proclamations related to flag status
         const proclamations = data.items
-            .filter(item => 
-                item.title.toLowerCase().includes('flag') ||
-                item.title.toLowerCase().includes('proclamation')
-            )
-            .map(item => ({
-                title: item.title,
-                content: item.content,
-                link: item.link,
-                date: new Date(item.pubDate)
-            }));
+            ? data.items
+                .filter(item =>
+                    item.title.toLowerCase().includes('flag') ||
+                    item.title.toLowerCase().includes('proclamation')
+                )
+                .map(item => ({
+                    title: item.title,
+                    content: item.content,
+                    link: item.link,
+                    date: new Date(item.pubDate)
+                }))
+            : [];
 
         // Update UI with latest proclamation if available
         if (proclamations.length > 0 && proclamationText && proclamationDate && proclamationLink) {
@@ -187,9 +192,30 @@ async function fetchWhiteHouseProclamations() {
             proclamationText.textContent = latest.title;
             proclamationDate.textContent = formatDate(latest.date);
             proclamationLink.href = latest.link;
+        } else {
+            // Show default message if no proclamations available
+            if (proclamationText) {
+                proclamationText.textContent = 'No recent proclamations available';
+            }
+            if (proclamationDate) {
+                proclamationDate.textContent = formatDate(new Date());
+            }
+            if (proclamationLink) {
+                proclamationLink.style.display = 'none';
+            }
         }
     } catch (error) {
         console.error('Error fetching proclamations:', error);
+        // Show error message in UI
+        if (proclamationText) {
+            proclamationText.textContent = 'Unable to load proclamations';
+        }
+        if (proclamationDate) {
+            proclamationDate.textContent = formatDate(new Date());
+        }
+        if (proclamationLink) {
+            proclamationLink.style.display = 'none';
+        }
     }
 }
 
