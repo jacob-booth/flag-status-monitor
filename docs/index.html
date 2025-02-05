@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flag Status</title>
-    <meta name="description" content="Real-time U.S. flag status monitor">
+    <title>U.S. Flag Status Monitor</title>
+    <meta name="description" content="Real-time U.S. flag status monitor with historical information">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -20,6 +20,42 @@
             <div class="USA-flag" id="flag">
                 <div class="USA-stars"></div>
             </div>
+            <div class="audio-controls">
+                <button id="anthem-toggle" class="audio-button" title="Play/Pause National Anthem">
+                    <span class="icon">♪</span>
+                </button>
+                <div class="volume-control">
+                    <input type="range" id="volume-slider" min="0" max="100" value="30">
+                </div>
+            </div>
+        </div>
+
+        <div class="interactive-timeline">
+            <div class="timeline-header">
+                <span>TODAY</span>
+                <span>WED</span>
+                <span>THU</span>
+                <span>FRI</span>
+                <span>SAT</span>
+                <span>SUN</span>
+                <span>MON</span>
+            </div>
+            <div class="timeline" id="timeline">
+                <div class="timeline-line"></div>
+                <div class="timeline-marker"></div>
+            </div>
+            <div class="timeline-controls">
+                <button class="timeline-button active" data-view="day">DAY</button>
+                <button class="timeline-button" data-view="week">WEEK</button>
+            </div>
+        </div>
+
+        <div class="historical-events">
+            <div class="events-header">
+                <h2>Flag History</h2>
+                <div class="theme-display" id="current-theme"></div>
+            </div>
+            <div class="events-content" id="events-list"></div>
         </div>
 
         <div class="details">
@@ -41,24 +77,12 @@
             </div>
         </div>
 
-        <div class="timeline-section">
-            <div class="timeline-header">
-                <span>TODAY</span>
-                <span>WED</span>
-                <span>THU</span>
-                <span>FRI</span>
-                <span>SAT</span>
-                <span>SUN</span>
-                <span>MON</span>
+        <div class="fun-facts-panel" id="fun-facts">
+            <div class="fact-content">
+                <div class="fact-label">DID YOU KNOW?</div>
+                <p id="current-fact"></p>
             </div>
-            <div class="timeline" id="timeline">
-                <div class="timeline-line"></div>
-                <div class="timeline-marker"></div>
-            </div>
-            <div class="timeline-controls">
-                <button class="timeline-button active">DAY</button>
-                <button class="timeline-button">WEEK</button>
-            </div>
+            <button class="fact-button" id="next-fact">Next Fact</button>
         </div>
 
         <div class="proclamation-panel" id="proclamation-panel">
@@ -78,6 +102,15 @@
         <div class="loading-spinner"></div>
     </div>
 
-    <script src="app.js"></script>
+    <!-- Audio Resources -->
+    <audio id="anthem" preload="none">
+        <source src="audio/anthem.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- JavaScript Modules -->
+    <script type="module" src="js/flag-data.js"></script>
+    <script type="module" src="js/audio-controller.js"></script>
+    <script type="module" src="js/timeline.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>
