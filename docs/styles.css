@@ -67,7 +67,7 @@ body {
     transform-style: preserve-3d;
     transform-origin: left center;
     transition: transform 0.5s ease;
-    animation: wave 10s infinite ease-in-out;
+    transition: transform 0.5s ease;
     box-shadow: 0 10px 20px rgba(0,0,0,0.15);
     border: 1px solid rgba(0,0,0,0.1);
     overflow: hidden;
@@ -81,11 +81,37 @@ body {
 }
 
 .USA-flag.half-staff {
-    transform: translateY(50%);
+    transform: translateY(50%) rotateY(0) rotateX(0) rotateZ(0);
+}
+
+.USA-flag.half-staff:hover {
+    animation: wave-half 10s infinite ease-in-out;
 }
 
 .USA-flag.full-staff {
-    transform: translateY(0);
+    transform: translateY(0) rotateY(0) rotateX(0) rotateZ(0);
+}
+
+.USA-flag.full-staff:hover {
+    animation: wave 10s infinite ease-in-out;
+}
+
+@keyframes wave-half {
+    0% {
+        transform: translateY(50%) rotateY(0) rotateX(0) rotateZ(0);
+    }
+    25% {
+        transform: translateY(50%) rotateY(0.5deg) rotateX(0.25deg) rotateZ(0.05deg);
+    }
+    50% {
+        transform: translateY(50%) rotateY(-0.25deg) rotateX(-0.125deg) rotateZ(-0.025deg);
+    }
+    75% {
+        transform: translateY(50%) rotateY(0.125deg) rotateX(0.125deg) rotateZ(0.025deg);
+    }
+    100% {
+        transform: translateY(50%) rotateY(0) rotateX(0) rotateZ(0);
+    }
 }
 
 /* Union (blue field) with stars */
