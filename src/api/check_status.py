@@ -2,7 +2,7 @@
 import json
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Optional
 import xml.etree.ElementTree as ET
 
@@ -26,7 +26,7 @@ FLAG_STATUS_SCHEMA = {
         "last_updated": {"type": "string", "format": "date-time"},
         "source": {"type": "string"},
         "reason": {"type": "string"},
-        "expires": {"type": "string", "format": "date-time", "nullable": True}
+        "expires": {"type": ["string", "null"]}
     },
     "required": ["status", "last_updated", "source"]
 }
@@ -34,8 +34,8 @@ FLAG_STATUS_SCHEMA = {
 class FlagStatusChecker:
     def __init__(self):
         self.third_party_api_key = os.getenv('THIRD_PARTY_API_KEY')
-        # Change to write directly to root directory for GitHub Pages
-        self.status_file = 'docs/flag_status.json'
+        # Write directly to docs directory for GitHub Pages
+        self.status_file = os.path.join('docs', 'flag_status.json')
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
     def check_opm_api(self) -> Optional[Dict]:
@@ -89,7 +89,7 @@ class FlagStatusChecker:
             
             return {
                 'status': data.get('status', 'full-staff'),
-                'last_updated': datetime.utcnow().isoformat(),
+                'last_updated': datetime.now(timezone.utc).isoformat(),
                 'source': 'Third-party API',
                 'reason': data.get('description', ''),
                 'expires': data.get('valid_until')
@@ -118,7 +118,7 @@ class FlagStatusChecker:
             
             return {
                 'status': 'half-staff' if is_half_staff else 'full-staff',
-                'last_updated': datetime.utcnow().isoformat(),
+                'last_updated': datetime.now(timezone.utc).isoformat(),
                 'source': 'Government Website Scraping',
                 'reason': status_element.get('data-reason', ''),
                 'expires': None
@@ -131,7 +131,7 @@ class FlagStatusChecker:
         """Get a default status when no sources are available."""
         return {
             'status': 'full-staff',  # Default to full-staff
-            'last_updated': datetime.utcnow().isoformat(),
+            'last_updated': datetime.now(timezone.utc).isoformat(),
             'source': 'Default',
             'reason': reason,
             'expires': None
@@ -160,6 +160,9 @@ class FlagStatusChecker:
         """Update and save current flag status."""
         try:
             status = self.get_current_status()
+            
+            # Create docs directory if it doesn't exist
+            os.makedirs(os.path.dirname(self.status_file), exist_ok=True)
             
             # Save status to file
             with open(self.status_file, 'w') as f:
