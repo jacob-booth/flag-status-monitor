@@ -5,7 +5,15 @@ import { timelineController } from './timeline.js';
 
 // Constants
 const FLAG_STATUS_URL = 'flag_status.json';
-const WHITE_HOUSE_RSS_PROXY = 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.whitehouse.gov%2Ffeed%2F';
+// Static proclamation data
+const PROCLAMATIONS = [
+    {
+        title: "Presidential Proclamation on Flag Day",
+        content: "Each year on June 14, we celebrate the symbol of our nation and union.",
+        date: "2025-02-05T00:00:00Z",
+        link: "https://www.whitehouse.gov/flag-day-2025"
+    }
+];
 const REFRESH_INTERVAL = 3600000; // 1 hour
 
 // DOM Elements
@@ -161,61 +169,15 @@ async function fetchFlagStatus() {
 }
 
 /**
- * Fetch and parse White House RSS feed
+ * Update proclamations display
  */
-async function fetchWhiteHouseProclamations() {
-    try {
-        const response = await fetch(WHITE_HOUSE_RSS_PROXY);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        
-        // Filter for proclamations related to flag status
-        const proclamations = data.items
-            ? data.items
-                .filter(item =>
-                    item.title.toLowerCase().includes('flag') ||
-                    item.title.toLowerCase().includes('proclamation')
-                )
-                .map(item => ({
-                    title: item.title,
-                    content: item.content,
-                    link: item.link,
-                    date: new Date(item.pubDate)
-                }))
-            : [];
-
-        // Update UI with latest proclamation if available
-        if (proclamations.length > 0 && proclamationText && proclamationDate && proclamationLink) {
-            const latest = proclamations[0];
-            proclamationText.textContent = latest.title;
-            proclamationDate.textContent = formatDate(latest.date);
-            proclamationLink.href = latest.link;
-        } else {
-            // Show default message if no proclamations available
-            if (proclamationText) {
-                proclamationText.textContent = 'No recent proclamations available';
-            }
-            if (proclamationDate) {
-                proclamationDate.textContent = formatDate(new Date());
-            }
-            if (proclamationLink) {
-                proclamationLink.style.display = 'none';
-            }
-        }
-    } catch (error) {
-        console.error('Error fetching proclamations:', error);
-        // Show error message in UI
-        if (proclamationText) {
-            proclamationText.textContent = 'Unable to load proclamations';
-        }
-        if (proclamationDate) {
-            proclamationDate.textContent = formatDate(new Date());
-        }
-        if (proclamationLink) {
-            proclamationLink.style.display = 'none';
-        }
+function updateProclamations() {
+    // Use static proclamation data
+    if (proclamationText && proclamationDate && proclamationLink) {
+        const latest = PROCLAMATIONS[0];
+        proclamationText.textContent = latest.title;
+        proclamationDate.textContent = formatDate(new Date(latest.date));
+        proclamationLink.href = latest.link;
     }
 }
 
@@ -264,21 +226,19 @@ async function init() {
         }
         
         // Initial updates
-        await Promise.all([
-            updateFlagStatus(),
-            fetchWhiteHouseProclamations()
-        ]);
+        await updateFlagStatus();
+        updateProclamations();
+        updateFunFact();
+        updateThemeDisplay();
         
         // Set up periodic updates
         setInterval(updateFlagStatus, REFRESH_INTERVAL);
-        setInterval(fetchWhiteHouseProclamations, REFRESH_INTERVAL);
         setInterval(updateFunFact, REFRESH_INTERVAL);
         
         // Handle visibility changes
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
                 updateFlagStatus();
-                fetchWhiteHouseProclamations();
                 updateThemeDisplay();
             }
         });
