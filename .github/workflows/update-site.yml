@@ -40,7 +40,7 @@ jobs:
           python src/api/check_status.py
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions@github.com"
-          git add docs/last_updated.txt docs/flag_status.json
+          git add docs/last_updated.txt docs/flag_status.json docs/js/* docs/index.html docs/styles.css
           git commit -m "Automated update at $(date)" || exit 0
           git push
 
