@@ -1,7 +1,7 @@
 {
   "status": "full-staff",
-  "last_updated": "2025-02-05T05:02:17.260000",
+  "last_updated": "2025-02-05T19:00:30",
   "source": "OPM API",
-  "reason": "Federal agencies in the Washington, DC area are Open.\n Employees are expected to begin the workday on time.  Normal operating procedures are in effect.",
+  "reason": "Federal agencies in the Washington, DC area are Open and employees have the Option for Unscheduled Leave or Unscheduled Telework.\n Telework Employees Not Scheduled to Telework must report to the office on time or notify their supervisor of their intent to use unscheduled leave or unscheduled telework.  Employees who request unscheduled telework must be prepared to telework, take unscheduled leave or other paid time off, or a combination-thereby accounting for the entire workday.\nRemote Workers and Telework Employees Scheduled to Telework are expected to begin their workday on time unless requesting unscheduled leave.\nNon-Telework Employees must report to the office on time or notify their supervisor of their intent to use unscheduled leave.\nEmergency Employees are expected to report to their worksites on time unless otherwise directed by their agencies.\n",
   "expires": null
 }
