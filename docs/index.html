@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>U.S. Flag Status Monitor</title>
+    <meta name="description" content="Real-time U.S. flag status monitor with historical information">
+    <base href="/flag-status-monitor/">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="time">NOW</div>
+
+        <div class="status-display">
+            <div class="status-label">STATUS</div>
+            <div class="status-value" id="status-text">FULL</div>
+        </div>
+
+        <div class="flag-container">
+            <div class="USA-flag" id="flag">
+                <div class="USA-stars"></div>
+            </div>
+            <div class="audio-controls">
+                <button id="anthem-toggle" class="audio-button" title="Play/Pause National Anthem">
+                    <span class="icon">♪</span>
+                </button>
+                <div class="volume-control">
+                    <input type="range" id="volume-slider" min="0" max="100" value="30">
+                </div>
+            </div>
+        </div>
+
+        <div class="interactive-timeline">
+            <div class="timeline-header"></div>
+            <div class="timeline" id="timeline"></div>
+            <div class="timeline-controls">
+                <button class="timeline-button active" data-view="day">DAY</button>
+                <button class="timeline-button" data-view="week">WEEK</button>
+            </div>
+        </div>
+
+        <div class="historical-events">
+            <div class="events-header">
+                <h2>Flag History</h2>
+                <div class="theme-display" id="current-theme"></div>
+            </div>
+            <div class="events-content" id="events-list"></div>
+        </div>
+
+        <div class="details">
+            <div class="detail-row">
+                <div class="detail-label">POSITION</div>
+                <div class="detail-value" id="position-value">---</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">SINCE</div>
+                <div class="detail-value" id="since-value">---</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">DURATION</div>
+                <div class="detail-value" id="duration-value">---</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">SOURCE</div>
+                <div class="detail-value" id="source-value">---</div>
+            </div>
+        </div>
+
+        <div class="fun-facts-panel" id="fun-facts">
+            <div class="fact-content">
+                <div class="fact-label">DID YOU KNOW?</div>
+                <p id="current-fact"></p>
+            </div>
+            <button class="fact-button" id="next-fact">Next Fact</button>
+        </div>
+
+        <div class="proclamation-panel" id="proclamation-panel">
+            <div class="handle"></div>
+            <div class="proclamation-content">
+                <div class="proclamation-label">PROCLAMATION</div>
+                <p id="proclamation-text">Loading latest proclamation...</p>
+                <div class="proclamation-meta">
+                    <span id="proclamation-date">---</span>
+                    <a href="#" id="proclamation-link" target="_blank">VIEW FULL TEXT →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Audio Resources -->
+    <audio id="anthem" preload="none">
+        <source src="data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAASAAAeMwAUFBQUFCIiIiIiIjAwMDAwPz8/Pz8/TU1NTU1NW1tbW1tbamtra2tra3l5eXl5iYmJiYmJmZmZmZmZqampqampu7u7u7u7xMTExMTE0tLS0tLS4ODg4ODg7+/v7+/v//////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAQKAAAAAAAAHjOZTf9C" type="audio/mpeg">
+    </audio>
+
+    <!-- JavaScript Modules -->
+    <script type="module">
+        // Import and initialize app
+        import './js/app.js';
+    </script>
+</body>
+</html>

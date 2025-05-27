@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <style>
+      .flag-pole { fill: #8B4513; }
+      .flag-red { fill: #B22234; }
+      .flag-white { fill: #FFFFFF; }
+      .flag-blue { fill: #3C3B6E; }
+      .star { fill: #FFFFFF; font-family: Arial, sans-serif; font-size: 2px; }
+    </style>
+  </defs>
+  
+  <!-- Flag pole -->
+  <rect class="flag-pole" x="2" y="4" width="1" height="24"/>
+  
+  <!-- Flag stripes -->
+  <rect class="flag-red" x="4" y="6" width="24" height="2"/>
+  <rect class="flag-white" x="4" y="8" width="24" height="2"/>
+  <rect class="flag-red" x="4" y="10" width="24" height="2"/>
+  <rect class="flag-white" x="4" y="12" width="24" height="2"/>
+  <rect class="flag-red" x="4" y="14" width="24" height="2"/>
+  <rect class="flag-white" x="4" y="16" width="24" height="2"/>
+  <rect class="flag-red" x="4" y="18" width="24" height="2"/>
+  
+  <!-- Blue union -->
+  <rect class="flag-blue" x="4" y="6" width="10" height="8"/>
+  
+  <!-- Stars (simplified) -->
+  <text class="star" x="6" y="8">★</text>
+  <text class="star" x="8" y="8">★</text>
+  <text class="star" x="10" y="8">★</text>
+  <text class="star" x="12" y="8">★</text>
+  <text class="star" x="7" y="10">★</text>
+  <text class="star" x="9" y="10">★</text>
+  <text class="star" x="11" y="10">★</text>
+  <text class="star" x="6" y="12">★</text>
+  <text class="star" x="8" y="12">★</text>
+  <text class="star" x="10" y="12">★</text>
+  <text class="star" x="12" y="12">★</text>
+  <text class="star" x="7" y="14">★</text>
+  <text class="star" x="9" y="14">★</text>
+  <text class="star" x="11" y="14">★</text>
+</svg> 

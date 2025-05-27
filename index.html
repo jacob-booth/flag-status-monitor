@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🇺🇸 U.S. Flag Status Monitor</title>
+    
+    <!-- SEO and Social Media -->
+    <meta name="description" content="Real-time U.S. flag status monitor showing current flag position (full-staff or half-staff) with push notifications and PWA support">
+    <meta name="keywords" content="US flag, flag status, half-staff, full-staff, government, memorial, PWA">
+    <meta name="author" content="Jacob Booth">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="U.S. Flag Status Monitor">
+    <meta property="og:description" content="Real-time monitoring of U.S. flag status with notifications">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://jacob-booth.github.io/flag-status-monitor">
+    <meta property="og:image" content="https://jacob-booth.github.io/flag-status-monitor/assets/og-image.png">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="U.S. Flag Status Monitor">
+    <meta name="twitter:description" content="Real-time monitoring of U.S. flag status">
+    <meta name="twitter:image" content="https://jacob-booth.github.io/flag-status-monitor/assets/og-image.png">
+    
+    <!-- PWA -->
+    <meta name="theme-color" content="#3C3B6E">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Flag Monitor">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+    <link rel="mask-icon" href="assets/safari-pinned-tab.svg" color="#3C3B6E">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="src/css/styles.css" as="style">
+    <link rel="preload" href="src/js/main.js" as="script">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="src/css/styles.css">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "U.S. Flag Status Monitor",
+      "description": "Real-time monitoring of U.S. flag status",
+      "url": "https://jacob-booth.github.io/flag-status-monitor",
+      "applicationCategory": "GovernmentApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+</head>
+<body>
+    <!-- Skip to main content for accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <!-- Header -->
+    <header class="header" role="banner">
+        <div class="header__container">
+            <h1 class="header__title">
+                <span class="header__flag-emoji" aria-hidden="true">🇺🇸</span>
+                Flag Monitor
+            </h1>
+            
+            <!-- Control buttons -->
+            <div class="header__controls">
+                <button 
+                    id="refresh-btn" 
+                    class="btn btn--icon btn--ghost" 
+                    aria-label="Refresh flag status"
+                    title="Refresh status (Ctrl+R)"
+                >
+                    <span aria-hidden="true">🔄</span>
+                </button>
+                
+                <button 
+                    id="notification-toggle" 
+                    class="btn btn--icon btn--ghost" 
+                    aria-label="Toggle notifications"
+                    title="Toggle notifications (Ctrl+N)"
+                >
+                    <span aria-hidden="true">🔕</span>
+                </button>
+                
+                <button 
+                    id="theme-toggle" 
+                    class="btn btn--icon btn--ghost" 
+                    aria-label="Toggle theme"
+                    title="Toggle theme (Ctrl+T)"
+                >
+                    <span aria-hidden="true">🔄</span>
+                </button>
+                
+                <button 
+                    id="history-btn" 
+                    class="btn btn--icon btn--ghost" 
+                    aria-label="View history"
+                    title="View flag status history"
+                >
+                    <span aria-hidden="true">📊</span>
+                </button>
+                
+                <button 
+                    id="settings-btn" 
+                    class="btn btn--icon btn--ghost" 
+                    aria-label="Open settings"
+                    title="Open settings"
+                >
+                    <span aria-hidden="true">⚙️</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <main id="main-content" class="main" role="main">
+        <!-- Hero section -->
+        <section class="hero-section" aria-labelledby="hero-title">
+            <h1 id="hero-title" class="hero-title">
+                U.S. Flag Status Monitor
+            </h1>
+            <p class="hero-subtitle">
+                Real-time monitoring of the United States flag status with official government sources, 
+                push notifications, and offline support.
+            </p>
+            <div class="current-date" aria-live="polite">
+                <span aria-hidden="true">📅</span>
+                <time id="current-date" datetime="">Loading date...</time>
+            </div>
+        </section>
+
+        <!-- Flag display section -->
+        <section class="flag-section" aria-labelledby="flag-heading">
+            <h2 id="flag-heading" class="sr-only">Flag Display</h2>
+            <div id="flag-container" class="flag-display-container">
+                <!-- Flag will be dynamically created here -->
+            </div>
+        </section>
+
+        <!-- Status information -->
+        <section class="status-section" aria-labelledby="status-heading">
+            <div class="status-card">
+                <h2 id="status-heading" class="status-card__title">
+                    Current Status: 
+                    <span id="status-text" class="status-card__status" aria-live="polite">
+                        Loading...
+                    </span>
+                </h2>
+                
+                <div id="reason" class="status-card__reason" aria-live="polite">
+                    Checking official sources...
+                </div>
+                
+                <div class="status-card__meta">
+                    <div class="status-card__meta-item">
+                        <div class="status-card__label">Last Updated</div>
+                        <div class="status-card__value">
+                            <time id="last-updated" datetime="">checking...</time>
+                        </div>
+                    </div>
+                    
+                    <div class="status-card__meta-item">
+                        <div class="status-card__label">Source</div>
+                        <div class="status-card__value" id="source">checking...</div>
+                    </div>
+                </div>
+                
+                <!-- Connection status indicator -->
+                <div class="connection-status" aria-live="polite">
+                    <span class="connection-status__indicator" aria-hidden="true"></span>
+                    <span class="connection-status__text">Connected</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick actions -->
+        <section class="actions-section" aria-labelledby="actions-heading">
+            <h2 id="actions-heading" class="sr-only">Quick Actions</h2>
+            <div class="quick-actions">
+                <button class="btn btn--primary" onclick="window.flagApp?.refreshStatus()">
+                    <span aria-hidden="true">🔄</span>
+                    Refresh Now
+                </button>
+                
+                <button class="btn btn--secondary" onclick="window.flagApp?.openHistory()">
+                    <span aria-hidden="true">📊</span>
+                    View History
+                </button>
+                
+                <button class="btn btn--secondary" onclick="window.flagApp?.toggleNotifications()">
+                    <span aria-hidden="true">🔔</span>
+                    Notifications
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="footer__container">
+            <div class="footer__content">
+                <p class="footer__text">
+                    Data sourced from official U.S. government sources. 
+                    Updates automatically every hour during business hours.
+                </p>
+                
+                <div class="footer__links">
+                    <a href="https://github.com/jacob-booth/flag-status-monitor" 
+                       target="_blank" 
+                       rel="noopener noreferrer"
+                       class="footer__link">
+                        <span aria-hidden="true">📱</span>
+                        View on GitHub
+                    </a>
+                    
+                    <a href="docs/" 
+                       target="_blank" 
+                       rel="noopener noreferrer"
+                       class="footer__link">
+                        <span aria-hidden="true">📚</span>
+                        Documentation
+                    </a>
+                    
+                    <a href="admin.html" 
+                       class="footer__link footer__link--admin"
+                       aria-label="Admin panel (authorized users only)">
+                        <span aria-hidden="true">🔐</span>
+                        Admin
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Version and build info -->
+            <div class="footer__meta">
+                <span class="footer__version">v2.0.0</span>
+                <span class="footer__separator">•</span>
+                <span class="footer__build">Built with ❤️ for 🇺🇸</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading overlay -->
+    <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
+        <div class="loading-spinner" aria-hidden="true"></div>
+        <p class="loading-text">Loading flag status...</p>
+    </div>
+
+    <!-- Notification container (dynamically populated) -->
+    <div class="notification-container" aria-live="polite" aria-atomic="false"></div>
+
+    <!-- Install prompt for PWA -->
+    <div id="install-prompt" class="install-prompt" hidden>
+        <div class="install-prompt__content">
+            <h3 class="install-prompt__title">Install Flag Monitor</h3>
+            <p class="install-prompt__text">
+                Get instant notifications and offline access by installing this app.
+            </p>
+            <div class="install-prompt__actions">
+                <button id="install-btn" class="btn btn--primary">
+                    <span aria-hidden="true">📱</span>
+                    Install App
+                </button>
+                <button id="install-dismiss" class="btn btn--ghost">
+                    Maybe Later
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="src/js/main.js"></script>
+    
+    <!-- Service Worker registration -->
+    <script>
+        // Register service worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+
+        // PWA install prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            const installPrompt = document.getElementById('install-prompt');
+            const installBtn = document.getElementById('install-btn');
+            const dismissBtn = document.getElementById('install-dismiss');
+            
+            if (installPrompt && installBtn && dismissBtn) {
+                installPrompt.hidden = false;
+                
+                installBtn.addEventListener('click', () => {
+                    installPrompt.hidden = true;
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('User accepted the install prompt');
+                        }
+                        deferredPrompt = null;
+                    });
+                });
+                
+                dismissBtn.addEventListener('click', () => {
+                    installPrompt.hidden = true;
+                });
+            }
+        });
+
+        // Set current date
+        function updateCurrentDate() {
+            const dateElement = document.getElementById('current-date');
+            if (dateElement) {
+                const now = new Date();
+                const options = { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    timeZone: 'America/New_York'
+                };
+                const formattedDate = now.toLocaleDateString('en-US', options);
+                dateElement.textContent = formattedDate;
+                dateElement.setAttribute('datetime', now.toISOString());
+            }
+        }
+
+        // Update date immediately and then every minute
+        updateCurrentDate();
+        setInterval(updateCurrentDate, 60000);
+    </script>
+</body>
+</html>

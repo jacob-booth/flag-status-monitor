@@ -1,0 +1,66 @@
+name: Auto Update and Deploy GitHub Pages
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Runs every 6 hours (UTC)
+  workflow_dispatch:  # Allows manual trigger if needed
+  push:
+    branches: [ main ]  # Also run on pushes to main
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Update Site Content
+        run: |
+          echo "Updating site at $(date)" > docs/last_updated.txt
+          python src/api/check_status.py
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions@github.com"
+          git add docs/last_updated.txt docs/flag_status.json docs/js/* docs/index.html docs/styles.css
+          git commit -m "Automated update at $(date)" || exit 0
+          git push
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

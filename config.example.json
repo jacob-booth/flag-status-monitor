@@ -1,0 +1,35 @@
+{
+  "api": {
+    "opm": {
+      "url": "https://api.opm.gov/v1/flag-status",
+      "key": "YOUR_OPM_API_KEY"
+    },
+    "thirdParty": {
+      "url": "https://api.flagstatus.example.com/v1/status",
+      "key": "YOUR_THIRD_PARTY_API_KEY"
+    }
+  },
+  "update": {
+    "interval": 21600,
+    "retries": 3,
+    "timeout": 5000
+  },
+  "sources": [
+    {
+      "name": "OPM API",
+      "priority": 1,
+      "type": "api"
+    },
+    {
+      "name": "Third-party API",
+      "priority": 2,
+      "type": "api"
+    },
+    {
+      "name": "Government Website",
+      "priority": 3,
+      "type": "scrape",
+      "url": "https://www.usa.gov/flag-status"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "name": "flag-status-monitor",
+  "version": "2.0.0",
+  "description": "Modern U.S. Flag Status Monitor with real-time updates and PWA capabilities",
+  "main": "src/js/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src/js/**/*.js",
+    "format": "prettier --write src/js/**/*.js",
+    "test": "vitest",
+    "backend:dev": "cd backend && uvicorn main:app --reload --host 0.0.0.0 --port 8000",
+    "backend:install": "cd backend && pip install -r requirements.txt"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0",
+    "vitest": "^1.0.0",
+    "@types/node": "^20.0.0"
+  },
+  "dependencies": {
+    "workbox-window": "^7.0.0"
+  },
+  "keywords": ["flag", "status", "monitor", "government", "pwa"],
+  "author": "Jacob Booth",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jacob-booth/flag-status-monitor.git"
+  }
+} 
