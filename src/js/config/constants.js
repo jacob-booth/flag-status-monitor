@@ -4,10 +4,12 @@
  */
 
 export const API_CONFIG = {
-  BASE_URL: '/api',
+  BASE_URL: window.location.hostname === 'jacob-booth.github.io' 
+    ? '/flag-status-monitor/api' 
+    : '/api',
   ENDPOINTS: {
-    STATUS: '/status',
-    HISTORY: '/history',
+    STATUS: window.location.hostname === 'jacob-booth.github.io' ? '/status.json' : '/status',
+    HISTORY: window.location.hostname === 'jacob-booth.github.io' ? '/history.json' : '/history',
     SUBSCRIBE: '/subscribe',
     ADMIN: '/admin'
   },
