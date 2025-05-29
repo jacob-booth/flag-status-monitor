@@ -336,10 +336,39 @@ export class FlagStatusApp {
     this.elements.lastUpdated.textContent = this.formatDate(status.last_updated);
     this.elements.source.textContent = status.source || '';
 
+    // Update status styling
+    this.elements.statusText.className = 'status-card__status';
+    if (status.status === 'half-staff') {
+      this.elements.statusText.classList.add('half-staff');
+    } else {
+      this.elements.statusText.classList.add('full-staff');
+    }
+
     // Update accessibility
     this.elements.statusText.setAttribute('aria-label', 
       `Current flag status: ${statusText}${status.reason ? `. Reason: ${status.reason}` : ''}`
     );
+
+    // Update connection status
+    this.updateConnectionStatus();
+  }
+
+  /**
+   * Update connection status indicator
+   */
+  updateConnectionStatus() {
+    const connectionStatus = document.querySelector('.connection-status');
+    const connectionText = document.querySelector('.connection-status__text');
+    
+    if (connectionStatus && connectionText) {
+      if (this.isOnline) {
+        connectionStatus.classList.remove('offline');
+        connectionText.textContent = 'Connected';
+      } else {
+        connectionStatus.classList.add('offline');
+        connectionText.textContent = 'Offline';
+      }
+    }
   }
 
   /**
@@ -623,12 +652,14 @@ export class FlagStatusApp {
     console.error('App error:', message);
     
     this.elements.statusText.textContent = 'Error';
+    this.elements.statusText.className = 'status-card__status error';
     this.elements.reason.textContent = message;
     this.elements.lastUpdated.textContent = 'Unable to update';
     this.elements.source.textContent = 'Error';
     
     this.flagDisplay?.showError();
     this.notificationSystem?.showInApp('error', 'Error', message);
+    this.updateConnectionStatus();
   }
 
   /**
