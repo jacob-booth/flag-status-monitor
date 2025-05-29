@@ -16,22 +16,16 @@ function initializeApp() {
     // Add global error handler
     window.addEventListener('error', (event) => {
       console.error('Global error:', event.error);
-      if (window.flagApp && window.flagApp.notificationManager) {
-        window.flagApp.notificationManager.showInAppNotification(
-          'An unexpected error occurred', 
-          'error'
-        );
+      if (window.flagApp && window.flagApp.notificationSystem) {
+        window.flagApp.notificationSystem.showInApp('error', 'Unexpected Error', 'An unexpected error occurred');
       }
     });
 
     // Add unhandled promise rejection handler
     window.addEventListener('unhandledrejection', (event) => {
       console.error('Unhandled promise rejection:', event.reason);
-      if (window.flagApp && window.flagApp.notificationManager) {
-        window.flagApp.notificationManager.showInAppNotification(
-          'An unexpected error occurred', 
-          'error'
-        );
+      if (window.flagApp && window.flagApp.notificationSystem) {
+        window.flagApp.notificationSystem.showInApp('error', 'Unexpected Error', 'An unexpected error occurred');
       }
     });
 

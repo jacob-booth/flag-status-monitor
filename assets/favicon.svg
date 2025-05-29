@@ -1,42 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <defs>
-    <style>
-      .flag-pole { fill: #8B4513; }
-      .flag-red { fill: #B22234; }
-      .flag-white { fill: #FFFFFF; }
-      .flag-blue { fill: #3C3B6E; }
-      .star { fill: #FFFFFF; font-family: Arial, sans-serif; font-size: 2px; }
-    </style>
-  </defs>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- White background -->
+  <rect x="3.1999999999999993" y="9.216" width="25.6" height="13.568000000000001" fill="white"/>
   
-  <!-- Flag pole -->
-  <rect class="flag-pole" x="2" y="4" width="1" height="24"/>
-  
-  <!-- Flag stripes -->
-  <rect class="flag-red" x="4" y="6" width="24" height="2"/>
-  <rect class="flag-white" x="4" y="8" width="24" height="2"/>
-  <rect class="flag-red" x="4" y="10" width="24" height="2"/>
-  <rect class="flag-white" x="4" y="12" width="24" height="2"/>
-  <rect class="flag-red" x="4" y="14" width="24" height="2"/>
-  <rect class="flag-white" x="4" y="16" width="24" height="2"/>
-  <rect class="flag-red" x="4" y="18" width="24" height="2"/>
+  <!-- Red stripes -->
+  <rect x="3.1999999999999993" y="9.216" width="25.6" height="1.0436923076923077" fill="#B22234"/><rect x="3.1999999999999993" y="11.303384615384616" width="25.6" height="1.0436923076923077" fill="#B22234"/><rect x="3.1999999999999993" y="13.39076923076923" width="25.6" height="1.0436923076923077" fill="#B22234"/><rect x="3.1999999999999993" y="15.478153846153845" width="25.6" height="1.0436923076923077" fill="#B22234"/><rect x="3.1999999999999993" y="17.56553846153846" width="25.6" height="1.0436923076923077" fill="#B22234"/><rect x="3.1999999999999993" y="19.652923076923074" width="25.6" height="1.0436923076923077" fill="#B22234"/><rect x="3.1999999999999993" y="21.74030769230769" width="25.6" height="1.0436923076923077" fill="#B22234"/>
   
   <!-- Blue union -->
-  <rect class="flag-blue" x="4" y="6" width="10" height="8"/>
+  <rect x="3.1999999999999993" y="9.216" width="10.240000000000002" height="7.326720000000002" fill="#3C3B6E"/>
   
-  <!-- Stars (simplified) -->
-  <text class="star" x="6" y="8">★</text>
-  <text class="star" x="8" y="8">★</text>
-  <text class="star" x="10" y="8">★</text>
-  <text class="star" x="12" y="8">★</text>
-  <text class="star" x="7" y="10">★</text>
-  <text class="star" x="9" y="10">★</text>
-  <text class="star" x="11" y="10">★</text>
-  <text class="star" x="6" y="12">★</text>
-  <text class="star" x="8" y="12">★</text>
-  <text class="star" x="10" y="12">★</text>
-  <text class="star" x="12" y="12">★</text>
-  <text class="star" x="7" y="14">★</text>
-  <text class="star" x="9" y="14">★</text>
-  <text class="star" x="11" y="14">★</text>
-</svg> 
+  <!-- Stars -->
+  <circle cx="4.053333333333333" cy="9.62304" r="1" fill="white"/><circle cx="5.76" cy="9.62304" r="1" fill="white"/><circle cx="7.466666666666667" cy="9.62304" r="1" fill="white"/><circle cx="9.173333333333334" cy="9.62304" r="1" fill="white"/><circle cx="10.88" cy="9.62304" r="1" fill="white"/><circle cx="12.586666666666668" cy="9.62304" r="1" fill="white"/><circle cx="5.247999999999999" cy="10.43712" r="1" fill="white"/><circle cx="7.295999999999999" cy="10.43712" r="1" fill="white"/><circle cx="9.344000000000001" cy="10.43712" r="1" fill="white"/><circle cx="11.392000000000003" cy="10.43712" r="1" fill="white"/><circle cx="13.440000000000003" cy="10.43712" r="1" fill="white"/><circle cx="4.053333333333333" cy="11.251199999999999" r="1" fill="white"/><circle cx="5.76" cy="11.251199999999999" r="1" fill="white"/><circle cx="7.466666666666667" cy="11.251199999999999" r="1" fill="white"/><circle cx="9.173333333333334" cy="11.251199999999999" r="1" fill="white"/><circle cx="10.88" cy="11.251199999999999" r="1" fill="white"/><circle cx="12.586666666666668" cy="11.251199999999999" r="1" fill="white"/><circle cx="5.247999999999999" cy="12.06528" r="1" fill="white"/><circle cx="7.295999999999999" cy="12.06528" r="1" fill="white"/><circle cx="9.344000000000001" cy="12.06528" r="1" fill="white"/><circle cx="11.392000000000003" cy="12.06528" r="1" fill="white"/><circle cx="13.440000000000003" cy="12.06528" r="1" fill="white"/><circle cx="4.053333333333333" cy="12.87936" r="1" fill="white"/><circle cx="5.76" cy="12.87936" r="1" fill="white"/><circle cx="7.466666666666667" cy="12.87936" r="1" fill="white"/><circle cx="9.173333333333334" cy="12.87936" r="1" fill="white"/><circle cx="10.88" cy="12.87936" r="1" fill="white"/><circle cx="12.586666666666668" cy="12.87936" r="1" fill="white"/><circle cx="5.247999999999999" cy="13.69344" r="1" fill="white"/><circle cx="7.295999999999999" cy="13.69344" r="1" fill="white"/><circle cx="9.344000000000001" cy="13.69344" r="1" fill="white"/><circle cx="11.392000000000003" cy="13.69344" r="1" fill="white"/><circle cx="13.440000000000003" cy="13.69344" r="1" fill="white"/><circle cx="4.053333333333333" cy="14.507520000000001" r="1" fill="white"/><circle cx="5.76" cy="14.507520000000001" r="1" fill="white"/><circle cx="7.466666666666667" cy="14.507520000000001" r="1" fill="white"/><circle cx="9.173333333333334" cy="14.507520000000001" r="1" fill="white"/><circle cx="10.88" cy="14.507520000000001" r="1" fill="white"/><circle cx="12.586666666666668" cy="14.507520000000001" r="1" fill="white"/><circle cx="5.247999999999999" cy="15.321600000000002" r="1" fill="white"/><circle cx="7.295999999999999" cy="15.321600000000002" r="1" fill="white"/><circle cx="9.344000000000001" cy="15.321600000000002" r="1" fill="white"/><circle cx="11.392000000000003" cy="15.321600000000002" r="1" fill="white"/><circle cx="13.440000000000003" cy="15.321600000000002" r="1" fill="white"/><circle cx="4.053333333333333" cy="16.13568" r="1" fill="white"/><circle cx="5.76" cy="16.13568" r="1" fill="white"/><circle cx="7.466666666666667" cy="16.13568" r="1" fill="white"/><circle cx="9.173333333333334" cy="16.13568" r="1" fill="white"/><circle cx="10.88" cy="16.13568" r="1" fill="white"/><circle cx="12.586666666666668" cy="16.13568" r="1" fill="white"/>
+  
+  <!-- Border -->
+  <rect x="3.1999999999999993" y="9.216" width="25.6" height="13.568000000000001" fill="none" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+</svg>

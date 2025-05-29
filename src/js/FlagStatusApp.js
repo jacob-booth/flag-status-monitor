@@ -8,6 +8,8 @@ import { api, APIError } from './utils/api.js';
 import { appStorage } from './utils/storage.js';
 import { FlagDisplay } from './components/FlagDisplay.js';
 import { NotificationManager } from './components/NotificationManager.js';
+import { HistoryView } from './components/HistoryView.js';
+import { NotificationSystem } from './components/NotificationSystem.js';
 
 /**
  * Main Flag Status Application
@@ -24,6 +26,8 @@ export class FlagStatusApp {
     // Components
     this.flagDisplay = null;
     this.notificationManager = null;
+    this.historyView = null;
+    this.notificationSystem = null;
     
     // DOM elements
     this.elements = {};
@@ -48,7 +52,7 @@ export class FlagStatusApp {
       this.setupDOM();
       console.log('✅ FlagStatusApp: DOM setup complete');
       
-      this.initializeComponents();
+      await this.initializeComponents();
       console.log('✅ FlagStatusApp: Components initialized');
       
       this.setupEventListeners();
@@ -130,12 +134,18 @@ export class FlagStatusApp {
   /**
    * Initialize components
    */
-  initializeComponents() {
+  async initializeComponents() {
     // Initialize flag display
     this.flagDisplay = new FlagDisplay(this.elements.flagContainer);
     
     // Initialize notification manager
     this.notificationManager = new NotificationManager();
+    
+    // Initialize history view
+    this.historyView = new HistoryView();
+    
+    // Initialize notification system
+    this.notificationSystem = new NotificationSystem();
   }
 
   /**
@@ -177,16 +187,26 @@ export class FlagStatusApp {
       });
     }
 
+    // Custom events for new components
+    window.addEventListener('show-history', () => {
+      this.openHistory();
+    });
+
+    window.addEventListener('flag-status-changed', (event) => {
+      // This will be handled by the notification system automatically
+      console.log('Flag status changed:', event.detail);
+    });
+
     // Online/offline detection
     window.addEventListener('online', () => {
       this.isOnline = true;
-      this.notificationManager.showInAppNotification('Connection restored', 'success');
+      this.notificationSystem.showInApp('success', 'Connection Restored', 'You\'re back online!');
       this.refreshStatus();
     });
 
     window.addEventListener('offline', () => {
       this.isOnline = false;
-      this.notificationManager.showInAppNotification('Connection lost - using cached data', 'warning');
+      this.notificationSystem.showInApp('warning', 'Connection Lost', 'Using cached data until connection is restored.');
     });
 
     // Visibility change (tab focus/blur)
@@ -233,10 +253,7 @@ export class FlagStatusApp {
       const cachedStatus = appStorage.getLastStatus();
       if (cachedStatus) {
         await this.updateUI(cachedStatus, false);
-        this.notificationManager.showInAppNotification(
-          'Using cached data - unable to fetch latest status', 
-          'warning'
-        );
+        this.notificationSystem.showInApp('warning', 'Using Cached Data', 'Unable to fetch latest status - showing cached data');
       } else {
         this.handleError('Unable to load flag status');
       }
@@ -293,7 +310,14 @@ export class FlagStatusApp {
 
     // Handle status change notifications
     if (previousStatus && previousStatus.status !== status.status) {
+      // Use both notification systems for compatibility
       this.notificationManager.handleStatusChange(status, previousStatus);
+      this.notificationSystem.showFlagStatusChange(status.status, status.reason);
+      
+      // Dispatch custom event for other components
+      window.dispatchEvent(new CustomEvent('flag-status-changed', {
+        detail: { newStatus: status, previousStatus }
+      }));
     }
 
     // Update page title
@@ -401,10 +425,7 @@ export class FlagStatusApp {
    */
   async refreshStatus() {
     if (!this.isOnline) {
-      this.notificationManager.showInAppNotification(
-        'Cannot refresh - you are offline', 
-        'warning'
-      );
+      this.notificationSystem.showInApp('warning', 'Offline', 'Cannot refresh - you are offline');
       return;
     }
 
@@ -425,11 +446,7 @@ export class FlagStatusApp {
     appStorage.setTheme(this.theme);
     this.applyTheme();
     
-    this.notificationManager.showInAppNotification(
-      `Theme changed to ${this.theme}`, 
-      'info', 
-      2000
-    );
+    this.notificationSystem.showInApp('info', 'Theme Changed', `Theme changed to ${this.theme}`, { duration: 2000 });
   }
 
   /**
@@ -539,16 +556,18 @@ export class FlagStatusApp {
   openSettings() {
     // This would open a settings modal
     console.log('Opening settings...');
-    this.notificationManager.showInAppNotification('Settings coming soon!', 'info');
+    this.notificationSystem.showInApp('info', 'Settings', 'Settings panel coming soon!');
   }
 
   /**
    * Open history view
    */
   openHistory() {
-    // This would open a history view
-    console.log('Opening history...');
-    this.notificationManager.showInAppNotification('History view coming soon!', 'info');
+    if (this.historyView) {
+      this.historyView.show();
+    } else {
+      this.notificationSystem.showInApp('error', 'History Unavailable', 'History view is not available at this time.');
+    }
   }
 
   /**
@@ -609,7 +628,7 @@ export class FlagStatusApp {
     this.elements.source.textContent = 'Error';
     
     this.flagDisplay?.showError();
-    this.notificationManager?.handleError(message);
+    this.notificationSystem?.showInApp('error', 'Error', message);
   }
 
   /**
