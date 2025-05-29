@@ -10,6 +10,7 @@ import { FlagDisplay } from './components/FlagDisplay.js';
 import { NotificationManager } from './components/NotificationManager.js';
 import { HistoryView } from './components/HistoryView.js';
 import { NotificationSystem } from './components/NotificationSystem.js';
+import { getFlagInfo, getNearestFederalHoliday, getTodaysObservance, formatHolidayDate } from './utils/flagInfo.js';
 
 /**
  * Main Flag Status Application
@@ -135,17 +136,49 @@ export class FlagStatusApp {
    * Initialize components
    */
   async initializeComponents() {
-    // Initialize flag display
-    this.flagDisplay = new FlagDisplay(this.elements.flagContainer);
+    try {
+      // Initialize core components
+      this.flagDisplay = new FlagDisplay(this.elements.flagContainer);
+      this.notificationManager = new NotificationManager();
+      this.historyView = new HistoryView();
+      this.notificationSystem = new NotificationSystem();
+
+      // Initialize enhanced status display
+      this.initializeEnhancedStatus();
+
+      // Set up event listeners
+      this.setupEventListeners();
+
+      // Load initial data
+      await this.loadInitialData();
+
+      console.log('✅ All components initialized successfully');
+    } catch (error) {
+      console.error('❌ Failed to initialize components:', error);
+      this.showError('Failed to initialize application components');
+    }
+  }
+
+  initializeEnhancedStatus() {
+    // Initialize flag code toggle
+    const flagCodeSummary = document.querySelector('.flag-code-summary');
+    const flagCodeContent = document.querySelector('.flag-code-content');
     
-    // Initialize notification manager
-    this.notificationManager = new NotificationManager();
-    
-    // Initialize history view
-    this.historyView = new HistoryView();
-    
-    // Initialize notification system
-    this.notificationSystem = new NotificationSystem();
+    if (flagCodeSummary && flagCodeContent) {
+      flagCodeSummary.addEventListener('click', () => {
+        const isOpen = flagCodeContent.style.display !== 'none';
+        flagCodeContent.style.display = isOpen ? 'none' : 'block';
+        
+        // Update arrow icon
+        const arrow = flagCodeSummary.querySelector('.flag-code-arrow');
+        if (arrow) {
+          arrow.textContent = isOpen ? '▶' : '▼';
+        }
+      });
+      
+      // Initially hide the content
+      flagCodeContent.style.display = 'none';
+    }
   }
 
   /**
@@ -679,5 +712,160 @@ export class FlagStatusApp {
     window.removeEventListener('offline', this.handleOffline);
     document.removeEventListener('visibilitychange', this.handleVisibilityChange);
     document.removeEventListener('keydown', this.handleKeyboardShortcuts);
+  }
+
+  async updateStatus() {
+    try {
+      this.showLoading(true);
+      
+      const data = await api.getStatus();
+      this.currentStatus = data;
+      this.lastUpdate = new Date();
+      
+      // Update basic status display
+      this.updateStatusDisplay(data);
+      
+      // Update enhanced status information
+      this.updateEnhancedStatusDisplay(data);
+      
+      // Update flag display
+      if (this.flagDisplay) {
+        this.flagDisplay.updateFlag(data.status, data.reason);
+      }
+      
+      // Store in history
+      appStorage.addToHistory(data);
+      
+      // Update connection status
+      this.updateConnectionStatus(true);
+      
+      console.log('✅ Status updated successfully');
+      
+    } catch (error) {
+      console.error('❌ Failed to update status:', error);
+      this.handleError(error);
+    } finally {
+      this.showLoading(false);
+    }
+  }
+
+  updateStatusDisplay(data) {
+    const statusElement = this.elements.statusText;
+    const reasonElement = this.elements.reason;
+    
+    if (statusElement) {
+      statusElement.textContent = data.status || 'Unknown';
+      statusElement.className = `status-card__status ${(data.status || '').toLowerCase().replace(/\s+/g, '-')}`;
+    }
+    
+    if (reasonElement) {
+      reasonElement.textContent = data.reason || 'No reason provided';
+    }
+  }
+
+  updateEnhancedStatusDisplay(data) {
+    try {
+      // Get comprehensive flag information
+      const flagInfo = getFlagInfo(data.status, data.reason);
+      
+      // Update context information
+      this.updateContextInfo(flagInfo);
+      
+      // Update today's observance
+      this.updateTodaysObservance();
+      
+      // Update upcoming holidays
+      this.updateUpcomingHolidays();
+      
+      // Update historical note if applicable
+      this.updateHistoricalNote();
+      
+    } catch (error) {
+      console.error('❌ Failed to update enhanced status display:', error);
+    }
+  }
+
+  updateContextInfo(flagInfo) {
+    const contextElement = document.querySelector('.status-card__context');
+    if (contextElement && flagInfo.context) {
+      contextElement.textContent = flagInfo.context;
+      contextElement.style.display = 'block';
+    }
+  }
+
+  updateTodaysObservance() {
+    const observanceSection = document.querySelector('.status-card__observance');
+    const observanceBadge = document.querySelector('.observance-badge');
+    const observanceName = document.querySelector('.observance-badge__name');
+    
+    const todaysObservance = getTodaysObservance();
+    
+    if (todaysObservance && observanceSection && observanceBadge && observanceName) {
+      observanceName.textContent = todaysObservance.name;
+      observanceSection.style.display = 'block';
+    } else if (observanceSection) {
+      observanceSection.style.display = 'none';
+    }
+  }
+
+  updateUpcomingHolidays() {
+    const holidaysSection = document.querySelector('.status-card__holidays');
+    const holidayName = document.querySelector('.holiday-info__name');
+    const holidayDate = document.querySelector('.holiday-info__date');
+    const holidayCountdown = document.querySelector('.holiday-info__countdown');
+    
+    const nearestHoliday = getNearestFederalHoliday();
+    
+    if (nearestHoliday && holidaysSection && holidayName && holidayDate && holidayCountdown) {
+      holidayName.textContent = nearestHoliday.name;
+      holidayDate.textContent = formatHolidayDate(nearestHoliday.date);
+      
+      // Calculate days until holiday
+      const today = new Date();
+      const holidayDateObj = new Date(nearestHoliday.date);
+      const daysUntil = Math.ceil((holidayDateObj - today) / (1000 * 60 * 60 * 24));
+      
+      if (daysUntil === 0) {
+        holidayCountdown.textContent = 'Today';
+      } else if (daysUntil === 1) {
+        holidayCountdown.textContent = 'Tomorrow';
+      } else if (daysUntil > 0) {
+        holidayCountdown.textContent = `In ${daysUntil} days`;
+      } else {
+        holidayCountdown.textContent = 'Past';
+      }
+      
+      holidaysSection.style.display = 'block';
+    } else if (holidaysSection) {
+      holidaysSection.style.display = 'none';
+    }
+  }
+
+  updateHistoricalNote() {
+    const historicalSection = document.querySelector('.historical-note');
+    const historicalText = document.querySelector('.historical-note__text');
+    
+    // Check if today has any historical significance
+    const today = new Date();
+    const month = today.getMonth() + 1;
+    const day = today.getDate();
+    
+    // Add historical notes for significant dates
+    const historicalNotes = {
+      '9-11': 'Today marks the anniversary of September 11, 2001. Flags are traditionally flown at half-staff.',
+      '12-7': 'Today is Pearl Harbor Remembrance Day. Flags are flown at half-staff until sunset.',
+      '5-15': 'Today is Peace Officers Memorial Day. Flags are flown at half-staff.',
+      '4-15': 'This week includes National Police Week, when flags may be at half-staff for fallen officers.'
+    };
+    
+    const dateKey = `${month}-${day}`;
+    const note = historicalNotes[dateKey];
+    
+    if (note && historicalSection && historicalText) {
+      historicalText.textContent = note;
+      historicalSection.style.display = 'flex';
+    } else if (historicalSection) {
+      historicalSection.style.display = 'none';
+    }
   }
 } 

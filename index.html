@@ -128,33 +128,11 @@
 
     <!-- Main content -->
     <main id="main-content" class="main" role="main">
-        <!-- Hero section -->
-        <section class="hero-section" aria-labelledby="hero-title">
-            <h1 id="hero-title" class="hero-title">
-                U.S. Flag Status Monitor
-            </h1>
-            <p class="hero-subtitle">
-                Real-time monitoring of the United States flag status with official government sources, 
-                push notifications, and offline support.
-            </p>
-            <div class="current-date" aria-live="polite">
-                <span aria-hidden="true">📅</span>
-                <time id="current-date" datetime="">Loading date...</time>
-            </div>
-        </section>
-
-        <!-- Flag display section -->
-        <section class="flag-section" aria-labelledby="flag-heading">
-            <h2 id="flag-heading" class="sr-only">Flag Display</h2>
-            <div id="flag-container" class="flag-display-container">
-                <!-- Flag will be dynamically created here -->
-            </div>
-        </section>
-
-        <!-- Status information -->
+        <!-- Status information - moved to top -->
         <section class="status-section" aria-labelledby="status-heading">
             <div class="status-card">
                 <h2 id="status-heading" class="status-card__title">
+                    <span class="status-card__flag-icon" aria-hidden="true">🇺🇸</span>
                     Current Status: 
                     <span id="status-text" class="status-card__status" aria-live="polite">
                         Loading...
@@ -163,6 +141,46 @@
                 
                 <div id="reason" class="status-card__reason" aria-live="polite">
                     Checking official sources...
+                </div>
+
+                <!-- Enhanced context information -->
+                <div id="status-context" class="status-card__context" aria-live="polite">
+                    Loading detailed information...
+                </div>
+
+                <!-- Today's observance -->
+                <div id="todays-observance" class="status-card__observance" style="display: none;">
+                    <div class="observance-badge">
+                        <span class="observance-badge__icon" aria-hidden="true">📅</span>
+                        <span class="observance-badge__text"></span>
+                    </div>
+                </div>
+
+                <!-- Federal holiday information -->
+                <div class="status-card__holidays">
+                    <div id="upcoming-holiday" class="holiday-info" style="display: none;">
+                        <div class="holiday-info__label">Next Federal Holiday</div>
+                        <div class="holiday-info__content">
+                            <span class="holiday-info__name"></span>
+                            <span class="holiday-info__date"></span>
+                            <span class="holiday-info__countdown"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flag Code reference -->
+                <div id="flag-code-ref" class="status-card__flag-code" style="display: none;">
+                    <details class="flag-code-details">
+                        <summary class="flag-code-summary">
+                            <span aria-hidden="true">📜</span>
+                            U.S. Flag Code Reference
+                        </summary>
+                        <div class="flag-code-content">
+                            <div class="flag-code-section"></div>
+                            <div class="flag-code-text"></div>
+                            <div class="flag-code-note"></div>
+                        </div>
+                    </details>
                 </div>
                 
                 <div class="status-card__meta">
@@ -187,6 +205,28 @@
             </div>
         </section>
 
+        <!-- Hero section - simplified -->
+        <section class="hero-section" aria-labelledby="hero-title">
+            <div class="current-date" aria-live="polite">
+                <span aria-hidden="true">📅</span>
+                <time id="current-date" datetime="">Loading date...</time>
+            </div>
+            
+            <!-- Historical note -->
+            <div id="historical-note" class="historical-note" style="display: none;">
+                <span class="historical-note__icon" aria-hidden="true">📚</span>
+                <span class="historical-note__text"></span>
+            </div>
+        </section>
+
+        <!-- Flag display section -->
+        <section class="flag-section" aria-labelledby="flag-heading">
+            <h2 id="flag-heading" class="sr-only">Flag Display</h2>
+            <div id="flag-container" class="flag-display-container">
+                <!-- Flag will be dynamically created here -->
+            </div>
+        </section>
+
         <!-- Quick actions -->
         <section class="actions-section" aria-labelledby="actions-heading">
             <h2 id="actions-heading" class="sr-only">Quick Actions</h2>
@@ -204,6 +244,11 @@
                 <button class="btn btn--secondary" onclick="window.flagApp?.toggleNotifications()">
                     <span aria-hidden="true">🔔</span>
                     Notifications
+                </button>
+
+                <button class="btn btn--secondary" onclick="window.flagApp?.showFlagEtiquette()">
+                    <span aria-hidden="true">📖</span>
+                    Flag Etiquette
                 </button>
             </div>
         </section>

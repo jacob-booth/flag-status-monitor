@@ -636,6 +636,13 @@ a:focus {
   backdrop-filter: blur(10px);
   position: relative;
   overflow: hidden;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.status-card__flag-icon {
+  font-size: 1.2em;
+  margin-right: var(--spacing-2);
 }
 
 .status-card__title {
@@ -660,24 +667,59 @@ a:focus {
 .status-card__reason {
   font-size: var(--font-size-base);
   color: var(--text-secondary);
-  margin-bottom: var(--spacing-4);
+  margin-bottom: var(--spacing-3);
   line-height: 1.5;
   min-height: 1.5em;
 }
 
-.status-card__meta {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-4);
-  padding-top: var(--spacing-4);
-  border-top: 1px solid var(--border-color);
+.status-card__context {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-4);
+  padding: var(--spacing-3);
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  border-left: 3px solid var(--primary-color);
 }
 
-.status-card__meta-item {
-  text-align: center;
+/* ===== OBSERVANCE BADGE ===== */
+
+.status-card__observance {
+  margin-bottom: var(--spacing-4);
 }
 
-.status-card__label {
+.observance-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: white;
+  border-radius: 20px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
+}
+
+.observance-badge__icon {
+  font-size: 1.1em;
+}
+
+/* ===== HOLIDAY INFORMATION ===== */
+
+.status-card__holidays {
+  margin-bottom: var(--spacing-4);
+}
+
+.holiday-info {
+  padding: var(--spacing-3);
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.holiday-info__label {
   font-size: var(--font-size-xs);
   color: var(--text-muted);
   text-transform: uppercase;
@@ -686,126 +728,556 @@ a:focus {
   margin-bottom: var(--spacing-1);
 }
 
-.status-card__value {
-  font-size: var(--font-size-sm);
-  color: var(--text-primary);
-  font-weight: 500;
+.holiday-info__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
 }
 
-.connection-status {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  margin-top: var(--spacing-4);
-  padding: var(--spacing-2) var(--spacing-3);
-  background: var(--success-bg);
-  border-radius: 8px;
-  border: 1px solid rgba(16, 185, 129, 0.2);
+.holiday-info__name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.holiday-info__date {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.holiday-info__countdown {
+  color: var(--primary-color);
   font-size: var(--font-size-xs);
   font-weight: 500;
 }
 
-.connection-status__indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--success-color);
-  animation: pulse-dot 2s infinite;
-  flex-shrink: 0;
+/* ===== FLAG CODE REFERENCE ===== */
+
+.status-card__flag-code {
+  margin-bottom: var(--spacing-4);
 }
 
-.connection-status__text {
-  color: var(--success-color);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+.flag-code-details {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.connection-status.offline {
-  background: var(--error-bg);
-  border-color: rgba(239, 68, 68, 0.2);
+.flag-code-summary {
+  padding: var(--spacing-3);
+  background: var(--bg-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  transition: background-color 0.2s ease;
 }
 
-.connection-status.offline .connection-status__indicator {
-  background: var(--error-color);
-  animation: none;
+.flag-code-summary:hover {
+  background: var(--bg-hover);
 }
 
-.connection-status.offline .connection-status__text {
-  color: var(--error-color);
+.flag-code-content {
+  padding: var(--spacing-3);
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
 }
 
-/* ===== STATUS INDICATORS ===== */
+.flag-code-section {
+  font-weight: 600;
+  color: var(--primary-color);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-2);
+}
 
-.status-card__status.half-staff {
-  background: var(--warning-bg);
+.flag-code-text {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: var(--spacing-2);
+  font-style: italic;
+}
+
+.flag-code-note {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* ===== HISTORICAL NOTE ===== */
+
+.historical-note {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3);
+  background: linear-gradient(135deg, var(--warning-bg), var(--warning-light));
+  border: 1px solid var(--warning-border);
+  border-radius: 8px;
+  margin-top: var(--spacing-3);
+}
+
+.historical-note__icon {
+  font-size: 1.2em;
   color: var(--warning-color);
 }
 
-.status-card__status.full-staff {
+.historical-note__text {
+  font-size: var(--font-size-sm);
+  color: var(--warning-dark);
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* ===== SIMPLIFIED HERO SECTION ===== */
+
+.hero-section {
+  text-align: center;
+  margin-bottom: var(--spacing-6);
+}
+
+.current-date {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
+
+@media (max-width: 1023px) {
+  .main {
+    display: block;
+  }
+
+  .status-section {
+    margin-bottom: var(--spacing-6);
+  }
+
+  .hero-section {
+    margin-bottom: var(--spacing-4);
+  }
+
+  .flag-section {
+    margin-bottom: var(--spacing-6);
+  }
+
+  .holiday-info__content {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .status-card {
+    padding: var(--spacing-4);
+  }
+
+  .status-card__title {
+    font-size: var(--font-size-lg);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-1);
+  }
+
+  .status-card__flag-icon {
+    font-size: 1.5em;
+  }
+
+  .holiday-info__content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .observance-badge {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-1) var(--spacing-2);
+  }
+
+  .historical-note {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--spacing-1);
+  }
+}
+
+/* ===== DESKTOP LAYOUT OPTIMIZATION ===== */
+
+@media (min-width: 1024px) {
+  .main {
+    padding: var(--spacing-6) var(--spacing-8);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    gap: var(--spacing-8);
+    grid-template-areas: 
+      "status status"
+      "hero flag"
+      "actions actions";
+    max-height: calc(100vh - 80px);
+  }
+
+  .status-section {
+    grid-area: status;
+  }
+
+  .hero-section {
+    grid-area: hero;
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .flag-section {
+    grid-area: flag;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .actions-section {
+    grid-area: actions;
+    margin-top: 0;
+  }
+
+  .flag-display-container {
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .flag-container {
+    transform: scale(1.0);
+  }
+
+  .status-card {
+    max-width: none;
+  }
+}
+
+/* ===== ENHANCED STATUS CARD ===== */
+
+.status-card {
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  padding: var(--spacing-6);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.status-card__flag-icon {
+  font-size: 1.2em;
+  margin-right: var(--spacing-2);
+}
+
+.status-card__title {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-3);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.status-card__status {
+  font-weight: 700;
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: 8px;
   background: var(--success-bg);
   color: var(--success-color);
-}
-
-.status-card__status.error {
-  background: var(--error-bg);
-  color: var(--error-color);
-}
-
-/* ===== ENHANCED VISUAL HIERARCHY ===== */
-
-.status-card__title::before {
-  content: "🇺🇸";
-  margin-right: var(--spacing-2);
   font-size: var(--font-size-lg);
 }
 
-.status-card__meta-item {
-  text-align: center;
-  padding: var(--spacing-2);
-  border-radius: 8px;
+.status-card__reason {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-3);
+  line-height: 1.5;
+  min-height: 1.5em;
+}
+
+.status-card__context {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-4);
+  padding: var(--spacing-3);
   background: var(--bg-tertiary);
-  transition: all 0.2s ease;
+  border-radius: 8px;
+  border-left: 3px solid var(--primary-color);
 }
 
-.status-card__meta-item:hover {
+/* ===== OBSERVANCE BADGE ===== */
+
+.status-card__observance {
+  margin-bottom: var(--spacing-4);
+}
+
+.observance-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: white;
+  border-radius: 20px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
+}
+
+.observance-badge__icon {
+  font-size: 1.1em;
+}
+
+/* ===== HOLIDAY INFORMATION ===== */
+
+.status-card__holidays {
+  margin-bottom: var(--spacing-4);
+}
+
+.holiday-info {
+  padding: var(--spacing-3);
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.holiday-info__label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  margin-bottom: var(--spacing-1);
+}
+
+.holiday-info__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.holiday-info__name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.holiday-info__date {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.holiday-info__countdown {
+  color: var(--primary-color);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+}
+
+/* ===== FLAG CODE REFERENCE ===== */
+
+.status-card__flag-code {
+  margin-bottom: var(--spacing-4);
+}
+
+.flag-code-details {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.flag-code-summary {
+  padding: var(--spacing-3);
+  background: var(--bg-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  transition: background-color 0.2s ease;
+}
+
+.flag-code-summary:hover {
   background: var(--bg-hover);
-  transform: translateY(-1px);
 }
 
-/* ===== QUICK GLANCE IMPROVEMENTS ===== */
+.flag-code-content {
+  padding: var(--spacing-3);
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+}
 
-@media (min-width: 1024px) {
+.flag-code-section {
+  font-weight: 600;
+  color: var(--primary-color);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-2);
+}
+
+.flag-code-text {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: var(--spacing-2);
+  font-style: italic;
+}
+
+.flag-code-note {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* ===== HISTORICAL NOTE ===== */
+
+.historical-note {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3);
+  background: linear-gradient(135deg, var(--warning-bg), var(--warning-light));
+  border: 1px solid var(--warning-border);
+  border-radius: 8px;
+  margin-top: var(--spacing-3);
+}
+
+.historical-note__icon {
+  font-size: 1.2em;
+  color: var(--warning-color);
+}
+
+.historical-note__text {
+  font-size: var(--font-size-sm);
+  color: var(--warning-dark);
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* ===== SIMPLIFIED HERO SECTION ===== */
+
+.hero-section {
+  text-align: center;
+  margin-bottom: var(--spacing-6);
+}
+
+.current-date {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
+
+@media (max-width: 1023px) {
+  .main {
+    display: block;
+  }
+
+  .status-section {
+    margin-bottom: var(--spacing-6);
+  }
+
   .hero-section {
-    padding: var(--spacing-4) 0;
+    margin-bottom: var(--spacing-4);
   }
-  
-  .current-date {
-    position: absolute;
-    top: var(--spacing-4);
-    right: var(--spacing-8);
-    margin: 0;
+
+  .flag-section {
+    margin-bottom: var(--spacing-6);
   }
-  
-  .status-card {
-    min-height: 300px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-  
-  .status-card__title {
-    font-size: var(--font-size-2xl);
-    border-bottom: 2px solid var(--border-color);
-    padding-bottom: var(--spacing-3);
-  }
-  
-  .status-card__reason {
-    flex: 1;
-    display: flex;
+
+  .holiday-info__content {
+    flex-direction: row;
     align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .status-card {
+    padding: var(--spacing-4);
+  }
+
+  .status-card__title {
     font-size: var(--font-size-lg);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-1);
+  }
+
+  .status-card__flag-icon {
+    font-size: 1.5em;
+  }
+
+  .holiday-info__content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .observance-badge {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-1) var(--spacing-2);
+  }
+
+  .historical-note {
+    flex-direction: column;
     text-align: center;
-    padding: var(--spacing-4) 0;
+    gap: var(--spacing-1);
+  }
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  .header__controls,
+  .quick-actions,
+  .loading-overlay,
+  .notification-container,
+  .install-prompt {
+    display: none !important;
+  }
+  
+  .flag {
+    animation: none !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .hero-title,
+  .status-card__status {
+    -webkit-text-fill-color: initial !important;
+    color: black !important;
   }
 }
 
@@ -1204,29 +1676,26 @@ a:focus {
   .main {
     padding: var(--spacing-6) var(--spacing-8);
     display: grid;
-    grid-template-columns: 1fr 400px;
-    grid-template-rows: auto auto 1fr;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
     gap: var(--spacing-8);
     grid-template-areas: 
-      "hero hero"
-      "flag status"
+      "status status"
+      "hero flag"
       "actions actions";
     max-height: calc(100vh - 80px);
+  }
+
+  .status-section {
+    grid-area: status;
   }
 
   .hero-section {
     grid-area: hero;
     margin-bottom: 0;
-  }
-
-  .hero-title {
-    font-size: var(--font-size-4xl);
-    margin-bottom: var(--spacing-3);
-  }
-
-  .hero-subtitle {
-    font-size: var(--font-size-lg);
-    margin-bottom: var(--spacing-3);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
   .flag-section {
@@ -1236,32 +1705,24 @@ a:focus {
     justify-content: center;
   }
 
-  .status-section {
-    grid-area: status;
-    display: flex;
-    align-items: flex-start;
-  }
-
   .actions-section {
     grid-area: actions;
     margin-top: 0;
   }
 
   .flag-display-container {
-    height: 400px;
+    height: 300px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
   .flag-container {
-    transform: scale(1.2);
+    transform: scale(1.0);
   }
 
   .status-card {
-    height: fit-content;
-    position: sticky;
-    top: var(--spacing-4);
+    max-width: none;
   }
 }
 
