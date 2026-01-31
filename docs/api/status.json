@@ -1,12 +1,7 @@
 {
   "status": "full-staff",
-  "reason": "Normal operations",
-  "source": "GitHub Pages Demo",
-  "last_updated": "2025-01-27T19:00:00.000Z",
-  "next_check": "2025-01-27T20:00:00.000Z",
-  "confidence": 100,
-  "metadata": {
-    "version": "2.0.0",
-    "environment": "production"
-  }
-} 
+  "last_updated": "2026-01-31T20:17:10.148344+00:00",
+  "source": "HalfStaff.org",
+  "reason": "No active half-staff notices",
+  "expires": null
+}
