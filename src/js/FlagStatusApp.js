@@ -3,7 +3,7 @@
  * @fileoverview Main application class that orchestrates all components
  */
 
-import { UPDATE_INTERVALS, THEMES, CSS_CLASSES } from './config/constants.js';
+import { UPDATE_INTERVALS, THEMES, CSS_CLASSES, STATE_OPTIONS } from './config/constants.js';
 import { api, APIError } from './utils/api.js';
 import { appStorage } from './utils/storage.js';
 import { FlagDisplay } from './components/FlagDisplay.js';
@@ -36,6 +36,7 @@ export class FlagStatusApp {
     // User preferences
     this.preferences = appStorage.getUserPreferences();
     this.theme = appStorage.getTheme();
+    this.selectedState = appStorage.getStatePreference();
     
     this.init();
   }
@@ -52,7 +53,9 @@ export class FlagStatusApp {
       
       this.setupDOM();
       console.log('✅ FlagStatusApp: DOM setup complete');
-      
+
+      this.populateStateOptions();
+
       await this.initializeComponents();
       console.log('✅ FlagStatusApp: Components initialized');
       
@@ -120,7 +123,8 @@ export class FlagStatusApp {
       themeToggle: document.getElementById('theme-toggle'),
       notificationToggle: document.getElementById('notification-toggle'),
       settingsBtn: document.getElementById('settings-btn'),
-      historyBtn: document.getElementById('history-btn')
+      historyBtn: document.getElementById('history-btn'),
+      stateSelect: document.getElementById('state-select')
     };
 
     // Validate required elements
@@ -130,6 +134,19 @@ export class FlagStatusApp {
         throw new Error(`Required element not found: ${elementKey}`);
       }
     }
+  }
+
+  /**
+   * Populate state selector options
+   */
+  populateStateOptions() {
+    if (!this.elements.stateSelect) return;
+
+    this.elements.stateSelect.innerHTML = STATE_OPTIONS.map(option => 
+      `<option value="${option.value}">${option.label}</option>`
+    ).join('');
+
+    this.elements.stateSelect.value = this.selectedState || 'US';
   }
 
   /**
@@ -188,6 +205,15 @@ export class FlagStatusApp {
     // Refresh button
     if (this.elements.refreshBtn) {
       this.elements.refreshBtn.addEventListener('click', () => {
+        this.refreshStatus();
+      });
+    }
+
+    // State selector
+    if (this.elements.stateSelect) {
+      this.elements.stateSelect.addEventListener('change', (e) => {
+        this.selectedState = e.target.value;
+        appStorage.setStatePreference(this.selectedState);
         this.refreshStatus();
       });
     }
@@ -300,11 +326,14 @@ export class FlagStatusApp {
    */
   async fetchAndUpdateStatus() {
     try {
-      const status = await api.getStatus();
+      const status = this.selectedState === 'US'
+        ? await api.getStatus()
+        : await api.getStatusForState(this.selectedState);
       await this.updateUI(status);
       
       // Cache the status
       appStorage.setLastStatus(status);
+      appStorage.addStatusHistory(status);
       
       // Clear any retry timeouts
       if (this.retryTimeout) {
@@ -718,7 +747,9 @@ export class FlagStatusApp {
     try {
       this.showLoading(true);
       
-      const data = await api.getStatus();
+      const data = this.selectedState === 'US'
+        ? await api.getStatus()
+        : await api.getStatusForState(this.selectedState);
       this.currentStatus = data;
       this.lastUpdate = new Date();
       
@@ -734,7 +765,7 @@ export class FlagStatusApp {
       }
       
       // Store in history
-      appStorage.addToHistory(data);
+      appStorage.addStatusHistory(data);
       
       // Update connection status
       this.updateConnectionStatus(true);

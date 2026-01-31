@@ -183,6 +183,47 @@ export const appStorage = {
   },
 
   /**
+   * Get state preference
+   * @returns {string}
+   */
+  getStatePreference() {
+    return storage.get(STORAGE_KEYS.STATE_PREFERENCE, 'US');
+  },
+
+  /**
+   * Set state preference
+   * @param {string} state
+   */
+  setStatePreference(state) {
+    storage.set(STORAGE_KEYS.STATE_PREFERENCE, state);
+  },
+
+  /**
+   * Get status history
+   * @returns {Array}
+   */
+  getStatusHistory() {
+    return storage.get(STORAGE_KEYS.STATUS_HISTORY, []);
+  },
+
+  /**
+   * Add a status entry to history
+   * @param {Object} status
+   */
+  addStatusHistory(status) {
+    const history = storage.get(STORAGE_KEYS.STATUS_HISTORY, []);
+    const entry = {
+      date: status.last_updated || new Date().toISOString(),
+      status: status.status,
+      reason: status.reason || '',
+      source: status.source || ''
+    };
+
+    const updated = [entry, ...history].slice(0, 200);
+    storage.set(STORAGE_KEYS.STATUS_HISTORY, updated);
+  },
+
+  /**
    * Clear all app-specific storage
    */
   clearAll() {

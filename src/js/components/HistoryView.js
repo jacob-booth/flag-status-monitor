@@ -165,6 +165,19 @@ export class HistoryView {
    */
   async loadHistory() {
     try {
+      const localHistory = appStorage.getStatusHistory();
+      if (localHistory && localHistory.length) {
+        const total = localHistory.length;
+        const start = (this.currentPage - 1) * this.itemsPerPage;
+        const pageItems = localHistory.slice(start, start + this.itemsPerPage);
+
+        this.historyData = pageItems;
+        this.updateStats({ history: localHistory });
+        this.renderTimeline();
+        this.renderPagination({ total });
+        return;
+      }
+
       const response = await api.getHistory({
         page: this.currentPage,
         per_page: this.itemsPerPage
