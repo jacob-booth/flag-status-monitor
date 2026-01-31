@@ -4,7 +4,6 @@ import logging
 import os
 from datetime import datetime, timezone
 from typing import Dict, Optional
-import xml.etree.ElementTree as ET
 
 import requests
 from bs4 import BeautifulSoup
@@ -33,89 +32,50 @@ FLAG_STATUS_SCHEMA = {
 
 class FlagStatusChecker:
     def __init__(self):
-        self.third_party_api_key = os.getenv('THIRD_PARTY_API_KEY')
         # Write directly to docs directory for GitHub Pages
         self.status_file = os.path.join('docs', 'flag_status.json')
+        self.api_status_file = os.path.join('docs', 'api', 'status.json')
+        self.source_url = 'https://halfstaff.org/wp-json/halfstaff/v1/widget'
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
-    def check_opm_api(self) -> Optional[Dict]:
-        """Check U.S. Office of Personnel Management API for flag status."""
+    def check_halfstaff_api(self) -> Optional[Dict]:
+        """Check HalfStaff.org widget API for current flag status."""
         try:
-            response = requests.get(
-                'https://www.opm.gov/xml/operatingstatus.xml',
-                timeout=5
-            )
-            response.raise_for_status()
-            
-            # Parse XML response
-            root = ET.fromstring(response.content)
-            
-            # Extract relevant information
-            status_type = root.find('StatusType').text
-            status_title = root.find('StatusTitle').text
-            date_posted = root.find('DateStatusPosted').text
-            message = root.find('LongStatusMessage').text
-            
-            # Map OPM status to flag status
-            # This is a simplified mapping - you might want to adjust based on actual OPM statuses
-            is_half_staff = 'closed' in status_type.lower() or 'emergency' in status_type.lower()
-            
-            return {
-                'status': 'half-staff' if is_half_staff else 'full-staff',
-                'last_updated': datetime.fromisoformat(date_posted).isoformat(),
-                'source': 'OPM API',
-                'reason': message,
-                'expires': None  # OPM XML doesn't provide expiration date
-            }
-        except Exception as e:
-            logger.error(f"Error checking OPM API: {str(e)}")
-            return None
-
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
-    def check_third_party_api(self) -> Optional[Dict]:
-        """Check third-party API for flag status."""
-        if not self.third_party_api_key:
-            logger.warning("Third-party API key not configured, using default status")
-            return self.get_default_status("Third-party API key not configured")
-
-        try:
-            response = requests.get(
-                'https://api.flagstatus.example.com/v1/status',  # Example URL
-                headers={'X-API-Key': self.third_party_api_key},
-                timeout=5
-            )
+            response = requests.get(self.source_url, timeout=10)
             response.raise_for_status()
             data = response.json()
-            
+
+            is_half_staff = data.get('type') and data.get('type') != 'none'
+            reason = data.get('title') or data.get('reason') or ''
+
             return {
-                'status': data.get('status', 'full-staff'),
+                'status': 'half-staff' if is_half_staff else 'full-staff',
                 'last_updated': datetime.now(timezone.utc).isoformat(),
-                'source': 'Third-party API',
-                'reason': data.get('description', ''),
-                'expires': data.get('valid_until')
+                'source': 'HalfStaff.org',
+                'reason': reason or ('No active half-staff notices' if not is_half_staff else ''),
+                'expires': None
             }
         except Exception as e:
-            logger.error(f"Error checking third-party API: {str(e)}")
+            logger.error(f"Error checking HalfStaff API: {str(e)}")
             return None
 
     def scrape_government_website(self) -> Optional[Dict]:
         """Scrape government website for flag status (fallback method)."""
         try:
             response = requests.get(
-                'https://www.usa.gov/flag-status',  # Example URL
-                timeout=5
+                'https://www.usa.gov/flag-status',
+                timeout=10
             )
             response.raise_for_status()
             soup = BeautifulSoup(response.text, 'html.parser')
-            
-            # Example scraping logic - would need to be adapted to actual website structure
+
             status_element = soup.find('div', {'class': 'flag-status'})
             if not status_element:
                 return None
-                
+
             status_text = status_element.text.lower()
             is_half_staff = 'half-staff' in status_text or 'half staff' in status_text
-            
+
             return {
                 'status': 'half-staff' if is_half_staff else 'full-staff',
                 'last_updated': datetime.now(timezone.utc).isoformat(),
@@ -141,8 +101,7 @@ class FlagStatusChecker:
         """Get current flag status from all available sources."""
         # Try sources in order of priority
         status = (
-            self.check_opm_api() or
-            self.check_third_party_api() or
+            self.check_halfstaff_api() or
             self.scrape_government_website() or
             self.get_default_status("All sources unavailable")
         )
@@ -161,11 +120,14 @@ class FlagStatusChecker:
         try:
             status = self.get_current_status()
             
-            # Create docs directory if it doesn't exist
+            # Create docs directories if they don't exist
             os.makedirs(os.path.dirname(self.status_file), exist_ok=True)
+            os.makedirs(os.path.dirname(self.api_status_file), exist_ok=True)
             
-            # Save status to file
+            # Save status to file(s)
             with open(self.status_file, 'w') as f:
+                json.dump(status, f, indent=2)
+            with open(self.api_status_file, 'w') as f:
                 json.dump(status, f, indent=2)
             
             logger.info(f"Flag status updated: {status['status']} (Source: {status['source']})")
@@ -174,7 +136,11 @@ class FlagStatusChecker:
             logger.error(f"Error updating flag status: {str(e)}")
             # Create a default status file if update fails
             default_status = self.get_default_status("Error updating status")
+            os.makedirs(os.path.dirname(self.status_file), exist_ok=True)
+            os.makedirs(os.path.dirname(self.api_status_file), exist_ok=True)
             with open(self.status_file, 'w') as f:
+                json.dump(default_status, f, indent=2)
+            with open(self.api_status_file, 'w') as f:
                 json.dump(default_status, f, indent=2)
             raise
 
