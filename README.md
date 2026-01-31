@@ -15,7 +15,7 @@
 
 **A cutting-edge, real-time Progressive Web Application that monitors and displays the current status of the United States flag with HalfStaff.org data, push notifications, and comprehensive accessibility features.**
 
-![Flag Status Monitor](docs/assets/og-image.png)
+![Flag Status Monitor](docs/assets/demo.gif)
 
 [🚀 **Live Demo**](https://jacob-booth.github.io/flag-status-monitor) • [📖 **Documentation**](docs/) • [🐛 **Report Bug**](https://github.com/jacob-booth/flag-status-monitor/issues) • [💡 **Request Feature**](https://github.com/jacob-booth/flag-status-monitor/issues)
 
