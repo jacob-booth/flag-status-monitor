@@ -91,7 +91,10 @@ async function withRetry(fn, attempts = API_CONFIG.RETRY_ATTEMPTS, delay = API_C
  * @returns {Promise<any>}
  */
 async function makeRequest(endpoint, options = {}, useCache = true) {
-  const url = `${API_CONFIG.BASE_URL}${endpoint}`;
+  const isGet = !options.method || options.method === 'GET';
+  const cacheBuster = isGet ? `t=${Date.now()}` : '';
+  const separator = endpoint.includes('?') ? '&' : '?';
+  const url = `${API_CONFIG.BASE_URL}${endpoint}${cacheBuster ? separator + cacheBuster : ''}`;
   const cacheKey = `${url}:${JSON.stringify(options)}`;
   
   console.log('[API] Making request to:', url);
@@ -112,6 +115,7 @@ async function makeRequest(endpoint, options = {}, useCache = true) {
     console.log('[API] Fetching:', url);
     const response = await fetch(url, {
       ...options,
+      cache: isGet ? 'no-store' : options.cache,
       signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
