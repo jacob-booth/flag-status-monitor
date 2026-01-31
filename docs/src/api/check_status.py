@@ -129,6 +129,18 @@ class FlagStatusChecker:
                 json.dump(status, f, indent=2)
             with open(self.api_status_file, 'w') as f:
                 json.dump(status, f, indent=2)
+
+            # Write badge JSON for README
+            badge = {
+                "schemaVersion": 1,
+                "label": "flag status",
+                "message": "half-staff" if status.get("status") == "half-staff" else "full-staff",
+                "color": "orange" if status.get("status") == "half-staff" else "brightgreen"
+            }
+            with open(os.path.join('docs', 'badge.json'), 'w') as f:
+                json.dump(badge, f, indent=2)
+            with open(os.path.join('docs', 'api', 'badge.json'), 'w') as f:
+                json.dump(badge, f, indent=2)
             
             logger.info(f"Flag status updated: {status['status']} (Source: {status['source']})")
             
@@ -142,6 +154,17 @@ class FlagStatusChecker:
                 json.dump(default_status, f, indent=2)
             with open(self.api_status_file, 'w') as f:
                 json.dump(default_status, f, indent=2)
+
+            badge = {
+                "schemaVersion": 1,
+                "label": "flag status",
+                "message": "unknown",
+                "color": "lightgrey"
+            }
+            with open(os.path.join('docs', 'badge.json'), 'w') as f:
+                json.dump(badge, f, indent=2)
+            with open(os.path.join('docs', 'api', 'badge.json'), 'w') as f:
+                json.dump(badge, f, indent=2)
             raise
 
 def main():

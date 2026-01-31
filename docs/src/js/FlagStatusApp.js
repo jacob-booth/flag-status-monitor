@@ -3,11 +3,12 @@
  * @fileoverview Main application class that orchestrates all components
  */
 
-import { UPDATE_INTERVALS, THEMES, CSS_CLASSES } from './config/constants.js';
+import { UPDATE_INTERVALS, THEMES, CSS_CLASSES, STATE_OPTIONS } from './config/constants.js';
 import { api, APIError } from './utils/api.js';
 import { appStorage } from './utils/storage.js';
 import { FlagDisplay } from './components/FlagDisplay.js';
 import { NotificationManager } from './components/NotificationManager.js';
+import { HistoryView } from './components/HistoryView.js';
 
 /**
  * Main Flag Status Application
@@ -31,6 +32,7 @@ export class FlagStatusApp {
     // User preferences
     this.preferences = appStorage.getUserPreferences();
     this.theme = appStorage.getTheme();
+    this.selectedState = appStorage.getStatePreference();
     
     this.init();
   }
@@ -47,7 +49,9 @@ export class FlagStatusApp {
       
       this.setupDOM();
       console.log('✅ FlagStatusApp: DOM setup complete');
-      
+
+      this.populateStateOptions();
+
       this.initializeComponents();
       console.log('✅ FlagStatusApp: Components initialized');
       
@@ -115,7 +119,8 @@ export class FlagStatusApp {
       themeToggle: document.getElementById('theme-toggle'),
       notificationToggle: document.getElementById('notification-toggle'),
       settingsBtn: document.getElementById('settings-btn'),
-      historyBtn: document.getElementById('history-btn')
+      historyBtn: document.getElementById('history-btn'),
+      stateSelect: document.getElementById('state-select')
     };
 
     // Validate required elements
@@ -128,6 +133,19 @@ export class FlagStatusApp {
   }
 
   /**
+   * Populate state selector options
+   */
+  populateStateOptions() {
+    if (!this.elements.stateSelect) return;
+
+    this.elements.stateSelect.innerHTML = STATE_OPTIONS.map(option => 
+      `<option value="${option.value}">${option.label}</option>`
+    ).join('');
+
+    this.elements.stateSelect.value = this.selectedState || 'US';
+  }
+
+  /**
    * Initialize components
    */
   initializeComponents() {
@@ -136,6 +154,9 @@ export class FlagStatusApp {
     
     // Initialize notification manager
     this.notificationManager = new NotificationManager();
+
+    // Initialize history view
+    this.historyView = new HistoryView();
   }
 
   /**
@@ -145,6 +166,15 @@ export class FlagStatusApp {
     // Refresh button
     if (this.elements.refreshBtn) {
       this.elements.refreshBtn.addEventListener('click', () => {
+        this.refreshStatus();
+      });
+    }
+
+    // State selector
+    if (this.elements.stateSelect) {
+      this.elements.stateSelect.addEventListener('change', (e) => {
+        this.selectedState = e.target.value;
+        appStorage.setStatePreference(this.selectedState);
         this.refreshStatus();
       });
     }
@@ -250,11 +280,14 @@ export class FlagStatusApp {
    */
   async fetchAndUpdateStatus() {
     try {
-      const status = await api.getStatus();
+      const status = this.selectedState === 'US'
+        ? await api.getStatus()
+        : await api.getStatusForState(this.selectedState);
       await this.updateUI(status);
       
       // Cache the status
       appStorage.setLastStatus(status);
+      appStorage.addStatusHistory(status);
       
       // Clear any retry timeouts
       if (this.retryTimeout) {
@@ -546,9 +579,11 @@ export class FlagStatusApp {
    * Open history view
    */
   openHistory() {
-    // This would open a history view
-    console.log('Opening history...');
-    this.notificationManager.showInAppNotification('History view coming soon!', 'info');
+    if (this.historyView) {
+      this.historyView.show();
+    } else {
+      this.notificationManager.showInAppNotification('History view is unavailable.', 'info');
+    }
   }
 
   /**

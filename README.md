@@ -6,13 +6,16 @@
 [![GitHub Pages](https://img.shields.io/github/deployments/jacob-booth/flag-status-monitor/github-pages?style=for-the-badge&label=Deployment)](https://github.com/jacob-booth/flag-status-monitor/deployments)
 [![License](https://img.shields.io/github/license/jacob-booth/flag-status-monitor?style=for-the-badge)](LICENSE)
 [![Version](https://img.shields.io/github/package-json/v/jacob-booth/flag-status-monitor?style=for-the-badge)](package.json)
+[![Flag Status](https://img.shields.io/endpoint?style=for-the-badge&url=https://jacob-booth.github.io/flag-status-monitor/badge.json)](https://jacob-booth.github.io/flag-status-monitor)
 
 [![PWA](https://img.shields.io/badge/PWA-Ready-success?style=flat-square&logo=pwa)](https://web.dev/progressive-web-apps/)
 [![Accessibility](https://img.shields.io/badge/WCAG_2.1-AA_Compliant-green?style=flat-square&logo=accessibility)](https://www.w3.org/WAI/WCAG21/quickref/)
 [![Performance](https://img.shields.io/badge/Lighthouse-100%2F100-brightgreen?style=flat-square&logo=lighthouse)](https://pagespeed.web.dev/)
 [![Modern Web](https://img.shields.io/badge/ES2022-Modern_JavaScript-yellow?style=flat-square&logo=javascript)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 
-**A cutting-edge, real-time Progressive Web Application that monitors and displays the current status of the United States flag with official government integration, push notifications, and comprehensive accessibility features.**
+**A cutting-edge, real-time Progressive Web Application that monitors and displays the current status of the United States flag with HalfStaff.org data, push notifications, and comprehensive accessibility features.**
+
+![Flag Status Monitor](docs/assets/og-image.png)
 
 [🚀 **Live Demo**](https://jacob-booth.github.io/flag-status-monitor) • [📖 **Documentation**](docs/) • [🐛 **Report Bug**](https://github.com/jacob-booth/flag-status-monitor/issues) • [💡 **Request Feature**](https://github.com/jacob-booth/flag-status-monitor/issues)
 
@@ -41,11 +44,13 @@ In an era where digital civic engagement is more important than ever, the **U.S.
 
 ### 🚀 **Core Functionality**
 - **🔄 Real-time Monitoring** - Automatic status updates every hour
-- **🏛️ Official Sources** - Direct integration with government APIs
+- **🏛️ Source Integration** - HalfStaff.org + official notices
+- **🧭 State Selector** - Federal or state-specific status in one click
+- **📍 Live Status Badge** - README badge updates automatically
 - **📱 PWA Technology** - Install like a native app
 - **🌐 Offline Support** - Works without internet connection
 - **🔔 Push Notifications** - Never miss status changes
-- **📊 Historical Data** - Complete status history with analytics
+- **📊 Historical Data** - Session timeline + analytics
 
 </td>
 <td width="50%">

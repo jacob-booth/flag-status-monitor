@@ -157,6 +157,22 @@ async function makeRequest(endpoint, options = {}, useCache = true) {
 }
 
 /**
+ * Map HalfStaff.org widget response to app status format
+ * @param {Object} data
+ * @returns {Object}
+ */
+function mapHalfStaffResponse(data) {
+  const isHalfStaff = data?.type && data.type !== 'none';
+  return {
+    status: isHalfStaff ? 'half-staff' : 'full-staff',
+    last_updated: new Date().toISOString(),
+    source: 'HalfStaff.org',
+    reason: data?.title || data?.reason || (isHalfStaff ? '' : 'No active half-staff notices'),
+    expires: null
+  };
+}
+
+/**
  * API client with all endpoints
  */
 export const api = {
@@ -174,6 +190,31 @@ export const api = {
       console.error('[API] Failed to get flag status:', error);
       throw error;
     }
+  },
+
+  /**
+   * Get flag status for a specific state via HalfStaff.org
+   * @param {string} state
+   * @returns {Promise<Object>}
+   */
+  async getStatusForState(state) {
+    const stateParam = state && state !== 'US' ? `?state=${encodeURIComponent(state)}` : '';
+    const url = `https://halfstaff.org/wp-json/halfstaff/v1/widget${stateParam}`;
+    const separator = url.includes('?') ? '&' : '?';
+
+    const response = await fetch(`${url}${separator}t=${Date.now()}`, {
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new APIError(`HalfStaff API error: ${response.status}`, response.status);
+    }
+
+    const data = await response.json();
+    return mapHalfStaffResponse(data);
   },
 
   /**
