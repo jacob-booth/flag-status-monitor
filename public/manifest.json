@@ -2,31 +2,15 @@
   "name": "U.S. Flag Status Monitor",
   "short_name": "Flag Monitor",
   "description": "Real-time monitoring of U.S. flag status with official government sources, push notifications, and offline support",
-  "start_url": "/",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#3C3B6E",
   "orientation": "portrait-primary",
-  "scope": "/",
+  "scope": ".",
   "lang": "en-US",
   "dir": "ltr",
   "categories": ["government", "news", "utilities", "productivity"],
-  "screenshots": [
-    {
-      "src": "assets/screenshot-mobile.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Flag Status Monitor on mobile"
-    },
-    {
-      "src": "assets/screenshot-desktop.png", 
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Flag Status Monitor on desktop"
-    }
-  ],
   "icons": [
     {
       "src": "assets/icon-72x72.svg",
@@ -82,7 +66,7 @@
       "name": "Refresh Status",
       "short_name": "Refresh",
       "description": "Refresh the current flag status",
-      "url": "/?action=refresh",
+      "url": "./?action=refresh",
       "icons": [
         {
           "src": "assets/icon-96x96.svg",
@@ -93,9 +77,9 @@
     },
     {
       "name": "View History",
-      "short_name": "History", 
+      "short_name": "History",
       "description": "View flag status history",
-      "url": "/?action=history",
+      "url": "./?action=history",
       "icons": [
         {
           "src": "assets/icon-96x96.svg",
@@ -103,21 +87,6 @@
           "type": "image/svg+xml"
         }
       ]
-    }
-  ],
-  "share_target": {
-    "action": "/",
-    "method": "GET",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
-    }
-  },
-  "protocol_handlers": [
-    {
-      "protocol": "web+flagstatus",
-      "url": "/?status=%s"
     }
   ],
   "prefer_related_applications": false,
