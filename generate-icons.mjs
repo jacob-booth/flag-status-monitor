@@ -66,7 +66,7 @@ async function main() {
   console.log('🇺🇸 Generating PWA icons for Flag Status Monitor...');
   
   // Create assets directory
-  const assetsDir = path.join(__dirname, 'assets');
+  const assetsDir = path.join(__dirname, 'public', 'assets');
   if (!fs.existsSync(assetsDir)) {
     fs.mkdirSync(assetsDir, { recursive: true });
   }
@@ -96,7 +96,7 @@ async function main() {
   console.log('  ✅ Saved assets/favicon.svg');
   
   console.log('\n🎉 All PWA icons generated successfully!');
-  console.log('📱 Your app is now ready for installation on all devices!');
+  console.log('📱 Icons written to public/assets/ and are ready for installation on all devices!');
 }
 
 main().catch(console.error); 

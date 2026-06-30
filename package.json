@@ -1,34 +1,47 @@
 {
   "name": "flag-status-monitor",
-  "version": "2.0.0",
-  "description": "Modern U.S. Flag Status Monitor with real-time updates and PWA capabilities",
+  "version": "3.0.0",
+  "description": "A real-time, installable PWA that tracks the U.S. flag's official staff position with live updates, history, and accessible design.",
   "main": "src/js/main.js",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint src/js/**/*.js",
-    "format": "prettier --write src/js/**/*.js",
-    "test": "vitest",
-    "backend:dev": "cd backend && uvicorn main:app --reload --host 0.0.0.0 --port 8000",
-    "backend:install": "cd backend && pip install -r requirements.txt"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"src/**/*.{js,css}\" \"*.{js,json,md}\"",
+    "format:check": "prettier --check \"src/**/*.{js,css}\" \"*.{js,json,md}\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "icons": "node generate-icons.mjs",
+    "serve:mock": "python3 server.py"
   },
   "devDependencies": {
-    "vite": "^5.0.0",
-    "eslint": "^8.0.0",
-    "prettier": "^3.0.0",
-    "vitest": "^1.0.0",
-    "@types/node": "^20.0.0"
+    "@eslint/js": "^9.17.0",
+    "eslint": "^9.17.0",
+    "jsdom": "^25.0.1",
+    "prettier": "^3.4.2",
+    "vite": "^6.0.7",
+    "vitest": "^4.1.9"
   },
-  "dependencies": {
-    "workbox-window": "^7.0.0"
+  "engines": {
+    "node": ">=18"
   },
-  "keywords": ["flag", "status", "monitor", "government", "pwa"],
+  "keywords": [
+    "flag",
+    "flag-status",
+    "half-staff",
+    "pwa",
+    "government",
+    "vite",
+    "vanilla-js"
+  ],
   "author": "Jacob Booth",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/jacob-booth/flag-status-monitor.git"
-  }
-} 
+  },
+  "homepage": "https://jacob-booth.github.io/flag-status-monitor"
+}
