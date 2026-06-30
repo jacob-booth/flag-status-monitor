@@ -12,28 +12,31 @@ function initializeApp() {
   try {
     // Create and start the application
     window.flagApp = new FlagStatusApp();
-    
+
     // Add global error handler
     window.addEventListener('error', (event) => {
       console.error('Global error:', event.error);
-      if (window.flagApp && window.flagApp.notificationSystem) {
-        window.flagApp.notificationSystem.showInApp('error', 'Unexpected Error', 'An unexpected error occurred');
-      }
+      window.flagApp?.notifications?.showInApp(
+        'error',
+        'Unexpected Error',
+        'An unexpected error occurred.'
+      );
     });
 
     // Add unhandled promise rejection handler
     window.addEventListener('unhandledrejection', (event) => {
       console.error('Unhandled promise rejection:', event.reason);
-      if (window.flagApp && window.flagApp.notificationSystem) {
-        window.flagApp.notificationSystem.showInApp('error', 'Unexpected Error', 'An unexpected error occurred');
-      }
+      window.flagApp?.notifications?.showInApp(
+        'error',
+        'Unexpected Error',
+        'An unexpected error occurred.'
+      );
     });
 
-    console.log('🇺🇸 Flag Status Monitor v2.0 initialized successfully');
-    
+    console.log('🇺🇸 Flag Status Monitor initialized successfully');
   } catch (error) {
     console.error('Failed to initialize Flag Status Monitor:', error);
-    
+
     // Fallback error display
     const errorElement = document.createElement('div');
     errorElement.style.cssText = `
@@ -57,4 +60,4 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initializeApp);
 } else {
   initializeApp();
-} 
+}

@@ -103,10 +103,10 @@ export class HistoryView {
     // Close modal events
     const closeBtn = this.modal.querySelector('.history-modal__close');
     const backdrop = this.modal.querySelector('.history-modal__backdrop');
-    
+
     closeBtn.addEventListener('click', () => this.hide());
     backdrop.addEventListener('click', () => this.hide());
-    
+
     // Escape key to close
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && this.isVisible) {
@@ -116,13 +116,13 @@ export class HistoryView {
 
     // Filter buttons
     const filterBtns = this.modal.querySelectorAll('[data-filter]');
-    filterBtns.forEach(btn => {
+    filterBtns.forEach((btn) => {
       btn.addEventListener('click', (e) => {
         const filter = e.target.dataset.filter;
         this.applyFilter(filter);
-        
+
         // Update active state
-        filterBtns.forEach(b => b.classList.remove('btn--primary'));
+        filterBtns.forEach((b) => b.classList.remove('btn--primary'));
         e.target.classList.add('btn--primary');
       });
     });
@@ -134,7 +134,7 @@ export class HistoryView {
   async show() {
     this.isVisible = true;
     this.modal.style.display = 'flex';
-    
+
     // Animate in
     requestAnimationFrame(() => {
       this.modal.classList.add('history-modal--show');
@@ -142,7 +142,7 @@ export class HistoryView {
 
     // Load history data
     await this.loadHistory();
-    
+
     // Focus management for accessibility
     const firstFocusable = this.modal.querySelector('.history-modal__close');
     firstFocusable.focus();
@@ -154,7 +154,7 @@ export class HistoryView {
   hide() {
     this.isVisible = false;
     this.modal.classList.remove('history-modal--show');
-    
+
     setTimeout(() => {
       this.modal.style.display = 'none';
     }, 300);
@@ -182,12 +182,11 @@ export class HistoryView {
         page: this.currentPage,
         per_page: this.itemsPerPage
       });
-      
+
       this.historyData = response.history || [];
       this.updateStats(response);
       this.renderTimeline();
       this.renderPagination(response);
-      
     } catch (error) {
       console.error('Failed to load history:', error);
       this.showError('Failed to load history data');
@@ -199,7 +198,7 @@ export class HistoryView {
    */
   updateStats(data) {
     const stats = this.calculateStats(data.history || []);
-    
+
     document.getElementById('total-changes').textContent = stats.totalChanges;
     document.getElementById('half-staff-days').textContent = stats.halfStaffDays;
     document.getElementById('current-streak').textContent = stats.currentStreak;
@@ -211,8 +210,8 @@ export class HistoryView {
    */
   calculateStats(history) {
     const totalChanges = history.length;
-    const halfStaffDays = history.filter(h => h.status === 'half-staff').length;
-    
+    const halfStaffDays = history.filter((h) => h.status === 'half-staff').length;
+
     // Calculate current streak
     let currentStreak = 0;
     if (history.length > 0) {
@@ -227,9 +226,7 @@ export class HistoryView {
     }
 
     // Last change date
-    const lastChange = history.length > 0 
-      ? this.formatRelativeDate(history[0].date)
-      : 'No data';
+    const lastChange = history.length > 0 ? this.formatRelativeDate(history[0].date) : 'No data';
 
     return {
       totalChanges,
@@ -244,7 +241,7 @@ export class HistoryView {
    */
   renderTimeline() {
     const container = document.getElementById('timeline-content');
-    
+
     if (this.historyData.length === 0) {
       container.innerHTML = `
         <div class="history-empty">
@@ -256,13 +253,14 @@ export class HistoryView {
       return;
     }
 
-    const timelineHTML = this.historyData.map((entry, index) => {
-      const isHalfStaff = entry.status === 'half-staff';
-      const statusIcon = isHalfStaff ? '🇺🇸' : '🇺🇸';
-      const statusText = isHalfStaff ? 'Half-Staff' : 'Full-Staff';
-      const statusClass = isHalfStaff ? 'half-staff' : 'full-staff';
-      
-      return `
+    const timelineHTML = this.historyData
+      .map((entry) => {
+        const isHalfStaff = entry.status === 'half-staff';
+        const statusIcon = isHalfStaff ? '⬇️' : '⬆️';
+        const statusText = isHalfStaff ? 'Half-Staff' : 'Full-Staff';
+        const statusClass = isHalfStaff ? 'half-staff' : 'full-staff';
+
+        return `
         <div class="timeline-item timeline-item--${statusClass}" data-status="${entry.status}">
           <div class="timeline-item__marker">
             <span class="timeline-item__icon" aria-hidden="true">${statusIcon}</span>
@@ -274,19 +272,28 @@ export class HistoryView {
                 ${this.formatDate(entry.date)}
               </time>
             </div>
-            ${entry.reason ? `
+            ${
+              entry.reason
+                ? `
               <p class="timeline-item__reason">${entry.reason}</p>
-            ` : ''}
-            ${entry.duration ? `
+            `
+                : ''
+            }
+            ${
+              entry.duration
+                ? `
               <div class="timeline-item__duration">
                 <span aria-hidden="true">⏱️</span>
                 Duration: ${entry.duration}
               </div>
-            ` : ''}
+            `
+                : ''
+            }
           </div>
         </div>
       `;
-    }).join('');
+      })
+      .join('');
 
     container.innerHTML = `<div class="timeline">${timelineHTML}</div>`;
   }
@@ -297,14 +304,14 @@ export class HistoryView {
   renderPagination(data) {
     const container = document.getElementById('history-pagination');
     const totalPages = Math.ceil((data.total || 0) / this.itemsPerPage);
-    
+
     if (totalPages <= 1) {
       container.innerHTML = '';
       return;
     }
 
     let paginationHTML = '<div class="pagination">';
-    
+
     // Previous button
     if (this.currentPage > 1) {
       paginationHTML += `
@@ -338,7 +345,7 @@ export class HistoryView {
     container.innerHTML = paginationHTML;
 
     // Add pagination event listeners
-    container.querySelectorAll('[data-page]').forEach(btn => {
+    container.querySelectorAll('[data-page]').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         this.currentPage = parseInt(e.target.dataset.page);
         this.loadHistory();
@@ -351,11 +358,11 @@ export class HistoryView {
    */
   applyFilter(filter) {
     const items = this.modal.querySelectorAll('.timeline-item');
-    
-    items.forEach(item => {
+
+    items.forEach((item) => {
       const status = item.dataset.status;
       const shouldShow = filter === 'all' || status === filter;
-      
+
       item.style.display = shouldShow ? 'flex' : 'none';
     });
   }
@@ -370,7 +377,7 @@ export class HistoryView {
         dateStyle: 'medium',
         timeStyle: 'short'
       }).format(date);
-    } catch (error) {
+    } catch {
       return dateString;
     }
   }
@@ -384,12 +391,12 @@ export class HistoryView {
       const now = new Date();
       const diffTime = Math.abs(now - date);
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
+
       if (diffDays === 1) return 'Yesterday';
       if (diffDays < 7) return `${diffDays} days ago`;
       if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
       return `${Math.floor(diffDays / 30)} months ago`;
-    } catch (error) {
+    } catch {
       return 'Unknown';
     }
   }
@@ -404,11 +411,15 @@ export class HistoryView {
         <span class="history-error__icon" aria-hidden="true">⚠️</span>
         <h3 class="history-error__title">Unable to Load History</h3>
         <p class="history-error__text">${message}</p>
-        <button class="btn btn--primary" onclick="this.loadHistory()">
+        <button class="btn btn--primary" id="history-retry-btn">
           <span aria-hidden="true">🔄</span>
           Try Again
         </button>
       </div>
     `;
+
+    container
+      .querySelector('#history-retry-btn')
+      ?.addEventListener('click', () => this.loadHistory());
   }
-} 
+}
