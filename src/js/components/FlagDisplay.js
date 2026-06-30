@@ -19,7 +19,7 @@ export class FlagDisplay {
     this.currentStatus = null;
     this.isAnimating = false;
     this.animationQueue = [];
-    
+
     this.init();
   }
 
@@ -52,7 +52,7 @@ export class FlagDisplay {
         <div class="flag-shadow" aria-hidden="true"></div>
       </div>
     `;
-    
+
     this.flagElement = this.container.querySelector('.flag');
   }
 
@@ -62,27 +62,27 @@ export class FlagDisplay {
    */
   createStars() {
     const stars = [];
-    
+
     // 50 stars arranged in 9 rows (alternating 6 and 5 stars)
     // Rows 1, 3, 5, 7, 9: 6 stars each
     // Rows 2, 4, 6, 8: 5 stars each
     const starRows = [
-      { count: 6, offset: 0 },    // Row 1
-      { count: 5, offset: 0.5 },  // Row 2 (offset for staggered pattern)
-      { count: 6, offset: 0 },    // Row 3
-      { count: 5, offset: 0.5 },  // Row 4
-      { count: 6, offset: 0 },    // Row 5
-      { count: 5, offset: 0.5 },  // Row 6
-      { count: 6, offset: 0 },    // Row 7
-      { count: 5, offset: 0.5 },  // Row 8
-      { count: 6, offset: 0 }     // Row 9
+      { count: 6, offset: 0 }, // Row 1
+      { count: 5, offset: 0.5 }, // Row 2 (offset for staggered pattern)
+      { count: 6, offset: 0 }, // Row 3
+      { count: 5, offset: 0.5 }, // Row 4
+      { count: 6, offset: 0 }, // Row 5
+      { count: 5, offset: 0.5 }, // Row 6
+      { count: 6, offset: 0 }, // Row 7
+      { count: 5, offset: 0.5 }, // Row 8
+      { count: 6, offset: 0 } // Row 9
     ];
-    
+
     starRows.forEach((row, rowIndex) => {
       for (let i = 0; i < row.count; i++) {
-        const left = ((i + row.offset) * (100 / 6)) + (100 / 12); // Center the stars
-        const top = (rowIndex * (100 / 9)) + (100 / 18); // Distribute vertically
-        
+        const left = (i + row.offset) * (100 / 6) + 100 / 12; // Center the stars
+        const top = rowIndex * (100 / 9) + 100 / 18; // Distribute vertically
+
         stars.push(`
           <div class="star" style="
             position: absolute;
@@ -97,7 +97,7 @@ export class FlagDisplay {
         `);
       }
     });
-    
+
     return stars.join('');
   }
 
@@ -108,7 +108,7 @@ export class FlagDisplay {
     const flagContainer = this.container.querySelector('.flag-container');
     flagContainer.setAttribute('tabindex', '0');
     flagContainer.setAttribute('role', 'img');
-    
+
     // Add live region for status announcements
     const liveRegion = document.createElement('div');
     liveRegion.setAttribute('aria-live', 'polite');
@@ -157,6 +157,9 @@ export class FlagDisplay {
       return;
     }
 
+    // A successful status fetch always supersedes any previous error state.
+    this.hideError();
+
     const previousStatus = this.currentStatus;
     this.currentStatus = status;
 
@@ -182,17 +185,17 @@ export class FlagDisplay {
    */
   async animateStatusChange(status) {
     this.isAnimating = true;
-    
+
     // Add transition class
     this.flagElement.classList.add('transitioning');
-    
+
     // Set transition duration based on user preferences
     const duration = this.getAnimationDuration();
     this.flagElement.style.transition = `top ${duration}ms ease-in-out`;
-    
+
     // Update position
     this.setFlagPosition(status.status);
-    
+
     // Wait for animation to complete
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -233,8 +236,9 @@ export class FlagDisplay {
   updateAccessibility(status) {
     const flagContainer = this.container.querySelector('.flag-container');
     const statusText = status.status === FLAG_POSITIONS.HALF_STAFF ? 'Half-Staff' : 'Full-Staff';
-    
-    flagContainer.setAttribute('aria-label', 
+
+    flagContainer.setAttribute(
+      'aria-label',
       `${ARIA_LABELS.FLAG} - Currently at ${statusText}. ${status.reason || ''}`
     );
   }
@@ -244,10 +248,11 @@ export class FlagDisplay {
    */
   announceStatus() {
     if (!this.currentStatus) return;
-    
+
     const liveRegion = document.getElementById('flag-status-live');
-    const statusText = this.currentStatus.status === FLAG_POSITIONS.HALF_STAFF ? 'Half-Staff' : 'Full-Staff';
-    
+    const statusText =
+      this.currentStatus.status === FLAG_POSITIONS.HALF_STAFF ? 'Half-Staff' : 'Full-Staff';
+
     liveRegion.textContent = `Flag is currently at ${statusText}. ${this.currentStatus.reason || ''}`;
   }
 
@@ -258,7 +263,7 @@ export class FlagDisplay {
   announceStatusChange(status) {
     const liveRegion = document.getElementById('flag-status-live');
     const statusText = status.status === FLAG_POSITIONS.HALF_STAFF ? 'Half-Staff' : 'Full-Staff';
-    
+
     liveRegion.textContent = `Flag status changed to ${statusText}. ${status.reason || ''}`;
   }
 
@@ -276,7 +281,7 @@ export class FlagDisplay {
    */
   updateAnimationPreferences() {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    
+
     if (prefersReducedMotion) {
       this.flagElement.style.animation = 'none';
     } else {
@@ -319,9 +324,9 @@ export class FlagDisplay {
     if (this.flagElement) {
       this.flagElement.removeEventListener('transitionend', this.handleTransitionEnd);
     }
-    
+
     this.animationQueue = [];
     this.currentStatus = null;
     this.isAnimating = false;
   }
-} 
+}

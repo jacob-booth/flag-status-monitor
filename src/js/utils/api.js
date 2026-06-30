@@ -26,21 +26,22 @@ class APICache {
     this.timestamps = new Map();
   }
 
-  set(key, data, ttl = 300000) { // 5 minutes default TTL
+  set(key, data, ttl = 300000) {
+    // 5 minutes default TTL
     this.cache.set(key, data);
     this.timestamps.set(key, Date.now() + ttl);
   }
 
   get(key) {
     if (!this.cache.has(key)) return null;
-    
+
     const expiry = this.timestamps.get(key);
     if (Date.now() > expiry) {
       this.cache.delete(key);
       this.timestamps.delete(key);
       return null;
     }
-    
+
     return this.cache.get(key);
   }
 
@@ -57,7 +58,7 @@ const cache = new APICache();
  * @param {number} ms - Milliseconds to sleep
  * @returns {Promise<void>}
  */
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * Retry wrapper for async functions
@@ -68,7 +69,7 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
  */
 async function withRetry(fn, attempts = API_CONFIG.RETRY_ATTEMPTS, delay = API_CONFIG.RETRY_DELAY) {
   let lastError;
-  
+
   for (let i = 0; i < attempts; i++) {
     try {
       return await fn();
@@ -79,7 +80,7 @@ async function withRetry(fn, attempts = API_CONFIG.RETRY_ATTEMPTS, delay = API_C
       }
     }
   }
-  
+
   throw lastError;
 }
 
@@ -96,23 +97,16 @@ async function makeRequest(endpoint, options = {}, useCache = true) {
   const separator = endpoint.includes('?') ? '&' : '?';
   const url = `${API_CONFIG.BASE_URL}${endpoint}${cacheBuster ? separator + cacheBuster : ''}`;
   const cacheKey = `${url}:${JSON.stringify(options)}`;
-  
-  console.log('[API] Making request to:', url);
-  
-  // Check cache first for GET requests
-  if (useCache && (!options.method || options.method === 'GET')) {
+
+  if (useCache && isGet) {
     const cached = cache.get(cacheKey);
-    if (cached) {
-      console.log('[API] Returning cached response for:', url);
-      return cached;
-    }
+    if (cached) return cached;
   }
-  
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
-  
+
   try {
-    console.log('[API] Fetching:', url);
     const response = await fetch(url, {
       ...options,
       cache: isGet ? 'no-store' : options.cache,
@@ -122,10 +116,9 @@ async function makeRequest(endpoint, options = {}, useCache = true) {
         ...options.headers
       }
     });
-    
+
     clearTimeout(timeoutId);
-    console.log('[API] Response status:', response.status, response.statusText);
-    
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new APIError(
@@ -134,24 +127,21 @@ async function makeRequest(endpoint, options = {}, useCache = true) {
         errorData
       );
     }
-    
+
     const data = await response.json();
-    console.log('[API] Response data:', data);
-    
-    // Cache successful GET requests
-    if (useCache && (!options.method || options.method === 'GET')) {
+
+    if (useCache && isGet) {
       cache.set(cacheKey, data);
     }
-    
+
     return data;
   } catch (error) {
     clearTimeout(timeoutId);
-    console.error('[API] Request failed:', error);
-    
+
     if (error.name === 'AbortError') {
       throw new APIError('Request timeout', 408);
     }
-    
+
     throw error;
   }
 }
@@ -181,15 +171,7 @@ export const api = {
    * @returns {Promise<Object>}
    */
   async getStatus() {
-    console.log('[API] Fetching flag status...');
-    try {
-      const result = await withRetry(() => makeRequest(API_CONFIG.ENDPOINTS.STATUS));
-      console.log('[API] Flag status received:', result);
-      return result;
-    } catch (error) {
-      console.error('[API] Failed to get flag status:', error);
-      throw error;
-    }
+    return withRetry(() => makeRequest(API_CONFIG.ENDPOINTS.STATUS));
   },
 
   /**
@@ -229,55 +211,9 @@ export const api = {
   },
 
   /**
-   * Subscribe to push notifications
-   * @param {Object} subscription - Push subscription object
-   * @returns {Promise<Object>}
-   */
-  async subscribe(subscription) {
-    return withRetry(() => makeRequest(API_CONFIG.ENDPOINTS.SUBSCRIBE, {
-      method: 'POST',
-      body: JSON.stringify(subscription)
-    }), false);
-  },
-
-  /**
-   * Admin endpoints
-   */
-  admin: {
-    /**
-     * Update flag status (admin only)
-     * @param {Object} status - New status data
-     * @param {string} token - Admin token
-     * @returns {Promise<Object>}
-     */
-    async updateStatus(status, token) {
-      return withRetry(() => makeRequest(`${API_CONFIG.ENDPOINTS.ADMIN}/status`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(status)
-      }), false);
-    },
-
-    /**
-     * Get admin dashboard data
-     * @param {string} token - Admin token
-     * @returns {Promise<Object>}
-     */
-    async getDashboard(token) {
-      return withRetry(() => makeRequest(`${API_CONFIG.ENDPOINTS.ADMIN}/dashboard`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }));
-    }
-  },
-
-  /**
    * Clear API cache
    */
   clearCache() {
     cache.clear();
   }
-}; 
+};

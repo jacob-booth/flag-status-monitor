@@ -3,15 +3,16 @@
  * @fileoverview Central configuration for all application constants
  */
 
+// `import.meta.env.BASE_URL` resolves to whatever `base` Vite was built with
+// (see vite.config.js), so this works unmodified on GitHub Pages project
+// sites, custom domains, and local previews alike — no hostname sniffing.
+const apiBase = `${import.meta.env.BASE_URL}api`.replace(/\/{2,}/g, '/');
+
 export const API_CONFIG = {
-  BASE_URL: window.location.hostname === 'jacob-booth.github.io' 
-    ? '/flag-status-monitor/api' 
-    : '/api',
+  BASE_URL: apiBase,
   ENDPOINTS: {
-    STATUS: window.location.hostname === 'jacob-booth.github.io' ? '/status.json' : '/status',
-    HISTORY: window.location.hostname === 'jacob-booth.github.io' ? '/history.json' : '/history',
-    SUBSCRIBE: '/subscribe',
-    ADMIN: '/admin'
+    STATUS: '/status.json',
+    HISTORY: '/history.json'
   },
   TIMEOUT: 10000,
   RETRY_ATTEMPTS: 3,
@@ -20,8 +21,8 @@ export const API_CONFIG = {
 
 export const UPDATE_INTERVALS = {
   NORMAL: 3600000, // 1 hour
-  FAST: 300000,    // 5 minutes (when status changes expected)
-  SLOW: 21600000   // 6 hours (overnight)
+  FAST: 300000, // 5 minutes (when status changes expected)
+  SLOW: 21600000 // 6 hours (overnight)
 };
 
 export const ANIMATION_CONFIG = {
@@ -49,12 +50,6 @@ export const THEMES = {
 export const FLAG_POSITIONS = {
   FULL_STAFF: 'full-staff',
   HALF_STAFF: 'half-staff'
-};
-
-export const NOTIFICATION_TYPES = {
-  STATUS_CHANGE: 'status-change',
-  ERROR: 'error',
-  UPDATE: 'update'
 };
 
 export const CSS_CLASSES = {
@@ -129,4 +124,4 @@ export const ARIA_LABELS = {
   THEME_TOGGLE: 'Toggle dark mode',
   NOTIFICATION_TOGGLE: 'Toggle notifications',
   REFRESH: 'Refresh status'
-}; 
+};

@@ -4,4 +4,4 @@
  */
 
 // Re-export all constants from the config directory
-export * from '../config/constants.js'; 
+export * from '../config/constants.js';
