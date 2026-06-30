@@ -32,10 +32,14 @@ FLAG_STATUS_SCHEMA = {
 
 class FlagStatusChecker:
     def __init__(self):
-        # Write directly to docs directory for GitHub Pages
-        self.status_file = os.path.join('docs', 'flag_status.json')
-        self.api_status_file = os.path.join('docs', 'api', 'status.json')
+        # `public/` is the single source of truth for static data. Vite
+        # copies it verbatim into `dist/` at build time, so there is no
+        # separate "docs" copy to keep in sync.
+        self.api_status_file = os.path.join('public', 'api', 'status.json')
+        self.history_file = os.path.join('public', 'api', 'history.json')
+        self.badge_file = os.path.join('public', 'badge.json')
         self.source_url = 'https://halfstaff.org/wp-json/halfstaff/v1/widget'
+        self.max_history_entries = 200
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
     def check_halfstaff_api(self) -> Optional[Dict]:
@@ -115,56 +119,72 @@ class FlagStatusChecker:
 
         return status
 
+    def _append_history(self, status: Dict) -> None:
+        """Append a status entry to history.json only when the status actually
+        changed, so the timeline reflects real transitions rather than every
+        hourly poll."""
+        os.makedirs(os.path.dirname(self.history_file), exist_ok=True)
+
+        existing = {"history": []}
+        if os.path.exists(self.history_file):
+            try:
+                with open(self.history_file) as f:
+                    existing = json.load(f)
+            except (json.JSONDecodeError, OSError) as e:
+                logger.warning(f"Could not read existing history, starting fresh: {e}")
+
+        history = existing.get("history", [])
+        last_entry = history[0] if history else None
+
+        if not last_entry or last_entry.get("status") != status.get("status"):
+            history.insert(0, {
+                "date": status.get("last_updated"),
+                "status": status.get("status"),
+                "reason": status.get("reason", ""),
+                "source": status.get("source", "")
+            })
+            history = history[: self.max_history_entries]
+
+        with open(self.history_file, 'w') as f:
+            json.dump({
+                "history": history,
+                "total": len(history),
+                "page": 1,
+                "per_page": len(history)
+            }, f, indent=2)
+
+    def _write_status(self, status: Dict, badge_message: str, badge_color: str) -> None:
+        os.makedirs(os.path.dirname(self.api_status_file), exist_ok=True)
+        with open(self.api_status_file, 'w') as f:
+            json.dump(status, f, indent=2)
+        self._append_history(status)
+
+        badge = {
+            "schemaVersion": 1,
+            "label": "flag status",
+            "message": badge_message,
+            "color": badge_color
+        }
+        os.makedirs(os.path.dirname(self.badge_file), exist_ok=True)
+        with open(self.badge_file, 'w') as f:
+            json.dump(badge, f, indent=2)
+
     def update_status(self):
         """Update and save current flag status."""
         try:
             status = self.get_current_status()
-            
-            # Create docs directories if they don't exist
-            os.makedirs(os.path.dirname(self.status_file), exist_ok=True)
-            os.makedirs(os.path.dirname(self.api_status_file), exist_ok=True)
-            
-            # Save status to file(s)
-            with open(self.status_file, 'w') as f:
-                json.dump(status, f, indent=2)
-            with open(self.api_status_file, 'w') as f:
-                json.dump(status, f, indent=2)
-
-            # Write badge JSON for README
-            badge = {
-                "schemaVersion": 1,
-                "label": "flag status",
-                "message": "half-staff" if status.get("status") == "half-staff" else "full-staff",
-                "color": "orange" if status.get("status") == "half-staff" else "brightgreen"
-            }
-            with open(os.path.join('docs', 'badge.json'), 'w') as f:
-                json.dump(badge, f, indent=2)
-            with open(os.path.join('docs', 'api', 'badge.json'), 'w') as f:
-                json.dump(badge, f, indent=2)
-            
+            is_half_staff = status.get("status") == "half-staff"
+            self._write_status(
+                status,
+                badge_message="half-staff" if is_half_staff else "full-staff",
+                badge_color="orange" if is_half_staff else "brightgreen"
+            )
             logger.info(f"Flag status updated: {status['status']} (Source: {status['source']})")
-            
+
         except Exception as e:
             logger.error(f"Error updating flag status: {str(e)}")
-            # Create a default status file if update fails
             default_status = self.get_default_status("Error updating status")
-            os.makedirs(os.path.dirname(self.status_file), exist_ok=True)
-            os.makedirs(os.path.dirname(self.api_status_file), exist_ok=True)
-            with open(self.status_file, 'w') as f:
-                json.dump(default_status, f, indent=2)
-            with open(self.api_status_file, 'w') as f:
-                json.dump(default_status, f, indent=2)
-
-            badge = {
-                "schemaVersion": 1,
-                "label": "flag status",
-                "message": "unknown",
-                "color": "lightgrey"
-            }
-            with open(os.path.join('docs', 'badge.json'), 'w') as f:
-                json.dump(badge, f, indent=2)
-            with open(os.path.join('docs', 'api', 'badge.json'), 'w') as f:
-                json.dump(badge, f, indent=2)
+            self._write_status(default_status, badge_message="unknown", badge_color="lightgrey")
             raise
 
 def main():

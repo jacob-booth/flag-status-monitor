@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 """
-Simple development server for Flag Status Monitor
-Provides API endpoints and serves static files for testing
+Optional mock API server for Flag Status Monitor.
+
+The Vite dev server (`npm run dev`) already serves `public/api/*.json`
+directly, so this script is NOT required for day-to-day frontend work.
+Use it only when you want a *dynamic* backend to prototype against (e.g.
+random status changes, manual overrides, pagination) instead of static
+fixture files.
 """
 
 import json
@@ -53,10 +58,10 @@ class FlagStatusHandler(SimpleHTTPRequestHandler):
         parsed_path = urlparse(self.path)
         path = parsed_path.path
         
-        # API endpoints
-        if path == '/api/status':
+        # API endpoints (mirrors the static public/api/*.json contract)
+        if path in ('/api/status', '/api/status.json'):
             self.handle_status_api()
-        elif path == '/api/history':
+        elif path in ('/api/history', '/api/history.json'):
             self.handle_history_api()
         elif path == '/api/health':
             self.handle_health_api()
@@ -228,15 +233,16 @@ def main():
     httpd = HTTPServer(server_address, FlagStatusHandler)
     
     print(f"""
-🇺🇸 Flag Status Monitor Development Server
+🇺🇸 Flag Status Monitor — Mock API Server
 ==========================================
 Server running at: http://localhost:{port}
 API endpoints:
-  - GET  /api/status     - Current flag status
-  - GET  /api/history    - Flag status history
-  - GET  /api/health     - Server health check
+  - GET  /api/status.json     - Current flag status (randomized)
+  - GET  /api/history.json    - Flag status history
+  - GET  /api/health          - Server health check
   - POST /api/status/override - Manual status override
 
+This is an optional tool. The frontend (`npm run dev`) does not require it.
 Press Ctrl+C to stop the server
 """)
     
