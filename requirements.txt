@@ -1,7 +1,6 @@
+# Dependencies for src/api/check_status.py (the hourly status-update script).
+# server.py uses only the Python standard library and needs nothing here.
 requests>=2.31.0
-python-dateutil>=2.8.2
-beautifulsoup4==4.12.2
-python-dotenv==1.0.0
-jsonschema==4.20.0
-tenacity==8.2.3
-aiohttp==3.9.1
+beautifulsoup4>=4.12.2
+jsonschema>=4.20.0
+tenacity>=8.2.3
