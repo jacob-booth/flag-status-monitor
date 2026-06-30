@@ -33,8 +33,8 @@ jobs:
           if [[ -n "$(git status --porcelain)" ]]; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add docs/flag_status.json docs/api/status.json docs/badge.json docs/api/badge.json
-            git commit -m "Update flag status"
+            git add public/api/status.json public/api/history.json public/badge.json
+            git commit -m "chore: update flag status"
             git push
           else
             echo "No changes to commit"
