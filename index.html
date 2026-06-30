@@ -3,26 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🇺🇸 U.S. Flag Status Monitor</title>
-    
+    <title>🇺🇸 U.S. Flag Status Monitor — Live Half-Staff Tracker</title>
+
     <!-- SEO and Social Media -->
-    <meta name="description" content="Real-time U.S. flag status monitor showing current flag position (full-staff or half-staff) with push notifications and PWA support">
-    <meta name="keywords" content="US flag, flag status, half-staff, full-staff, government, memorial, PWA">
+    <meta name="description" content="A real-time, installable PWA that tracks whether the U.S. flag is at full-staff or half-staff, with live history, federal holiday context, and offline support.">
+    <meta name="keywords" content="US flag, flag status, half-staff, full-staff, government, memorial, PWA, flag etiquette">
     <meta name="author" content="Jacob Booth">
-    
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://jacob-booth.github.io/flag-status-monitor/">
+
     <!-- Open Graph -->
     <meta property="og:title" content="U.S. Flag Status Monitor">
-    <meta property="og:description" content="Real-time monitoring of U.S. flag status with notifications">
+    <meta property="og:description" content="Real-time monitoring of the U.S. flag's staff position, with history and federal holiday context.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://jacob-booth.github.io/flag-status-monitor">
+    <meta property="og:url" content="https://jacob-booth.github.io/flag-status-monitor/">
     <meta property="og:image" content="https://jacob-booth.github.io/flag-status-monitor/assets/og-image.png">
-    
+
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="U.S. Flag Status Monitor">
     <meta name="twitter:description" content="Real-time monitoring of U.S. flag status">
     <meta name="twitter:image" content="https://jacob-booth.github.io/flag-status-monitor/assets/og-image.png">
-    
+
     <!-- PWA -->
     <meta name="theme-color" content="#3C3B6E">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -30,22 +32,17 @@
     <meta name="apple-mobile-web-app-title" content="Flag Monitor">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Flag Monitor">
-    
+
     <!-- Icons -->
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.svg">
     <link rel="mask-icon" href="assets/favicon.svg" color="#3C3B6E">
     <link rel="manifest" href="manifest.json">
-    
-    <!-- Preload critical resources -->
-    <link rel="preload" href="src/css/styles.css" as="style">
-    <link rel="preload" href="src/js/main.js?v=2026-01-31" as="script">
-    
+
     <!-- Stylesheets -->
     <link rel="stylesheet" href="src/css/styles.css">
-    
+
     <!-- Structured Data -->
     <script type="application/ld+json">
     {
@@ -53,7 +50,7 @@
       "@type": "WebApplication",
       "name": "U.S. Flag Status Monitor",
       "description": "Real-time monitoring of U.S. flag status",
-      "url": "https://jacob-booth.github.io/flag-status-monitor",
+      "url": "https://jacob-booth.github.io/flag-status-monitor/",
       "applicationCategory": "GovernmentApplication",
       "operatingSystem": "Any",
       "offers": {
@@ -67,7 +64,7 @@
 <body>
     <!-- Skip to main content for accessibility -->
     <a href="#main-content" class="skip-link">Skip to main content</a>
-    
+
     <!-- Header -->
     <header class="header" role="banner">
         <div class="header__container">
@@ -75,48 +72,48 @@
                 <span class="header__flag-emoji" aria-hidden="true">🇺🇸</span>
                 Flag Monitor
             </h1>
-            
+
             <!-- Control buttons -->
             <div class="header__controls">
-                <button 
-                    id="refresh-btn" 
-                    class="btn btn--icon btn--ghost" 
+                <button
+                    id="refresh-btn"
+                    class="btn btn--icon btn--ghost"
                     aria-label="Refresh flag status"
                     title="Refresh status (Ctrl+R)"
                 >
                     <span aria-hidden="true">🔄</span>
                 </button>
-                
-                <button 
-                    id="notification-toggle" 
-                    class="btn btn--icon btn--ghost" 
+
+                <button
+                    id="notification-toggle"
+                    class="btn btn--icon btn--ghost"
                     aria-label="Toggle notifications"
                     title="Toggle notifications (Ctrl+N)"
                 >
                     <span aria-hidden="true">🔕</span>
                 </button>
-                
-                <button 
-                    id="theme-toggle" 
-                    class="btn btn--icon btn--ghost" 
+
+                <button
+                    id="theme-toggle"
+                    class="btn btn--icon btn--ghost"
                     aria-label="Toggle theme"
                     title="Toggle theme (Ctrl+T)"
                 >
-                    <span aria-hidden="true">🔄</span>
+                    <span aria-hidden="true">🖥️</span>
                 </button>
-                
-                <button 
-                    id="history-btn" 
-                    class="btn btn--icon btn--ghost" 
+
+                <button
+                    id="history-btn"
+                    class="btn btn--icon btn--ghost"
                     aria-label="View history"
                     title="View flag status history"
                 >
                     <span aria-hidden="true">📊</span>
                 </button>
-                
-                <button 
-                    id="settings-btn" 
-                    class="btn btn--icon btn--ghost" 
+
+                <button
+                    id="settings-btn"
+                    class="btn btn--icon btn--ghost"
                     aria-label="Open settings"
                     title="Open settings"
                 >
@@ -128,20 +125,60 @@
 
     <!-- Main content -->
     <main id="main-content" class="main" role="main">
-        <!-- Status information - moved to top -->
+        <!-- Hero: status + flag side by side -->
+        <section class="hero" aria-labelledby="hero-title">
+            <div class="hero__primary">
+                <div class="hero__meta">
+                    <span class="live-pill"><span class="live-pill__dot" aria-hidden="true"></span> Live</span>
+                    <div class="current-date">
+                        <span aria-hidden="true">📅</span>
+                        <time id="current-date" datetime="">Loading date…</time>
+                    </div>
+                </div>
+
+                <p class="eyebrow">U.S. Flag Status Monitor</p>
+                <h2 id="hero-title" class="hero__title gradient-text">
+                    Currently <span id="status-text" class="skeleton">Loading…</span>
+                </h2>
+                <p class="hero__subtitle" id="reason">Checking official sources for the current staff position…</p>
+
+                <div class="hero__stats" role="list" aria-label="At a glance">
+                    <div class="stat-chip" role="listitem">
+                        <div class="stat-chip__value" id="stat-changes">–</div>
+                        <div class="stat-chip__label">Logged Changes</div>
+                    </div>
+                    <div class="stat-chip" role="listitem">
+                        <div class="stat-chip__value" id="stat-streak">–</div>
+                        <div class="stat-chip__label">Current Streak</div>
+                    </div>
+                    <div class="stat-chip" role="listitem">
+                        <div class="stat-chip__value" id="stat-holiday">–</div>
+                        <div class="stat-chip__label">Next Holiday</div>
+                    </div>
+                </div>
+
+                <!-- Historical note -->
+                <div id="historical-note" class="historical-note" style="display: none;">
+                    <span class="historical-note__icon" aria-hidden="true">📚</span>
+                    <span class="historical-note__text"></span>
+                </div>
+            </div>
+
+            <div class="flag-section" aria-labelledby="flag-heading">
+                <h2 id="flag-heading" class="sr-only">Flag Display</h2>
+                <div id="flag-container" class="flag-display-container">
+                    <!-- Flag will be dynamically created here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Status information -->
         <section class="status-section" aria-labelledby="status-heading">
             <div class="status-card">
                 <h2 id="status-heading" class="status-card__title">
                     <span class="status-card__flag-icon" aria-hidden="true">🇺🇸</span>
-                    Current Status: 
-                    <span id="status-text" class="status-card__status" aria-live="polite">
-                        Loading...
-                    </span>
+                    Detailed Status
                 </h2>
-                
-                <div id="reason" class="status-card__reason" aria-live="polite">
-                    Checking official sources...
-                </div>
 
                 <div class="status-card__state">
                     <label class="status-card__label" for="state-select">Scope</label>
@@ -150,7 +187,7 @@
 
                 <!-- Enhanced context information -->
                 <div id="status-context" class="status-card__context" aria-live="polite">
-                    Loading detailed information...
+                    Loading detailed information…
                 </div>
 
                 <!-- Today's observance -->
@@ -187,48 +224,37 @@
                         </div>
                     </details>
                 </div>
-                
-                <div class="status-card__meta">
-                    <div class="status-card__meta-item">
-                        <div class="status-card__label">Last Updated</div>
-                        <div class="status-card__value">
-                            <time id="last-updated" datetime="">checking...</time>
-                        </div>
-                    </div>
-                    
-                    <div class="status-card__meta-item">
-                        <div class="status-card__label">Source</div>
-                        <div class="status-card__value" id="source">checking...</div>
-                    </div>
-                </div>
-                
-                <!-- Connection status indicator -->
+
                 <div class="connection-status" aria-live="polite">
                     <span class="connection-status__indicator" aria-hidden="true"></span>
                     <span class="connection-status__text">Connected</span>
                 </div>
             </div>
-        </section>
 
-        <!-- Hero section - simplified -->
-        <section class="hero-section" aria-labelledby="hero-title">
-            <div class="current-date" aria-live="polite">
-                <span aria-hidden="true">📅</span>
-                <time id="current-date" datetime="">Loading date...</time>
-            </div>
-            
-            <!-- Historical note -->
-            <div id="historical-note" class="historical-note" style="display: none;">
-                <span class="historical-note__icon" aria-hidden="true">📚</span>
-                <span class="historical-note__text"></span>
-            </div>
-        </section>
+            <div class="status-card">
+                <h2 class="status-card__title">
+                    <span aria-hidden="true">🗂️</span>
+                    Source &amp; Timing
+                </h2>
 
-        <!-- Flag display section -->
-        <section class="flag-section" aria-labelledby="flag-heading">
-            <h2 id="flag-heading" class="sr-only">Flag Display</h2>
-            <div id="flag-container" class="flag-display-container">
-                <!-- Flag will be dynamically created here -->
+                <div class="status-card__meta">
+                    <div class="status-card__meta-item">
+                        <div class="status-card__label">Last Updated</div>
+                        <div class="status-card__value">
+                            <time id="last-updated" datetime="">checking…</time>
+                        </div>
+                    </div>
+
+                    <div class="status-card__meta-item">
+                        <div class="status-card__label">Source</div>
+                        <div class="status-card__value" id="source">checking…</div>
+                    </div>
+                </div>
+
+                <p style="margin-top: var(--space-5); font-size: var(--font-size-sm); color: var(--text-secondary);">
+                    Status is cross-checked against HalfStaff.org and official notices, then cached locally so
+                    the app keeps working offline.
+                </p>
             </div>
         </section>
 
@@ -236,22 +262,22 @@
         <section class="actions-section" aria-labelledby="actions-heading">
             <h2 id="actions-heading" class="sr-only">Quick Actions</h2>
             <div class="quick-actions">
-                <button class="btn btn--primary" onclick="window.flagApp?.refreshStatus()">
+                <button id="quick-refresh" class="btn btn--primary">
                     <span aria-hidden="true">🔄</span>
                     Refresh Now
                 </button>
-                
-                <button class="btn btn--secondary" onclick="window.flagApp?.openHistory()">
+
+                <button id="quick-history" class="btn btn--secondary">
                     <span aria-hidden="true">📊</span>
                     View History
                 </button>
-                
-                <button class="btn btn--secondary" onclick="window.flagApp?.toggleNotifications()">
+
+                <button id="quick-notifications" class="btn btn--secondary">
                     <span aria-hidden="true">🔔</span>
                     Notifications
                 </button>
 
-                <button class="btn btn--secondary" onclick="window.flagApp?.showFlagEtiquette()">
+                <button id="quick-etiquette" class="btn btn--secondary">
                     <span aria-hidden="true">📖</span>
                     Flag Etiquette
                 </button>
@@ -267,36 +293,37 @@
                     Data sourced from HalfStaff.org and official notices.
                     Updates automatically every hour.
                 </p>
-                
+
                 <div class="footer__links">
-                    <a href="https://github.com/jacob-booth/flag-status-monitor" 
-                       target="_blank" 
+                    <a href="https://github.com/jacob-booth/flag-status-monitor"
+                       target="_blank"
                        rel="noopener noreferrer"
                        class="footer__link">
-                        <span aria-hidden="true">📱</span>
+                        <span aria-hidden="true">⭐</span>
                         View on GitHub
                     </a>
-                    
-                    <a href="docs/" 
-                       target="_blank" 
+
+                    <a href="https://github.com/jacob-booth/flag-status-monitor#readme"
+                       target="_blank"
                        rel="noopener noreferrer"
                        class="footer__link">
                         <span aria-hidden="true">📚</span>
                         Documentation
                     </a>
-                    
-                    <a href="admin.html" 
-                       class="footer__link footer__link--admin"
-                       aria-label="Admin panel (authorized users only)">
-                        <span aria-hidden="true">🔐</span>
-                        Admin
+
+                    <a href="https://github.com/jacob-booth/flag-status-monitor/issues"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="footer__link">
+                        <span aria-hidden="true">🐛</span>
+                        Report an Issue
                     </a>
                 </div>
             </div>
-            
+
             <!-- Version and build info -->
             <div class="footer__meta">
-                <span class="footer__version">v2.0.0</span>
+                <span class="footer__version">v3.0.0</span>
                 <span class="footer__separator">•</span>
                 <span class="footer__build">Built with ❤️ for 🇺🇸</span>
             </div>
@@ -306,7 +333,7 @@
     <!-- Loading overlay -->
     <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
         <div class="loading-spinner" aria-hidden="true"></div>
-        <p class="loading-text">Loading flag status...</p>
+        <p class="loading-text">Loading flag status…</p>
     </div>
 
     <!-- Notification container (dynamically populated) -->
@@ -331,75 +358,39 @@
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script type="module" src="src/js/main.js?v=2026-01-31"></script>
-    
-    <!-- Service Worker registration -->
-    <script>
-        // Register service worker for PWA functionality
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('SW registered: ', registration);
-                    })
-                    .catch(registrationError => {
-                        console.log('SW registration failed: ', registrationError);
-                    });
-            });
-        }
+    <!-- App entry point. The service worker is registered from within
+         NotificationCenter so there is a single, well-defined owner of
+         that lifecycle instead of duplicating registration logic here. -->
+    <script type="module" src="src/js/main.js"></script>
 
+    <script type="module">
         // PWA install prompt
         let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            
+        window.addEventListener('beforeinstallprompt', (event) => {
+            event.preventDefault();
+            deferredPrompt = event;
+
             const installPrompt = document.getElementById('install-prompt');
             const installBtn = document.getElementById('install-btn');
             const dismissBtn = document.getElementById('install-dismiss');
-            
-            if (installPrompt && installBtn && dismissBtn) {
-                installPrompt.hidden = false;
-                
-                installBtn.addEventListener('click', () => {
-                    installPrompt.hidden = true;
-                    deferredPrompt.prompt();
-                    deferredPrompt.userChoice.then((choiceResult) => {
-                        if (choiceResult.outcome === 'accepted') {
-                            console.log('User accepted the install prompt');
-                        }
-                        deferredPrompt = null;
-                    });
-                });
-                
-                dismissBtn.addEventListener('click', () => {
-                    installPrompt.hidden = true;
-                });
-            }
+
+            if (!installPrompt || !installBtn || !dismissBtn) return;
+            installPrompt.hidden = false;
+
+            installBtn.addEventListener('click', async () => {
+                installPrompt.hidden = true;
+                deferredPrompt?.prompt();
+                const choice = await deferredPrompt?.userChoice;
+                if (choice?.outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                }
+                deferredPrompt = null;
+            });
+
+            dismissBtn.addEventListener('click', () => {
+                installPrompt.hidden = true;
+            });
         });
-
-        // Set current date
-        function updateCurrentDate() {
-            const dateElement = document.getElementById('current-date');
-            if (dateElement) {
-                const now = new Date();
-                const options = { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric',
-                    timeZone: 'America/New_York'
-                };
-                const formattedDate = now.toLocaleDateString('en-US', options);
-                dateElement.textContent = formattedDate;
-                dateElement.setAttribute('datetime', now.toISOString());
-            }
-        }
-
-        // Update date immediately and then every minute
-        updateCurrentDate();
-        setInterval(updateCurrentDate, 60000);
     </script>
 </body>
 </html>
