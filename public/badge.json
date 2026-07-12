@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
   "label": "flag status",
-  "message": "full-staff",
-  "color": "brightgreen"
+  "message": "half-staff",
+  "color": "orange"
 }

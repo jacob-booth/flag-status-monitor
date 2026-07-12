@@ -1,7 +1,28 @@
 {
-  "status": "full-staff",
-  "last_updated": "2026-07-12T17:54:21.792511+00:00",
-  "source": "HalfStaff.org",
-  "reason": "No active half-staff notices",
-  "expires": null
+  "status": "half-staff",
+  "reason": "Honoring the life and service of Senator Lindsey Graham",
+  "source": "Presidential order (verified by CNN and USA Today)",
+  "source_url": "https://www.cnn.com/2026/07/12/politics/live-news/lindsey-graham-tributes-death-updates",
+  "expires": "2026-07-18T22:00:00Z",
+  "verification": "verified-order",
+  "last_checked": "2026-07-12T18:00:00+00:00",
+  "checked_sources": [
+    {
+      "name": "known-orders",
+      "available": true
+    },
+    {
+      "name": "white-house",
+      "available": false
+    },
+    {
+      "name": "breaking-news",
+      "available": true
+    },
+    {
+      "name": "halfstaff-org",
+      "available": true
+    }
+  ],
+  "last_updated": "2026-07-12T18:11:50.428383+00:00"
 }
