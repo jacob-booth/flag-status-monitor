@@ -80,6 +80,7 @@ export class FlagStatusApp {
       statusText: document.getElementById('status-text'),
       reason: document.getElementById('reason'),
       lastUpdated: document.getElementById('last-updated'),
+      lastChecked: document.getElementById('last-checked'),
       source: document.getElementById('source'),
       loadingOverlay: document.getElementById('loading-overlay'),
       refreshBtn: document.getElementById('refresh-btn'),
@@ -252,6 +253,12 @@ export class FlagStatusApp {
     this.elements.reason.textContent = status.reason || '';
     this.elements.reason.classList.remove('skeleton');
     this.elements.lastUpdated.textContent = this.formatDate(status.last_updated);
+    this.elements.lastUpdated.setAttribute('datetime', status.last_updated || '');
+    if (this.elements.lastChecked) {
+      const checkedAt = status.last_checked || status.last_updated;
+      this.elements.lastChecked.textContent = this.formatDate(checkedAt);
+      this.elements.lastChecked.setAttribute('datetime', checkedAt || '');
+    }
     this.elements.source.textContent = status.source || '';
 
     this.elements.statusText.className = 'status-card__status';
@@ -588,6 +595,7 @@ export class FlagStatusApp {
     this.elements.statusText.className = 'status-card__status error';
     this.elements.reason.textContent = message;
     this.elements.lastUpdated.textContent = 'Unable to update';
+    if (this.elements.lastChecked) this.elements.lastChecked.textContent = 'Verification failed';
     this.elements.source.textContent = 'Error';
 
     this.flagDisplay?.showError();
