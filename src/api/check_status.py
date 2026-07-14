@@ -88,6 +88,7 @@ class FlagStatusChecker:
         expires: Optional[str] = None,
         priority: int = 0,
         verification: str = "provider",
+        order_id: Optional[str] = None,
     ) -> Dict:
         return {
             "status": status,
@@ -97,6 +98,7 @@ class FlagStatusChecker:
             "expires": expires,
             "priority": priority,
             "verification": verification,
+            "order_id": order_id,
         }
 
     def _is_active(self, signal: Dict) -> bool:
@@ -142,7 +144,10 @@ class FlagStatusChecker:
             order["source_url"],
             order["expires"],
             priority=100,
-            verification="verified-order",
+            verification="official-presidential-action"
+            if order["source"] == "The White House"
+            else "verified-order",
+            order_id=order.get("id"),
         )
 
     def check_halfstaff_api(self) -> Optional[Dict]:
@@ -186,6 +191,31 @@ class FlagStatusChecker:
             month = datetime.strptime(explicit_date.group(1), "%B").month
             year = int(explicit_date.group(3) or base.year)
             end = datetime(year, month, int(explicit_date.group(2)), 23, 59, tzinfo=EASTERN)
+            return end.astimezone(UTC).isoformat()
+
+        time_then_date = re.search(
+            r"until\s+(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)\s+on\s+"
+            r"(january|february|march|april|may|june|july|august|september|"
+            r"october|november|december)\s+(\d{1,2})(?:,\s*(\d{4}))?",
+            text,
+            re.I,
+        )
+        if time_then_date:
+            hour = int(time_then_date.group(1))
+            if "p" in time_then_date.group(3).lower() and hour != 12:
+                hour += 12
+            if "a" in time_then_date.group(3).lower() and hour == 12:
+                hour = 0
+            month = datetime.strptime(time_then_date.group(4), "%B").month
+            year = int(time_then_date.group(6) or base.year)
+            end = datetime(
+                year,
+                month,
+                int(time_then_date.group(5)),
+                hour,
+                int(time_then_date.group(2) or 0),
+                tzinfo=EASTERN,
+            )
             return end.astimezone(UTC).isoformat()
 
         weekday_time = re.search(
@@ -392,17 +422,42 @@ class FlagStatusChecker:
 
         history = existing.get("history", [])
         last_entry = history[0] if history else None
+        history_entry = {
+            "id": status.get("order_id"),
+            "date": status["last_updated"],
+            "status": status["status"],
+            "reason": status.get("reason", ""),
+            "source": status.get("source", ""),
+            "source_url": status.get("source_url"),
+            "ends": status.get("expires"),
+            "verification": status.get("verification"),
+        }
+        history_entry = {key: value for key, value in history_entry.items() if value is not None}
+
         if not last_entry or last_entry.get("status") != status.get("status"):
             history.insert(
                 0,
-                {
-                    "date": status["last_updated"],
-                    "status": status["status"],
-                    "reason": status.get("reason", ""),
-                    "source": status.get("source", ""),
-                },
+                history_entry,
             )
-            history = history[: self.max_history_entries]
+        else:
+            # Enrich the existing transition when a stronger source appears;
+            # do not manufacture a second event or move its original date.
+            history[0] = {**last_entry, **history_entry, "date": last_entry["date"]}
+
+        deduplicated = []
+        seen = set()
+        for entry in history:
+            fingerprint = entry.get("id") or (
+                entry.get("status"),
+                entry.get("date"),
+                entry.get("reason"),
+                entry.get("source"),
+            )
+            if fingerprint in seen:
+                continue
+            seen.add(fingerprint)
+            deduplicated.append(entry)
+        history = deduplicated[: self.max_history_entries]
 
         with open(self.history_file, "w", encoding="utf-8") as handle:
             json.dump(
@@ -421,7 +476,8 @@ class FlagStatusChecker:
         existing = self._read_existing_status() or {}
         semantic_fields = ("status", "reason", "source", "source_url", "expires", "verification")
         changed = any(existing.get(field) != status.get(field) for field in semantic_fields)
-        status["last_updated"] = self.now.isoformat() if changed else existing.get(
+        status_changed = existing.get("status") != status.get("status")
+        status["last_updated"] = self.now.isoformat() if status_changed else existing.get(
             "last_updated", self.now.isoformat()
         )
 

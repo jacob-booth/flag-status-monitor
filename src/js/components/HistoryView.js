@@ -1,92 +1,91 @@
-/**
- * History View Component
- * @fileoverview Beautiful history view with timeline and charts
- */
-
 import { api } from '../utils/api.js';
-import { appStorage } from '../utils/storage.js';
+import { calculateHistoryStats, normalizeHistory } from '../utils/history.js';
+
+const escapeHTML = (value = '') =>
+  String(value).replace(
+    /[&<>"']/g,
+    (character) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[character]
+  );
 
 export class HistoryView {
   constructor() {
     this.isVisible = false;
-    this.historyData = [];
+    this.allHistory = [];
     this.currentPage = 1;
     this.itemsPerPage = 10;
-    this.init();
-  }
-
-  /**
-   * Initialize the history view
-   */
-  init() {
+    this.activeFilter = 'all';
+    this.previousFocus = null;
+    this.previousBodyOverflow = '';
     this.createHistoryModal();
     this.setupEventListeners();
   }
 
-  /**
-   * Create the history modal structure
-   */
   createHistoryModal() {
     const modal = document.createElement('div');
     modal.id = 'history-modal';
     modal.className = 'history-modal';
+    modal.setAttribute('aria-hidden', 'true');
     modal.innerHTML = `
       <div class="history-modal__backdrop" aria-hidden="true"></div>
       <div class="history-modal__container" role="dialog" aria-labelledby="history-title" aria-modal="true">
         <div class="history-modal__header">
-          <h2 id="history-title" class="history-modal__title">
-            <span aria-hidden="true">📊</span>
-            Flag Status History
-          </h2>
+          <div>
+            <p class="history-modal__eyebrow">Verified federal records only</p>
+            <h2 id="history-title" class="history-modal__title">
+              <span aria-hidden="true">📊</span>
+              Flag Status History
+            </h2>
+          </div>
           <button class="history-modal__close btn btn--icon btn--ghost" aria-label="Close history">
             <span aria-hidden="true">✕</span>
           </button>
         </div>
-        
-        <div class="history-modal__content">
-          <!-- Stats Overview -->
-          <div class="history-stats">
+
+        <div class="history-modal__content" tabindex="0">
+          <div class="history-stats" aria-label="Verified history summary">
             <div class="history-stats__grid">
               <div class="history-stat">
-                <div class="history-stat__value" id="total-changes">-</div>
-                <div class="history-stat__label">Total Changes</div>
+                <div class="history-stat__value" data-stat="records">–</div>
+                <div class="history-stat__label">Verified Records</div>
               </div>
               <div class="history-stat">
-                <div class="history-stat__value" id="half-staff-days">-</div>
-                <div class="history-stat__label">Half-Staff Days</div>
+                <div class="history-stat__value" data-stat="ordered-days">–</div>
+                <div class="history-stat__label">Ordered Days</div>
               </div>
               <div class="history-stat">
-                <div class="history-stat__value" id="current-streak">-</div>
-                <div class="history-stat__label">Current Streak</div>
+                <div class="history-stat__value" data-stat="current-run">–</div>
+                <div class="history-stat__label">Current Run</div>
               </div>
               <div class="history-stat">
-                <div class="history-stat__value" id="last-change">-</div>
+                <div class="history-stat__value" data-stat="last-change">–</div>
                 <div class="history-stat__label">Last Change</div>
               </div>
             </div>
           </div>
 
-          <!-- Timeline View -->
           <div class="history-timeline">
             <div class="history-timeline__header">
-              <h3 class="history-timeline__title">Recent Changes</h3>
-              <div class="history-timeline__filters">
-                <button class="btn btn--secondary btn--sm" data-filter="all">All</button>
-                <button class="btn btn--secondary btn--sm" data-filter="half-staff">Half-Staff</button>
-                <button class="btn btn--secondary btn--sm" data-filter="full-staff">Full-Staff</button>
+              <div>
+                <h3 class="history-timeline__title">Verified Records</h3>
+                <p class="history-timeline__description" data-history-coverage>
+                  Refreshes never create entries. Loading coverage…
+                </p>
+              </div>
+              <div class="history-timeline__filters" aria-label="Filter history">
+                <button class="btn btn--primary btn--sm" data-filter="all" aria-pressed="true">All</button>
+                <button class="btn btn--secondary btn--sm" data-filter="half-staff" aria-pressed="false">Half-Staff</button>
+                <button class="btn btn--secondary btn--sm" data-filter="full-staff" aria-pressed="false">Full-Staff</button>
               </div>
             </div>
-            
-            <div class="history-timeline__content" id="timeline-content">
+
+            <div class="history-timeline__content" data-timeline>
               <div class="history-loading">
-                <div class="loading-spinner"></div>
-                <p>Loading history...</p>
+                <div class="loading-spinner" aria-hidden="true"></div>
+                <p>Loading verified history…</p>
               </div>
             </div>
-            
-            <div class="history-pagination" id="history-pagination">
-              <!-- Pagination will be inserted here -->
-            </div>
+            <div class="history-pagination" data-pagination></div>
           </div>
         </div>
       </div>
@@ -94,332 +93,255 @@ export class HistoryView {
 
     document.body.appendChild(modal);
     this.modal = modal;
+    this.scrollContainer = modal.querySelector('.history-modal__content');
   }
 
-  /**
-   * Setup event listeners
-   */
   setupEventListeners() {
-    // Close modal events
-    const closeBtn = this.modal.querySelector('.history-modal__close');
-    const backdrop = this.modal.querySelector('.history-modal__backdrop');
+    this.modal.querySelector('.history-modal__close').addEventListener('click', () => this.hide());
+    this.modal
+      .querySelector('.history-modal__backdrop')
+      .addEventListener('click', () => this.hide());
 
-    closeBtn.addEventListener('click', () => this.hide());
-    backdrop.addEventListener('click', () => this.hide());
-
-    // Escape key to close
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && this.isVisible) {
-        this.hide();
-      }
-    });
-
-    // Filter buttons
-    const filterBtns = this.modal.querySelectorAll('[data-filter]');
-    filterBtns.forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        const filter = e.target.dataset.filter;
-        this.applyFilter(filter);
-
-        // Update active state
-        filterBtns.forEach((b) => b.classList.remove('btn--primary'));
-        e.target.classList.add('btn--primary');
+    this.modal.querySelector('.history-timeline__filters').addEventListener('click', (event) => {
+      const button = event.target.closest('[data-filter]');
+      if (!button) return;
+      this.activeFilter = button.dataset.filter;
+      this.currentPage = 1;
+      this.modal.querySelectorAll('[data-filter]').forEach((filterButton) => {
+        const active = filterButton === button;
+        filterButton.classList.toggle('btn--primary', active);
+        filterButton.classList.toggle('btn--secondary', !active);
+        filterButton.setAttribute('aria-pressed', String(active));
       });
+      this.renderPage();
     });
+
+    this.modal.querySelector('[data-pagination]').addEventListener('click', (event) => {
+      const button = event.target.closest('[data-page]');
+      if (!button) return;
+      this.currentPage = Number(button.dataset.page);
+      this.renderPage();
+      this.scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    this.handleKeydown = (event) => {
+      if (!this.isVisible) return;
+      if (event.key === 'Escape') {
+        this.hide();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+
+      const focusable = [
+        ...this.modal.querySelectorAll(
+          'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
+        )
+      ].filter((element) => element.offsetParent !== null);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', this.handleKeydown);
   }
 
-  /**
-   * Show the history modal
-   */
   async show() {
     this.isVisible = true;
+    this.previousFocus = document.activeElement;
+    this.previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     this.modal.style.display = 'flex';
-
-    // Animate in
-    requestAnimationFrame(() => {
-      this.modal.classList.add('history-modal--show');
-    });
-
-    // Load history data
+    this.modal.setAttribute('aria-hidden', 'false');
+    this.scrollContainer.scrollTop = 0;
+    requestAnimationFrame(() => this.modal.classList.add('history-modal--show'));
+    this.modal.querySelector('.history-modal__close').focus();
     await this.loadHistory();
-
-    // Focus management for accessibility
-    const firstFocusable = this.modal.querySelector('.history-modal__close');
-    firstFocusable.focus();
   }
 
-  /**
-   * Hide the history modal
-   */
   hide() {
     this.isVisible = false;
     this.modal.classList.remove('history-modal--show');
-
+    this.modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = this.previousBodyOverflow;
     setTimeout(() => {
-      this.modal.style.display = 'none';
-    }, 300);
+      if (!this.isVisible) this.modal.style.display = 'none';
+    }, 250);
+    this.previousFocus?.focus?.();
   }
 
-  /**
-   * Load history data from API
-   */
   async loadHistory() {
+    const timeline = this.modal.querySelector('[data-timeline]');
+    timeline.innerHTML = `
+      <div class="history-loading">
+        <div class="loading-spinner" aria-hidden="true"></div>
+        <p>Loading verified history…</p>
+      </div>
+    `;
+
     try {
-      const localHistory = appStorage.getStatusHistory();
-      if (localHistory && localHistory.length) {
-        const total = localHistory.length;
-        const start = (this.currentPage - 1) * this.itemsPerPage;
-        const pageItems = localHistory.slice(start, start + this.itemsPerPage);
-
-        this.historyData = pageItems;
-        this.updateStats({ history: localHistory });
-        this.renderTimeline();
-        this.renderPagination({ total });
-        return;
-      }
-
-      const response = await api.getHistory({
-        page: this.currentPage,
-        per_page: this.itemsPerPage
-      });
-
-      this.historyData = response.history || [];
-      this.updateStats(response);
-      this.renderTimeline();
-      this.renderPagination(response);
+      const response = await api.getHistory();
+      this.allHistory = normalizeHistory(response.history);
+      const oldest = this.allHistory.at(-1);
+      this.modal.querySelector('[data-history-coverage]').textContent = oldest
+        ? `Refreshes never create entries. Verified coverage begins ${this.formatDate(oldest.date, false)}.`
+        : 'No verified history records have been published yet.';
+      this.currentPage = 1;
+      this.updateStats();
+      this.renderPage();
     } catch (error) {
-      console.error('Failed to load history:', error);
-      this.showError('Failed to load history data');
+      console.error('Failed to load verified history:', error);
+      this.showError('The verified history dataset could not be loaded.');
     }
   }
 
-  /**
-   * Update statistics display
-   */
-  updateStats(data) {
-    const stats = this.calculateStats(data.history || []);
-
-    document.getElementById('total-changes').textContent = stats.totalChanges;
-    document.getElementById('half-staff-days').textContent = stats.halfStaffDays;
-    document.getElementById('current-streak').textContent = stats.currentStreak;
-    document.getElementById('last-change').textContent = stats.lastChange;
+  get filteredHistory() {
+    if (this.activeFilter === 'all') return this.allHistory;
+    return this.allHistory.filter((entry) => entry.status === this.activeFilter);
   }
 
-  /**
-   * Calculate statistics from history data
-   */
-  calculateStats(history) {
-    const totalChanges = history.length;
-    const halfStaffDays = history.filter((h) => h.status === 'half-staff').length;
-
-    // Calculate current streak
-    let currentStreak = 0;
-    if (history.length > 0) {
-      const currentStatus = history[0].status;
-      for (const entry of history) {
-        if (entry.status === currentStatus) {
-          currentStreak++;
-        } else {
-          break;
-        }
-      }
-    }
-
-    // Last change date
-    const lastChange = history.length > 0 ? this.formatRelativeDate(history[0].date) : 'No data';
-
-    return {
-      totalChanges,
-      halfStaffDays,
-      currentStreak: `${currentStreak} days`,
-      lastChange
-    };
+  updateStats() {
+    const stats = calculateHistoryStats(this.allHistory);
+    this.modal.querySelector('[data-stat="records"]').textContent = stats.verifiedRecords;
+    this.modal.querySelector('[data-stat="ordered-days"]').textContent = stats.orderedDays;
+    this.modal.querySelector('[data-stat="current-run"]').textContent =
+      stats.currentRunDays === 0
+        ? 'Today'
+        : `${stats.currentRunDays} day${stats.currentRunDays === 1 ? '' : 's'}`;
+    this.modal.querySelector('[data-stat="last-change"]').textContent = stats.lastChangeDate
+      ? this.formatRelativeDate(stats.lastChangeDate)
+      : 'No data';
   }
 
-  /**
-   * Render the timeline
-   */
-  renderTimeline() {
-    const container = document.getElementById('timeline-content');
+  renderPage() {
+    const filtered = this.filteredHistory;
+    const totalPages = Math.max(1, Math.ceil(filtered.length / this.itemsPerPage));
+    this.currentPage = Math.min(this.currentPage, totalPages);
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    this.renderTimeline(filtered.slice(start, start + this.itemsPerPage));
+    this.renderPagination(filtered.length);
+  }
 
-    if (this.historyData.length === 0) {
+  renderTimeline(entries) {
+    const container = this.modal.querySelector('[data-timeline]');
+    if (!entries.length) {
       container.innerHTML = `
         <div class="history-empty">
           <span class="history-empty__icon" aria-hidden="true">📭</span>
-          <h3 class="history-empty__title">No History Available</h3>
-          <p class="history-empty__text">Flag status history will appear here once data is available.</p>
+          <h3 class="history-empty__title">No matching verified records</h3>
+          <p class="history-empty__text">Try another filter.</p>
         </div>
       `;
       return;
     }
 
-    const timelineHTML = this.historyData
+    const timelineHTML = entries
       .map((entry) => {
-        const isHalfStaff = entry.status === 'half-staff';
-        const statusIcon = isHalfStaff ? '⬇️' : '⬆️';
-        const statusText = isHalfStaff ? 'Half-Staff' : 'Full-Staff';
-        const statusClass = isHalfStaff ? 'half-staff' : 'full-staff';
+        const halfStaff = entry.status === 'half-staff';
+        const source = escapeHTML(entry.source || 'Published status data');
+        const sourceMarkup = entry.source_url
+          ? `<a href="${escapeHTML(entry.source_url)}" target="_blank" rel="noopener noreferrer">${source}</a>`
+          : source;
+        const endMarkup =
+          entry.end_label || entry.ends
+            ? `<div class="timeline-item__duration">
+              <span aria-hidden="true">🕒</span>
+              ${escapeHTML(entry.end_label || `Through ${this.formatDate(entry.ends, false)}`)}
+            </div>`
+            : '';
 
         return `
-        <div class="timeline-item timeline-item--${statusClass}" data-status="${entry.status}">
-          <div class="timeline-item__marker">
-            <span class="timeline-item__icon" aria-hidden="true">${statusIcon}</span>
-          </div>
-          <div class="timeline-item__content">
-            <div class="timeline-item__header">
-              <h4 class="timeline-item__title">Flag ${statusText}</h4>
-              <time class="timeline-item__date" datetime="${entry.date}">
-                ${this.formatDate(entry.date)}
-              </time>
+          <article class="timeline-item timeline-item--${entry.status}">
+            <div class="timeline-item__marker">
+              <span class="timeline-item__icon" aria-hidden="true">${halfStaff ? '⬇️' : '⬆️'}</span>
             </div>
-            ${
-              entry.reason
-                ? `
-              <p class="timeline-item__reason">${entry.reason}</p>
-            `
-                : ''
-            }
-            ${
-              entry.duration
-                ? `
-              <div class="timeline-item__duration">
-                <span aria-hidden="true">⏱️</span>
-                Duration: ${entry.duration}
+            <div class="timeline-item__content">
+              <div class="timeline-item__header">
+                <h4 class="timeline-item__title">Flag ${halfStaff ? 'Half-Staff' : 'Full-Staff'}</h4>
+                <time class="timeline-item__date" datetime="${escapeHTML(entry.date)}">
+                  ${escapeHTML(this.formatDate(entry.date))}
+                </time>
               </div>
-            `
-                : ''
-            }
-          </div>
-        </div>
-      `;
+              ${entry.reason ? `<p class="timeline-item__reason">${escapeHTML(entry.reason)}</p>` : ''}
+              <div class="timeline-item__meta"><span>Verified source:</span> ${sourceMarkup}</div>
+              ${endMarkup}
+            </div>
+          </article>
+        `;
       })
       .join('');
 
     container.innerHTML = `<div class="timeline">${timelineHTML}</div>`;
   }
 
-  /**
-   * Render pagination
-   */
-  renderPagination(data) {
-    const container = document.getElementById('history-pagination');
-    const totalPages = Math.ceil((data.total || 0) / this.itemsPerPage);
-
+  renderPagination(total) {
+    const container = this.modal.querySelector('[data-pagination]');
+    const totalPages = Math.ceil(total / this.itemsPerPage);
     if (totalPages <= 1) {
       container.innerHTML = '';
       return;
     }
 
-    let paginationHTML = '<div class="pagination">';
-
-    // Previous button
-    if (this.currentPage > 1) {
-      paginationHTML += `
-        <button class="btn btn--secondary btn--sm" data-page="${this.currentPage - 1}">
-          <span aria-hidden="true">←</span> Previous
-        </button>
-      `;
-    }
-
-    // Page numbers
-    for (let i = 1; i <= Math.min(totalPages, 5); i++) {
-      const isActive = i === this.currentPage;
-      paginationHTML += `
-        <button class="btn ${isActive ? 'btn--primary' : 'btn--secondary'} btn--sm" 
-                data-page="${i}" ${isActive ? 'aria-current="page"' : ''}>
-          ${i}
-        </button>
-      `;
-    }
-
-    // Next button
-    if (this.currentPage < totalPages) {
-      paginationHTML += `
-        <button class="btn btn--secondary btn--sm" data-page="${this.currentPage + 1}">
-          Next <span aria-hidden="true">→</span>
-        </button>
-      `;
-    }
-
-    paginationHTML += '</div>';
-    container.innerHTML = paginationHTML;
-
-    // Add pagination event listeners
-    container.querySelectorAll('[data-page]').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        this.currentPage = parseInt(e.target.dataset.page);
-        this.loadHistory();
-      });
-    });
+    const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
+    container.innerHTML = `
+      <nav class="pagination" aria-label="History pages">
+        <button class="btn btn--secondary btn--sm" data-page="${this.currentPage - 1}" ${this.currentPage === 1 ? 'disabled' : ''}>← Previous</button>
+        ${pages
+          .map(
+            (page) =>
+              `<button class="btn ${page === this.currentPage ? 'btn--primary' : 'btn--secondary'} btn--sm" data-page="${page}" ${page === this.currentPage ? 'aria-current="page"' : ''}>${page}</button>`
+          )
+          .join('')}
+        <button class="btn btn--secondary btn--sm" data-page="${this.currentPage + 1}" ${this.currentPage === totalPages ? 'disabled' : ''}>Next →</button>
+      </nav>
+    `;
   }
 
-  /**
-   * Apply filter to timeline
-   */
-  applyFilter(filter) {
-    const items = this.modal.querySelectorAll('.timeline-item');
-
-    items.forEach((item) => {
-      const status = item.dataset.status;
-      const shouldShow = filter === 'all' || status === filter;
-
-      item.style.display = shouldShow ? 'flex' : 'none';
-    });
-  }
-
-  /**
-   * Format date for display
-   */
-  formatDate(dateString) {
+  formatDate(value, includeTime = true) {
     try {
-      const date = new Date(dateString);
+      const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(value);
+      const date = new Date(dateOnly ? `${value}T12:00:00Z` : value);
       return new Intl.DateTimeFormat('en-US', {
         dateStyle: 'medium',
-        timeStyle: 'short'
+        ...(includeTime && !dateOnly ? { timeStyle: 'short' } : {})
       }).format(date);
     } catch {
-      return dateString;
+      return value;
     }
   }
 
-  /**
-   * Format relative date
-   */
-  formatRelativeDate(dateString) {
-    try {
-      const date = new Date(dateString);
-      const now = new Date();
-      const diffTime = Math.abs(now - date);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      if (diffDays === 1) return 'Yesterday';
-      if (diffDays < 7) return `${diffDays} days ago`;
-      if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-      return `${Math.floor(diffDays / 30)} months ago`;
-    } catch {
-      return 'Unknown';
-    }
+  formatRelativeDate(value) {
+    const date = new Date(value);
+    const days = Math.max(0, Math.floor((Date.now() - date) / 86400000));
+    if (days === 0) return 'Today';
+    if (days === 1) return 'Yesterday';
+    if (days < 7) return `${days} days ago`;
+    if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
+    return this.formatDate(value, false);
   }
 
-  /**
-   * Show error message
-   */
   showError(message) {
-    const container = document.getElementById('timeline-content');
+    const container = this.modal.querySelector('[data-timeline]');
     container.innerHTML = `
       <div class="history-error">
         <span class="history-error__icon" aria-hidden="true">⚠️</span>
         <h3 class="history-error__title">Unable to Load History</h3>
-        <p class="history-error__text">${message}</p>
-        <button class="btn btn--primary" id="history-retry-btn">
-          <span aria-hidden="true">🔄</span>
-          Try Again
-        </button>
+        <p class="history-error__text">${escapeHTML(message)}</p>
+        <button class="btn btn--primary" data-history-retry>Try Again</button>
       </div>
     `;
-
     container
-      .querySelector('#history-retry-btn')
-      ?.addEventListener('click', () => this.loadHistory());
+      .querySelector('[data-history-retry]')
+      .addEventListener('click', () => this.loadHistory());
+  }
+
+  destroy() {
+    document.removeEventListener('keydown', this.handleKeydown);
+    this.modal.remove();
   }
 }

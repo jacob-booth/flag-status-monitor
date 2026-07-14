@@ -7,7 +7,7 @@
  *   is cached the first time it is requested ("cache as you go").
  */
 
-const VERSION = 'v3';
+const VERSION = 'v4';
 const STATIC_CACHE = `flag-status-static-${VERSION}`;
 const API_CACHE = `flag-status-api-${VERSION}`;
 const API_CACHE_MAX_AGE = 60 * 60 * 1000; // 1 hour
@@ -23,7 +23,10 @@ self.addEventListener('activate', (event) => {
       .then((names) =>
         Promise.all(
           names
-            .filter((name) => name.startsWith('flag-status-') && name !== STATIC_CACHE && name !== API_CACHE)
+            .filter(
+              (name) =>
+                name.startsWith('flag-status-') && name !== STATIC_CACHE && name !== API_CACHE
+            )
             .map((name) => caches.delete(name))
         )
       )
@@ -38,13 +41,34 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (!url.protocol.startsWith('http')) return;
 
-  if (url.pathname.includes('/api/')) {
+  if (request.mode === 'navigate') {
+    event.respondWith(networkFirstNavigation(request));
+  } else if (url.pathname.includes('/api/')) {
     event.respondWith(networkFirstWithExpiry(request, API_CACHE, API_CACHE_MAX_AGE));
   } else if (url.origin === self.location.origin) {
     event.respondWith(cacheFirst(request, STATIC_CACHE));
   }
   // Cross-origin requests (e.g. HalfStaff.org) are left to the network.
 });
+
+/** Always check for the latest app shell; use the cached page only offline. */
+async function networkFirstNavigation(request) {
+  const cache = await caches.open(STATIC_CACHE);
+  try {
+    const response = await fetch(request, { cache: 'no-store' });
+    if (response.ok) cache.put(request, response.clone());
+    return response;
+  } catch {
+    return (
+      (await cache.match(request)) ||
+      (await cache.match('./index.html')) ||
+      new Response('Offline and the app shell is not cached.', {
+        status: 503,
+        headers: { 'Content-Type': 'text/plain' }
+      })
+    );
+  }
+}
 
 /** Cache-first for same-origin static assets (HTML/CSS/JS/icons). */
 async function cacheFirst(request, cacheName) {
@@ -74,7 +98,10 @@ async function networkFirstWithExpiry(request, cacheName, maxAge) {
     if (response.ok) {
       const headers = new Headers(response.headers);
       headers.set('sw-cached-at', Date.now().toString());
-      const stamped = new Response(await response.clone().blob(), { status: response.status, headers });
+      const stamped = new Response(await response.clone().blob(), {
+        status: response.status,
+        headers
+      });
       cache.put(request, stamped);
     }
     return response;
