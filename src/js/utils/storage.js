@@ -199,28 +199,11 @@ export const appStorage = {
   },
 
   /**
-   * Get status history
-   * @returns {Array}
+   * Remove history created by older clients. History is now server-published
+   * and source-verified; browser refreshes must never manufacture records.
    */
-  getStatusHistory() {
-    return storage.get(STORAGE_KEYS.STATUS_HISTORY, []);
-  },
-
-  /**
-   * Add a status entry to history
-   * @param {Object} status
-   */
-  addStatusHistory(status) {
-    const history = storage.get(STORAGE_KEYS.STATUS_HISTORY, []);
-    const entry = {
-      date: status.last_updated || new Date().toISOString(),
-      status: status.status,
-      reason: status.reason || '',
-      source: status.source || ''
-    };
-
-    const updated = [entry, ...history].slice(0, 200);
-    storage.set(STORAGE_KEYS.STATUS_HISTORY, updated);
+  clearLegacyStatusHistory() {
+    storage.remove(STORAGE_KEYS.STATUS_HISTORY);
   },
 
   /**

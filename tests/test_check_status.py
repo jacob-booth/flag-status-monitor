@@ -190,6 +190,53 @@ class WhiteHouseTests(unittest.TestCase):
         self.assertEqual(signal["status"], "half-staff")
         self.assertEqual(parse_datetime(signal["expires"]).date().isoformat(), "2026-07-19")
 
+    def test_parses_time_before_date_in_official_proclamation(self):
+        checker = FlagStatusChecker(now=NOW)
+        expires = checker._parse_expiration(
+            "The flag shall be flown at half-staff until 6:00 p.m. on July 18, 2026."
+        )
+        self.assertEqual(parse_datetime(expires), datetime(2026, 7, 18, 22, 0, tzinfo=UTC))
+
+
+class HistoryTests(unittest.TestCase):
+    def test_same_status_enriches_existing_record_without_duplication(self):
+        with tempfile.TemporaryDirectory() as directory:
+            checker = FlagStatusChecker(now=NOW)
+            checker.history_file = str(Path(directory) / "history.json")
+            Path(checker.history_file).write_text(
+                json.dumps(
+                    {
+                        "history": [
+                            {
+                                "date": "2026-07-12T17:30:00Z",
+                                "status": "half-staff",
+                                "reason": "Initial report",
+                                "source": "News",
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+            checker._append_history(
+                {
+                    "order_id": "verified-order",
+                    "last_updated": "2026-07-12T17:30:00Z",
+                    "status": "half-staff",
+                    "reason": "Official reason",
+                    "source": "The White House",
+                    "source_url": "https://example.gov/order",
+                    "expires": "2026-07-18T22:00:00Z",
+                    "verification": "official-presidential-action",
+                }
+            )
+
+            history = json.loads(Path(checker.history_file).read_text(encoding="utf-8"))["history"]
+            self.assertEqual(len(history), 1)
+            self.assertEqual(history[0]["date"], "2026-07-12T17:30:00Z")
+            self.assertEqual(history[0]["source"], "The White House")
+            self.assertEqual(history[0]["ends"], "2026-07-18T22:00:00Z")
+
 
 if __name__ == "__main__":
     unittest.main()

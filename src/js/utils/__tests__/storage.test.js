@@ -27,16 +27,10 @@ describe('appStorage', () => {
     expect(appStorage.getTheme()).toBe('auto');
   });
 
-  it('persists status history capped at 200 entries, newest first', () => {
-    for (let i = 0; i < 5; i++) {
-      appStorage.addStatusHistory({
-        status: 'full-staff',
-        last_updated: `2025-01-0${i + 1}T00:00:00Z`
-      });
-    }
-    const history = appStorage.getStatusHistory();
-    expect(history).toHaveLength(5);
-    expect(history[0].date).toBe('2025-01-05T00:00:00Z');
+  it('removes legacy browser-generated history', () => {
+    storage.set('flag-monitor-status-history', [{ status: 'full-staff' }]);
+    appStorage.clearLegacyStatusHistory();
+    expect(storage.has('flag-monitor-status-history')).toBe(false);
   });
 
   it('clearAll resets every namespaced key', () => {

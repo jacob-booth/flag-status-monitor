@@ -6,6 +6,7 @@
 import { UPDATE_INTERVALS, THEMES, CSS_CLASSES, STATE_OPTIONS } from './config/constants.js';
 import { api, APIError } from './utils/api.js';
 import { appStorage } from './utils/storage.js';
+import { calculateHistoryStats, normalizeHistory } from './utils/history.js';
 import { FlagDisplay } from './components/FlagDisplay.js';
 import { NotificationCenter } from './components/NotificationCenter.js';
 import { HistoryView } from './components/HistoryView.js';
@@ -36,6 +37,7 @@ export class FlagStatusApp {
     this.preferences = appStorage.getUserPreferences();
     this.theme = appStorage.getTheme();
     this.selectedState = appStorage.getStatePreference();
+    appStorage.clearLegacyStatusHistory();
 
     this.init();
   }
@@ -209,7 +211,6 @@ export class FlagStatusApp {
 
       await this.updateUI(status);
       appStorage.setLastStatus(status);
-      appStorage.addStatusHistory(status);
 
       if (this.retryTimeout) {
         clearTimeout(this.retryTimeout);
@@ -233,7 +234,7 @@ export class FlagStatusApp {
     await this.flagDisplay.updateStatus(status, animate);
     this.updateStatusText(status);
     this.updateEnhancedStatusDisplay(status);
-    this.updateHeroStats();
+    await this.updateHeroStats();
 
     if (previousStatus && previousStatus.status !== status.status) {
       this.notifications.notifyStatusChange(status.status, status.reason);
@@ -376,21 +377,22 @@ export class FlagStatusApp {
   }
 
   /** Populates the at-a-glance stat chips in the hero section. */
-  updateHeroStats() {
-    const history = appStorage.getStatusHistory();
+  async updateHeroStats() {
+    try {
+      const response = await api.getHistory();
+      const stats = calculateHistoryStats(normalizeHistory(response.history));
 
-    if (this.elements.statChanges) {
-      this.elements.statChanges.textContent = history.length;
-    }
-
-    if (this.elements.statStreak) {
-      let streak = 0;
-      const currentStatus = history[0]?.status;
-      for (const entry of history) {
-        if (entry.status === currentStatus) streak++;
-        else break;
+      if (this.elements.statChanges) {
+        this.elements.statChanges.textContent = stats.verifiedRecords;
       }
-      this.elements.statStreak.textContent = streak || 1;
+      if (this.elements.statStreak) {
+        this.elements.statStreak.textContent =
+          stats.currentRunDays === 0 ? 'Today' : `${stats.currentRunDays}d`;
+      }
+    } catch (error) {
+      console.warn('Unable to load verified history stats:', error);
+      if (this.elements.statChanges) this.elements.statChanges.textContent = '–';
+      if (this.elements.statStreak) this.elements.statStreak.textContent = '–';
     }
   }
 
