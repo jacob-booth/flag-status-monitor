@@ -4,12 +4,12 @@
       "id": "lindsey-graham-2026",
       "date": "2026-07-12T18:11:50.428383+00:00",
       "status": "half-staff",
-      "reason": "Honoring the memory and longstanding service of Senator Lindsey Graham",
-      "source": "The White House",
-      "source_url": "https://www.whitehouse.gov/presidential-actions/2026/07/death-of-senator-lindsey-graham/",
+      "reason": "Honoring Senator Lindsey Graham",
+      "source": "HalfStaff.org",
+      "source_url": "https://halfstaff.org/wp-json/halfstaff/v1/widget",
       "ends": "2026-07-18T22:00:00Z",
       "end_label": "Through 6:00 p.m., July 18, 2026",
-      "verification": "official-presidential-action"
+      "verification": "provider"
     },
     {
       "date": "2026-06-30T20:15:07.248349+00:00",

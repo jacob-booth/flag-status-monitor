@@ -1,20 +1,20 @@
 {
   "status": "half-staff",
-  "reason": "Honoring the memory and longstanding service of Senator Lindsey Graham",
-  "source": "The White House",
-  "source_url": "https://www.whitehouse.gov/presidential-actions/2026/07/death-of-senator-lindsey-graham/",
-  "expires": "2026-07-18T22:00:00Z",
-  "verification": "official-presidential-action",
-  "order_id": "lindsey-graham-2026",
-  "last_checked": "2026-07-18T21:00:00+00:00",
+  "reason": "Honoring Senator Lindsey Graham",
+  "source": "HalfStaff.org",
+  "source_url": "https://halfstaff.org/wp-json/halfstaff/v1/widget",
+  "expires": null,
+  "verification": "provider",
+  "order_id": null,
+  "last_checked": "2026-07-18T22:03:40.641739+00:00",
   "checked_sources": [
     {
       "name": "known-orders",
-      "available": true
+      "available": false
     },
     {
       "name": "white-house",
-      "available": true
+      "available": false
     },
     {
       "name": "breaking-news",
