@@ -4,9 +4,9 @@
   "source": "HalfStaff.org",
   "source_url": "https://halfstaff.org/wp-json/halfstaff/v1/widget",
   "expires": null,
-  "verification": "provider",
+  "verification": "retained-active-order",
   "order_id": null,
-  "last_checked": "2026-07-18T23:00:00+00:00",
+  "last_checked": "2026-07-19T00:05:18.378070+00:00",
   "checked_sources": [
     {
       "name": "known-orders",
