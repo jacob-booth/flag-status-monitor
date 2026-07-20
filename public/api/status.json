@@ -6,7 +6,7 @@
   "expires": null,
   "verification": "retained-active-order",
   "order_id": null,
-  "last_checked": "2026-07-20T04:00:00+00:00",
+  "last_checked": "2026-07-20T07:00:00+00:00",
   "checked_sources": [
     {
       "name": "known-orders",
@@ -22,7 +22,7 @@
     },
     {
       "name": "halfstaff-org",
-      "available": false
+      "available": true
     }
   ],
   "last_updated": "2026-07-12T18:11:50.428383+00:00"
