@@ -91,6 +91,34 @@ class KnownOrderTests(unittest.TestCase):
             checker.known_orders_file = str(order_file)
             self.assertIsNone(checker.check_known_orders())
 
+    def test_future_order_is_announced_before_it_becomes_active(self):
+        with tempfile.TemporaryDirectory() as directory:
+            order_file = Path(directory) / "orders.json"
+            order_file.write_text(
+                json.dumps(
+                    {
+                        "orders": [
+                            {
+                                "id": "upcoming-tribute",
+                                "starts": "2026-08-25T22:00:00Z",
+                                "expires": "2026-09-01T22:00:00Z",
+                                "reason": "Honoring Dolly Parton",
+                                "source": "Presidential announcement",
+                                "source_url": "https://example.gov/order",
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+            checker = FlagStatusChecker(now=datetime(2026, 8, 25, 18, 40, tzinfo=UTC))
+            checker.known_orders_file = str(order_file)
+
+            self.assertIsNone(checker.check_known_orders())
+            upcoming = checker.check_upcoming_order()
+            self.assertEqual(upcoming["id"], "upcoming-tribute")
+            self.assertEqual(upcoming["starts"], "2026-08-25T22:00:00Z")
+
 
 class BreakingNewsTests(unittest.TestCase):
     def test_detects_only_explicit_nationwide_order_and_parses_expiry(self):
@@ -158,6 +186,31 @@ class FailureSafetyTests(unittest.TestCase):
         status = checker.get_current_status()
         self.assertEqual(status["status"], "half-staff")
         self.assertEqual(status["verification"], "retained-active-order")
+
+    def test_does_not_retain_an_order_without_an_expiration(self):
+        checker = FlagStatusChecker(now=NOW)
+        checker.check_known_orders = lambda: None
+        checker.check_whitehouse_actions = lambda: None
+        checker.check_news_orders = lambda: None
+        checker.check_halfstaff_api = lambda: checker._signal(
+            "full-staff",
+            "No active notice",
+            "HalfStaff.org",
+            checker.halfstaff_url,
+            priority=10,
+            verification="negative-provider-signal",
+        )
+        checker._read_existing_status = lambda: {
+            "status": "half-staff",
+            "reason": "Old provider notice",
+            "source": "HalfStaff.org",
+            "source_url": checker.halfstaff_url,
+            "expires": None,
+        }
+
+        status = checker.get_current_status()
+        self.assertEqual(status["status"], "full-staff")
+        self.assertEqual(status["verification"], "negative-provider-signal")
 
 
 class WhiteHouseTests(unittest.TestCase):

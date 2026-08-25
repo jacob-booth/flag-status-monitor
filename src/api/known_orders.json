@@ -7,6 +7,15 @@
       "reason": "Honoring the memory and longstanding service of Senator Lindsey Graham",
       "source": "The White House",
       "source_url": "https://www.whitehouse.gov/presidential-actions/2026/07/death-of-senator-lindsey-graham/"
+    },
+    {
+      "id": "dolly-parton-2026",
+      "starts": "2026-08-25T22:00:00Z",
+      "expires": "2026-09-01T22:00:00Z",
+      "reason": "Honoring the life, music, and extraordinary legacy of Dolly Parton",
+      "source": "Presidential announcement",
+      "source_url": "https://truthsocial.com/@realDonaldTrump",
+      "verification": "presidential-social-announcement"
     }
   ]
 }
