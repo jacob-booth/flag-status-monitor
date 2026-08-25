@@ -193,7 +193,12 @@ class FailureSafetyTests(unittest.TestCase):
         checker.check_whitehouse_actions = lambda: None
         checker.check_news_orders = lambda: None
         checker.check_halfstaff_api = lambda: checker._signal(
-            "full-staff", "No active notice", "HalfStaff.org", checker.halfstaff_url, priority=10
+            "full-staff",
+            "No active notice",
+            "HalfStaff.org",
+            checker.halfstaff_url,
+            priority=10,
+            verification="negative-provider-signal",
         )
         checker._read_existing_status = lambda: {
             "status": "half-staff",
