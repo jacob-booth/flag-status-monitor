@@ -1,24 +1,17 @@
 {
   "status": "half-staff",
-  "reason": "Presidential half-staff order",
-  "source": "The White House",
-  "source_url": "https://www.whitehouse.gov/presidential-actions/2026/08/honoring-the-memory-of-dolly-parton/",
-  "expires": "2026-09-02T03:59:00+00:00",
-  "verification": "official-presidential-action",
-  "order_id": null,
-  "upcoming_order": {
-    "id": "dolly-parton-2026",
-    "starts": "2026-08-25T22:00:00Z",
-    "expires": "2026-09-01T22:00:00Z",
-    "reason": "Honoring the life, music, and extraordinary legacy of Dolly Parton",
-    "source": "Presidential announcement",
-    "source_url": "https://truthsocial.com/@realDonaldTrump"
-  },
-  "last_checked": "2026-08-25T21:00:00+00:00",
+  "reason": "Honoring the life, music, and extraordinary legacy of Dolly Parton",
+  "source": "Presidential announcement",
+  "source_url": "https://truthsocial.com/@realDonaldTrump",
+  "expires": "2026-09-01T22:00:00Z",
+  "verification": "presidential-social-announcement",
+  "order_id": "dolly-parton-2026",
+  "upcoming_order": null,
+  "last_checked": "2026-08-25T22:19:21.455955+00:00",
   "checked_sources": [
     {
       "name": "known-orders",
-      "available": false
+      "available": true
     },
     {
       "name": "white-house",
