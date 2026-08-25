@@ -94,7 +94,10 @@ export class FlagStatusApp {
       stateSelect: document.getElementById('state-select'),
       statChanges: document.getElementById('stat-changes'),
       statStreak: document.getElementById('stat-streak'),
-      statHoliday: document.getElementById('stat-holiday')
+      statHoliday: document.getElementById('stat-holiday'),
+      tributeBanner: document.getElementById('tribute-banner'),
+      tributeMessage: document.getElementById('tribute-message'),
+      tributeSource: document.getElementById('tribute-source')
     };
 
     const required = ['flagContainer', 'statusText', 'reason', 'lastUpdated', 'source'];
@@ -233,6 +236,7 @@ export class FlagStatusApp {
 
     await this.flagDisplay.updateStatus(status, animate);
     this.updateStatusText(status);
+    this.updateTribute(status);
     this.updateEnhancedStatusDisplay(status);
     await this.updateHeroStats();
 
@@ -281,6 +285,45 @@ export class FlagStatusApp {
 
     indicator.classList.toggle('offline', !this.isOnline);
     text.textContent = this.isOnline ? 'Connected' : 'Offline';
+  }
+
+  updateTribute(status) {
+    const upcoming = status.upcoming_order;
+    const activeDollyOrder =
+      status.status === 'half-staff' && status.reason?.toLowerCase().includes('dolly parton');
+    const upcomingDollyOrder = upcoming?.reason?.toLowerCase().includes('dolly parton');
+    const showTribute = activeDollyOrder || upcomingDollyOrder;
+
+    document.body.classList.toggle('tribute-dolly', Boolean(showTribute));
+    if (!this.elements.tributeBanner) return;
+
+    this.elements.tributeBanner.hidden = !showTribute;
+    if (!showTribute) return;
+
+    const order = activeDollyOrder ? status : upcoming;
+    if (this.elements.tributeMessage) {
+      this.elements.tributeMessage.textContent = activeDollyOrder
+        ? `The flag is lowered nationwide through ${this.formatEasternDate(order.expires)}.`
+        : `The flag will be lowered nationwide from ${this.formatEasternDate(order.starts)} through ${this.formatEasternDate(order.expires)}.`;
+    }
+
+    if (this.elements.tributeSource) {
+      this.elements.tributeSource.href = order.source_url;
+    }
+  }
+
+  formatEasternDate(dateString) {
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return 'the announced time';
+
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZone: 'America/New_York',
+      timeZoneName: 'short'
+    }).format(date);
   }
 
   updatePageTitle(status) {

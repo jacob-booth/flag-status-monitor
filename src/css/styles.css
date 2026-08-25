@@ -203,6 +203,28 @@
   --info-bg: rgba(37, 99, 235, 0.18);
 }
 
+/* A restrained, status-driven Dolly tribute: rose, rhinestone light, and warm gold. */
+.tribute-dolly {
+  --accent-primary: #b42363;
+  --accent-primary-rgb: 180, 35, 99;
+  --accent-secondary: #7d2855;
+  --accent-gold: #d6a84b;
+  --gradient-primary: linear-gradient(135deg, #b42363 0%, #7d2855 62%, #c9952c 100%);
+  --gradient-text: linear-gradient(135deg, #b42363 0%, #7d2855 58%, #a66d08 100%);
+  --gradient-hero:
+    radial-gradient(circle at 12% 15%, rgba(212, 75, 139, 0.18), transparent 42%),
+    radial-gradient(circle at 86% 18%, rgba(214, 168, 75, 0.2), transparent 38%),
+    radial-gradient(circle at 52% 100%, rgba(125, 40, 85, 0.11), transparent 55%);
+}
+
+.dark-theme.tribute-dolly {
+  --gradient-text: linear-gradient(135deg, #f9a8d4 0%, #f0c4df 55%, #f3d58a 100%);
+  --gradient-hero:
+    radial-gradient(circle at 12% 15%, rgba(212, 75, 139, 0.25), transparent 42%),
+    radial-gradient(circle at 86% 18%, rgba(214, 168, 75, 0.19), transparent 38%),
+    radial-gradient(circle at 52% 100%, rgba(125, 40, 85, 0.2), transparent 55%);
+}
+
 /* =========================================================
    RESET & BASE
    ========================================================= */
@@ -643,6 +665,76 @@ code {
   max-width: 36ch;
   line-height: var(--line-height-relaxed);
   margin-bottom: var(--space-6);
+}
+
+.tribute-banner {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-3);
+  max-width: 38rem;
+  margin: 0 0 var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 34%, transparent);
+  border-radius: var(--radius-xl);
+  background:
+    linear-gradient(135deg, rgba(var(--accent-primary-rgb), 0.1), transparent 72%), var(--bg-glass);
+  box-shadow: 0 12px 32px -20px rgba(var(--accent-primary-rgb), 0.65);
+}
+
+.tribute-banner[hidden] {
+  display: none;
+}
+
+.tribute-banner::after {
+  content: '✦';
+  position: absolute;
+  top: -0.8rem;
+  right: 0.7rem;
+  color: var(--accent-gold);
+  font-size: 3.8rem;
+  line-height: 1;
+  opacity: 0.14;
+  transform: rotate(12deg);
+}
+
+.tribute-banner__sparkle {
+  color: var(--accent-gold);
+  font-size: var(--font-size-xl);
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent-gold) 48%, transparent));
+}
+
+.tribute-banner__eyebrow {
+  color: var(--accent-primary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.tribute-banner__title {
+  margin: var(--space-0_5) 0 var(--space-1);
+  color: var(--text-primary);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: var(--font-size-xl);
+  letter-spacing: -0.01em;
+}
+
+.tribute-banner__message {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+}
+
+.tribute-banner__source {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  margin-top: var(--space-2);
+  color: var(--accent-primary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
 }
 
 .hero__stats {
@@ -1357,6 +1449,11 @@ code {
 
   .hero__subtitle {
     margin-inline: auto;
+  }
+
+  .tribute-banner {
+    margin-inline: auto;
+    text-align: left;
   }
 
   .status-section {
