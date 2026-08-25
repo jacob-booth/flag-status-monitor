@@ -1,12 +1,20 @@
 {
-  "status": "half-staff",
-  "reason": "Honoring Senator Lindsey Graham",
+  "status": "full-staff",
+  "reason": "No active notice reported by HalfStaff.org",
   "source": "HalfStaff.org",
   "source_url": "https://halfstaff.org/wp-json/halfstaff/v1/widget",
   "expires": null,
-  "verification": "retained-active-order",
+  "verification": "negative-provider-signal",
   "order_id": null,
-  "last_checked": "2026-08-25T18:00:00+00:00",
+  "upcoming_order": {
+    "id": "dolly-parton-2026",
+    "starts": "2026-08-25T22:00:00Z",
+    "expires": "2026-09-01T22:00:00Z",
+    "reason": "Honoring the life, music, and extraordinary legacy of Dolly Parton",
+    "source": "Presidential announcement",
+    "source_url": "https://truthsocial.com/@realDonaldTrump"
+  },
+  "last_checked": "2026-08-25T18:43:04.555658+00:00",
   "checked_sources": [
     {
       "name": "known-orders",
@@ -25,5 +33,5 @@
       "available": true
     }
   ],
-  "last_updated": "2026-07-12T18:11:50.428383+00:00"
+  "last_updated": "2026-08-25T18:43:04.555658+00:00"
 }

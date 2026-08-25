@@ -105,6 +105,11 @@ class FlagStatusChecker:
         expires = parse_datetime(signal.get("expires"))
         return signal.get("status") == "half-staff" and (not expires or expires > self.now)
 
+    def _is_retainable(self, signal: Dict) -> bool:
+        """Only retain a previously published order with a future end time."""
+        expires = parse_datetime(signal.get("expires"))
+        return signal.get("status") == "half-staff" and expires is not None and expires > self.now
+
     def _read_existing_status(self) -> Optional[Dict]:
         try:
             with open(self.api_status_file, encoding="utf-8") as handle:
@@ -144,11 +149,39 @@ class FlagStatusChecker:
             order["source_url"],
             order["expires"],
             priority=100,
-            verification="official-presidential-action"
-            if order["source"] == "The White House"
-            else "verified-order",
+            verification=order.get("verification")
+            or (
+                "official-presidential-action"
+                if order["source"] == "The White House"
+                else "verified-order"
+            ),
             order_id=order.get("id"),
         )
+
+    def check_upcoming_order(self) -> Optional[Dict]:
+        """Return the next reviewed order so the UI can announce its start."""
+        try:
+            with open(self.known_orders_file, encoding="utf-8") as handle:
+                orders = json.load(handle).get("orders", [])
+        except (OSError, json.JSONDecodeError):
+            return None
+
+        upcoming = []
+        for order in orders:
+            starts = parse_datetime(order.get("starts"))
+            expires = parse_datetime(order.get("expires"))
+            if starts and starts > self.now and expires and expires > starts:
+                upcoming.append((starts, order))
+
+        if not upcoming:
+            return None
+
+        _, order = min(upcoming, key=lambda item: item[0])
+        return {
+            key: order.get(key)
+            for key in ("id", "starts", "expires", "reason", "source", "source_url")
+            if order.get(key) is not None
+        }
 
     def check_halfstaff_api(self) -> Optional[Dict]:
         """Read HalfStaff.org, retaining `none` only as a negative signal."""
@@ -386,7 +419,7 @@ class FlagStatusChecker:
             chosen = max(active, key=lambda signal: signal["priority"])
         else:
             existing = self._read_existing_status()
-            if existing and self._is_active(existing):
+            if existing and self._is_retainable(existing):
                 chosen = {
                     **existing,
                     "priority": 60,
@@ -406,6 +439,7 @@ class FlagStatusChecker:
                     raise RuntimeError("No status source available; refusing to invent full-staff")
 
         chosen.pop("priority", None)
+        chosen["upcoming_order"] = self.check_upcoming_order()
         chosen["last_checked"] = self.now.isoformat()
         chosen["checked_sources"] = checked_sources
         return chosen
@@ -474,7 +508,15 @@ class FlagStatusChecker:
 
     def _write_status(self, status: Dict) -> None:
         existing = self._read_existing_status() or {}
-        semantic_fields = ("status", "reason", "source", "source_url", "expires", "verification")
+        semantic_fields = (
+            "status",
+            "reason",
+            "source",
+            "source_url",
+            "expires",
+            "verification",
+            "upcoming_order",
+        )
         changed = any(existing.get(field) != status.get(field) for field in semantic_fields)
         status_changed = existing.get("status") != status.get("status")
         status["last_updated"] = self.now.isoformat() if status_changed else existing.get(

@@ -1,6 +1,14 @@
 {
   "history": [
     {
+      "date": "2026-08-25T18:43:04.555658+00:00",
+      "status": "full-staff",
+      "reason": "No active notice reported by HalfStaff.org",
+      "source": "HalfStaff.org",
+      "source_url": "https://halfstaff.org/wp-json/halfstaff/v1/widget",
+      "verification": "negative-provider-signal"
+    },
+    {
       "id": "lindsey-graham-2026",
       "date": "2026-07-12T18:11:50.428383+00:00",
       "status": "half-staff",
@@ -29,7 +37,7 @@
       "verification": "official-presidential-action"
     }
   ],
-  "total": 3,
+  "total": 4,
   "page": 1,
-  "per_page": 3
+  "per_page": 4
 }
