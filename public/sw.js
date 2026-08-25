@@ -7,7 +7,7 @@
  *   is cached the first time it is requested ("cache as you go").
  */
 
-const VERSION = 'v4';
+const VERSION = 'v5';
 const STATIC_CACHE = `flag-status-static-${VERSION}`;
 const API_CACHE = `flag-status-api-${VERSION}`;
 const API_CACHE_MAX_AGE = 60 * 60 * 1000; // 1 hour
