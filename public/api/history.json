@@ -1,6 +1,15 @@
 {
   "history": [
     {
+      "date": "2026-08-25T20:44:33.228978+00:00",
+      "status": "half-staff",
+      "reason": "Presidential half-staff order",
+      "source": "The White House",
+      "source_url": "https://www.whitehouse.gov/presidential-actions/2026/08/honoring-the-memory-of-dolly-parton/",
+      "ends": "2026-09-02T03:59:00+00:00",
+      "verification": "official-presidential-action"
+    },
+    {
       "date": "2026-08-25T18:43:04.555658+00:00",
       "status": "full-staff",
       "reason": "No active notice reported by HalfStaff.org",
@@ -37,7 +46,7 @@
       "verification": "official-presidential-action"
     }
   ],
-  "total": 4,
+  "total": 5,
   "page": 1,
-  "per_page": 4
+  "per_page": 5
 }

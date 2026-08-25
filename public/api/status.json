@@ -1,10 +1,10 @@
 {
-  "status": "full-staff",
-  "reason": "No active notice reported by HalfStaff.org",
-  "source": "HalfStaff.org",
-  "source_url": "https://halfstaff.org/wp-json/halfstaff/v1/widget",
-  "expires": null,
-  "verification": "negative-provider-signal",
+  "status": "half-staff",
+  "reason": "Presidential half-staff order",
+  "source": "The White House",
+  "source_url": "https://www.whitehouse.gov/presidential-actions/2026/08/honoring-the-memory-of-dolly-parton/",
+  "expires": "2026-09-02T03:59:00+00:00",
+  "verification": "official-presidential-action",
   "order_id": null,
   "upcoming_order": {
     "id": "dolly-parton-2026",
@@ -14,7 +14,7 @@
     "source": "Presidential announcement",
     "source_url": "https://truthsocial.com/@realDonaldTrump"
   },
-  "last_checked": "2026-08-25T20:00:00+00:00",
+  "last_checked": "2026-08-25T20:44:33.228978+00:00",
   "checked_sources": [
     {
       "name": "known-orders",
@@ -22,7 +22,7 @@
     },
     {
       "name": "white-house",
-      "available": false
+      "available": true
     },
     {
       "name": "breaking-news",
@@ -33,5 +33,5 @@
       "available": true
     }
   ],
-  "last_updated": "2026-08-25T18:43:04.555658+00:00"
+  "last_updated": "2026-08-25T20:44:33.228978+00:00"
 }
