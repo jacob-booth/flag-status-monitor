@@ -3,6 +3,16 @@ name: Build & Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # The status-updater workflow commits with the default GITHUB_TOKEN, and
+  # GitHub does not let GITHUB_TOKEN-authored pushes trigger other `push`
+  # workflows (to avoid infinite recursion). Without this trigger, a flag
+  # status change lands on `main` but the live site keeps serving the old
+  # status.json until an unrelated human push happens to redeploy it.
+  workflow_run:
+    workflows: ['Update Flag Status']
+    types:
+      - completed
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -15,10 +25,20 @@ concurrency:
 
 jobs:
   build:
+    # Only build/deploy for direct pushes, manual runs, or a successful
+    # status-update run — a failed updater run shouldn't trigger a deploy.
+    if: >-
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          # For workflow_run events, GITHUB_SHA doesn't reliably point at the
+          # commit that finished building/pushing — pin to the exact commit
+          # the status updater produced so we never deploy stale content.
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
