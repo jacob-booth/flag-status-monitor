@@ -1,6 +1,14 @@
 {
   "history": [
     {
+      "date": "2026-09-02T05:09:46.756210+00:00",
+      "status": "full-staff",
+      "reason": "No active notice reported by HalfStaff.org",
+      "source": "HalfStaff.org",
+      "source_url": "https://halfstaff.org/wp-json/halfstaff/v1/widget",
+      "verification": "negative-provider-signal"
+    },
+    {
       "date": "2026-08-25T20:44:33.228978+00:00",
       "status": "half-staff",
       "reason": "Presidential half-staff order",
@@ -47,7 +55,7 @@
       "verification": "official-presidential-action"
     }
   ],
-  "total": 5,
+  "total": 6,
   "page": 1,
-  "per_page": 5
+  "per_page": 6
 }
