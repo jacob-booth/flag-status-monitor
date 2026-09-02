@@ -7,7 +7,7 @@
   "verification": "official-presidential-action",
   "order_id": null,
   "upcoming_order": null,
-  "last_checked": "2026-09-01T22:59:22.240304+00:00",
+  "last_checked": "2026-09-02T00:00:00+00:00",
   "checked_sources": [
     {
       "name": "known-orders",
