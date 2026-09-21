@@ -560,6 +560,14 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .timeline-item {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* Dark mode adjustments */
 @media (prefers-color-scheme: dark) {
   .history-modal__backdrop {

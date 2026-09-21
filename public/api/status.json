@@ -7,7 +7,15 @@
   "verification": "negative-provider-signal",
   "order_id": null,
   "upcoming_order": null,
-  "last_checked": "2026-09-21T16:00:00+00:00",
+  "recent_order": {
+    "id": "dolly-parton-2026",
+    "starts": "2026-08-25T22:00:00Z",
+    "expires": "2026-09-01T22:00:00Z",
+    "reason": "Honoring the life, music, and extraordinary legacy of Dolly Parton",
+    "source": "The White House",
+    "source_url": "https://www.whitehouse.gov/presidential-actions/2026/08/honoring-the-memory-of-dolly-parton/"
+  },
+  "last_checked": "2026-09-21T19:43:36.169024+00:00",
   "checked_sources": [
     {
       "name": "known-orders",

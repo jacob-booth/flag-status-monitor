@@ -90,6 +90,7 @@ class KnownOrderTests(unittest.TestCase):
             checker = FlagStatusChecker(now=NOW)
             checker.known_orders_file = str(order_file)
             self.assertIsNone(checker.check_known_orders())
+            self.assertEqual(checker.check_recent_order()["reason"], "Old order")
 
     def test_future_order_is_announced_before_it_becomes_active(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -256,6 +257,10 @@ class HistoryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             checker = FlagStatusChecker(now=NOW)
             checker.history_file = str(Path(directory) / "history.json")
+            checker.verified_history_file = str(Path(directory) / "verified-history.json")
+            Path(checker.verified_history_file).write_text(
+                json.dumps({"history": []}), encoding="utf-8"
+            )
             Path(checker.history_file).write_text(
                 json.dumps(
                     {
@@ -289,6 +294,62 @@ class HistoryTests(unittest.TestCase):
             self.assertEqual(history[0]["date"], "2026-07-12T17:30:00Z")
             self.assertEqual(history[0]["source"], "The White House")
             self.assertEqual(history[0]["ends"], "2026-07-18T22:00:00Z")
+
+    def test_reviewed_history_replaces_a_weaker_captured_record(self):
+        with tempfile.TemporaryDirectory() as directory:
+            checker = FlagStatusChecker(now=NOW)
+            checker.history_file = str(Path(directory) / "history.json")
+            checker.verified_history_file = str(Path(directory) / "verified-history.json")
+            Path(checker.history_file).write_text(
+                json.dumps(
+                    {
+                        "history": [
+                            {
+                                "id": "verified-order",
+                                "date": "2026-07-12T17:30:00Z",
+                                "status": "half-staff",
+                                "reason": "Initial report",
+                                "source": "News",
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+            Path(checker.verified_history_file).write_text(
+                json.dumps(
+                    {
+                        "history": [
+                            {
+                                "id": "verified-order",
+                                "date": "2026-07-12T17:00:00Z",
+                                "status": "half-staff",
+                                "reason": "Official reason",
+                                "source": "The White House",
+                                "source_url": "https://example.gov/order",
+                                "ends": "2026-07-18T22:00:00Z",
+                                "verification": "official-presidential-action",
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            checker._append_history(
+                {
+                    "last_updated": "2026-07-19T00:00:00Z",
+                    "status": "full-staff",
+                    "reason": "Order concluded",
+                    "source": "Official",
+                    "verification": "verified-transition",
+                }
+            )
+
+            history = json.loads(Path(checker.history_file).read_text(encoding="utf-8"))["history"]
+            order = next(entry for entry in history if entry.get("id") == "verified-order")
+            self.assertEqual(order["source"], "The White House")
+            self.assertEqual(order["date"], "2026-07-12T17:00:00Z")
 
 
 if __name__ == "__main__":
