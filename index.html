@@ -448,8 +448,12 @@
     <script type="module">
       // PWA install prompt
       let deferredPrompt;
+      const installDismissedUntilKey = 'flag-monitor-install-dismissed-until';
       window.addEventListener('beforeinstallprompt', (event) => {
         event.preventDefault();
+        const dismissedUntil = Number(localStorage.getItem(installDismissedUntilKey) || 0);
+        if (dismissedUntil > Date.now()) return;
+
         deferredPrompt = event;
 
         const installPrompt = document.getElementById('install-prompt');
@@ -457,21 +461,39 @@
         const dismissBtn = document.getElementById('install-dismiss');
 
         if (!installPrompt || !installBtn || !dismissBtn) return;
-        installPrompt.hidden = false;
+        const showTimer = window.setTimeout(() => {
+          if (deferredPrompt) installPrompt.hidden = false;
+        }, 12000);
 
-        installBtn.addEventListener('click', async () => {
-          installPrompt.hidden = true;
-          deferredPrompt?.prompt();
-          const choice = await deferredPrompt?.userChoice;
-          if (choice?.outcome === 'accepted') {
-            console.log('User accepted the install prompt');
-          }
-          deferredPrompt = null;
-        });
+        installBtn.addEventListener(
+          'click',
+          async () => {
+            window.clearTimeout(showTimer);
+            installPrompt.hidden = true;
+            deferredPrompt?.prompt();
+            const choice = await deferredPrompt?.userChoice;
+            if (choice?.outcome === 'accepted') {
+              localStorage.removeItem(installDismissedUntilKey);
+              console.log('User accepted the install prompt');
+            }
+            deferredPrompt = null;
+          },
+          { once: true }
+        );
 
-        dismissBtn.addEventListener('click', () => {
-          installPrompt.hidden = true;
-        });
+        dismissBtn.addEventListener(
+          'click',
+          () => {
+            window.clearTimeout(showTimer);
+            installPrompt.hidden = true;
+            deferredPrompt = null;
+            localStorage.setItem(
+              installDismissedUntilKey,
+              String(Date.now() + 7 * 24 * 60 * 60 * 1000)
+            );
+          },
+          { once: true }
+        );
       });
     </script>
   </body>
