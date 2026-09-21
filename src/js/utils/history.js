@@ -104,6 +104,8 @@ export function calculateHistoryStats(entries, now = new Date()) {
   const runStart = currentRunStart(history, now);
   return {
     verifiedRecords: history.length,
+    officialOrders: history.filter((entry) => entry.verification === 'official-presidential-action')
+      .length,
     orderedDays: uniqueOrderedCalendarDays(history, now),
     currentRunDays: runStart ? elapsedDaysSince(runStart, now) : 0,
     lastChangeDate: runStart?.toISOString() || null

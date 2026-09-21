@@ -47,7 +47,7 @@ export class HistoryView {
             <div class="history-stats__grid">
               <div class="history-stat">
                 <div class="history-stat__value" data-stat="records">–</div>
-                <div class="history-stat__label">Verified Records</div>
+                <div class="history-stat__label">Official Orders</div>
               </div>
               <div class="history-stat">
                 <div class="history-stat__value" data-stat="ordered-days">–</div>
@@ -189,7 +189,7 @@ export class HistoryView {
       this.allHistory = normalizeHistory(response.history);
       const oldest = this.allHistory.at(-1);
       this.modal.querySelector('[data-history-coverage]').textContent = oldest
-        ? `Refreshes never create entries. Verified coverage begins ${this.formatDate(oldest.date, false)}.`
+        ? `${response.official_order_count ?? 'Reviewed'} official orders · ${response.total ?? this.allHistory.length} sourced records · coverage since ${this.formatDate(oldest.date, false)}.`
         : 'No verified history records have been published yet.';
       this.currentPage = 1;
       this.updateStats();
@@ -207,7 +207,7 @@ export class HistoryView {
 
   updateStats() {
     const stats = calculateHistoryStats(this.allHistory);
-    this.modal.querySelector('[data-stat="records"]').textContent = stats.verifiedRecords;
+    this.modal.querySelector('[data-stat="records"]').textContent = stats.officialOrders;
     this.modal.querySelector('[data-stat="ordered-days"]').textContent = stats.orderedDays;
     this.modal.querySelector('[data-stat="current-run"]').textContent =
       stats.currentRunDays === 0

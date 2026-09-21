@@ -20,9 +20,9 @@ export const API_CONFIG = {
 };
 
 export const UPDATE_INTERVALS = {
-  NORMAL: 3600000, // 1 hour
-  FAST: 300000, // 5 minutes (when status changes expected)
-  SLOW: 21600000 // 6 hours (overnight)
+  NORMAL: 300000, // 5 minutes
+  FAST: 60000, // 1 minute while an order is active or imminent
+  SLOW: 900000 // 15-minute fallback for low-priority contexts
 };
 
 export const ANIMATION_CONFIG = {
