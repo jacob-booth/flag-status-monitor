@@ -169,7 +169,8 @@ function mapHalfStaffResponse(data, sourceUrl, scope) {
     confidence: {
       level: 'provider',
       label: 'State provider reported',
-      summary: 'State notices are reported directly by HalfStaff.org and are separate from federal status.'
+      summary:
+        'State notices are reported directly by HalfStaff.org and are separate from federal status.'
     },
     checked_sources: [
       {
