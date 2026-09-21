@@ -602,6 +602,7 @@ class FlagStatusChecker:
         new_half_staff_order = bool(
             last_entry
             and status.get("status") == "half-staff"
+            and last_entry.get("id")
             and status.get("order_id")
             and status.get("order_id") != last_entry.get("id")
         )

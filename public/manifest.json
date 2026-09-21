@@ -20,7 +20,7 @@
     },
     {
       "src": "assets/icon-96x96.svg",
-      "sizes": "96x96", 
+      "sizes": "96x96",
       "type": "image/svg+xml",
       "purpose": "maskable any"
     },
@@ -93,4 +93,4 @@
   "edge_side_panel": {
     "preferred_width": 400
   }
-} 
+}
