@@ -144,9 +144,10 @@
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero__primary">
           <div class="hero__meta">
-            <span class="live-pill"
-              ><span class="live-pill__dot" aria-hidden="true"></span> Live</span
-            >
+            <span id="health-pill" class="live-pill" role="status">
+              <span class="live-pill__dot" aria-hidden="true"></span>
+              <span id="health-pill-text">Checking</span>
+            </span>
             <div class="current-date">
               <span aria-hidden="true">📅</span>
               <time id="current-date" datetime="">Loading date…</time>
@@ -181,7 +182,7 @@
           <div class="hero__stats" role="list" aria-label="At a glance">
             <div class="stat-chip" role="listitem">
               <div class="stat-chip__value" id="stat-changes">–</div>
-              <div class="stat-chip__label">Verified Records</div>
+              <div class="stat-chip__label">Official Orders</div>
             </div>
             <div class="stat-chip" role="listitem">
               <div class="stat-chip__value" id="stat-streak">–</div>
@@ -273,13 +274,24 @@
 
         <div class="status-card">
           <h2 class="status-card__title">
-            <span aria-hidden="true">🗂️</span>
-            Source &amp; Timing
+            <span aria-hidden="true">🛡️</span>
+            Verification Center
           </h2>
+
+          <div id="verification-panel" class="verification-panel">
+            <div class="verification-panel__icon" aria-hidden="true">✓</div>
+            <div>
+              <div class="verification-panel__eyebrow">Federal status confidence</div>
+              <h3 id="verification-label" class="verification-panel__title">Checking sources…</h3>
+              <p id="verification-summary" class="verification-panel__summary">
+                Resolving the strongest available evidence.
+              </p>
+            </div>
+          </div>
 
           <div class="status-card__meta">
             <div class="status-card__meta-item">
-              <div class="status-card__label">Status Changed</div>
+              <div class="status-card__label">Current Since</div>
               <div class="status-card__value">
                 <time id="last-updated" datetime="">checking…</time>
               </div>
@@ -289,25 +301,38 @@
               <div class="status-card__label">Last Verified</div>
               <div class="status-card__value">
                 <time id="last-checked" datetime="">checking…</time>
+                <span id="verification-age" class="status-card__subvalue"></span>
               </div>
             </div>
 
             <div class="status-card__meta-item">
-              <div class="status-card__label">Source</div>
-              <div class="status-card__value" id="source">checking…</div>
+              <div class="status-card__label">Order Window</div>
+              <div class="status-card__value" id="order-window">No active federal order</div>
+            </div>
+
+            <div class="status-card__meta-item">
+              <div class="status-card__label">Primary Source</div>
+              <a
+                class="status-card__value status-card__source-link"
+                id="source"
+                target="_blank"
+                rel="noopener noreferrer"
+                >checking…</a
+              >
             </div>
           </div>
 
-          <p
-            style="
-              margin-top: var(--space-5);
-              font-size: var(--font-size-sm);
-              color: var(--text-secondary);
-            "
-          >
-            Status is cross-checked against HalfStaff.org and official notices, then cached locally
-            so the app keeps working offline.
-          </p>
+          <div class="source-checks">
+            <div class="source-checks__header">
+              <span>Source checks</span>
+              <span id="source-check-count">0/0 responding</span>
+            </div>
+            <ul
+              id="source-checks"
+              class="source-checks__list"
+              aria-label="Status source checks"
+            ></ul>
+          </div>
         </div>
       </section>
 
@@ -343,7 +368,8 @@
       <div class="footer__container">
         <div class="footer__content">
           <p class="footer__text">
-            Data sourced from HalfStaff.org and official notices. Updates automatically every hour.
+            Federal status is cross-checked against reviewed orders, White House actions, breaking
+            reports, and HalfStaff.org. Automated checks run every 15 minutes.
           </p>
 
           <div class="footer__links">
@@ -422,8 +448,12 @@
     <script type="module">
       // PWA install prompt
       let deferredPrompt;
+      const installDismissedUntilKey = 'flag-monitor-install-dismissed-until';
       window.addEventListener('beforeinstallprompt', (event) => {
         event.preventDefault();
+        const dismissedUntil = Number(localStorage.getItem(installDismissedUntilKey) || 0);
+        if (dismissedUntil > Date.now()) return;
+
         deferredPrompt = event;
 
         const installPrompt = document.getElementById('install-prompt');
@@ -431,21 +461,39 @@
         const dismissBtn = document.getElementById('install-dismiss');
 
         if (!installPrompt || !installBtn || !dismissBtn) return;
-        installPrompt.hidden = false;
+        const showTimer = window.setTimeout(() => {
+          if (deferredPrompt) installPrompt.hidden = false;
+        }, 12000);
 
-        installBtn.addEventListener('click', async () => {
-          installPrompt.hidden = true;
-          deferredPrompt?.prompt();
-          const choice = await deferredPrompt?.userChoice;
-          if (choice?.outcome === 'accepted') {
-            console.log('User accepted the install prompt');
-          }
-          deferredPrompt = null;
-        });
+        installBtn.addEventListener(
+          'click',
+          async () => {
+            window.clearTimeout(showTimer);
+            installPrompt.hidden = true;
+            deferredPrompt?.prompt();
+            const choice = await deferredPrompt?.userChoice;
+            if (choice?.outcome === 'accepted') {
+              localStorage.removeItem(installDismissedUntilKey);
+              console.log('User accepted the install prompt');
+            }
+            deferredPrompt = null;
+          },
+          { once: true }
+        );
 
-        dismissBtn.addEventListener('click', () => {
-          installPrompt.hidden = true;
-        });
+        dismissBtn.addEventListener(
+          'click',
+          () => {
+            window.clearTimeout(showTimer);
+            installPrompt.hidden = true;
+            deferredPrompt = null;
+            localStorage.setItem(
+              installDismissedUntilKey,
+              String(Date.now() + 7 * 24 * 60 * 60 * 1000)
+            );
+          },
+          { once: true }
+        );
       });
     </script>
   </body>
