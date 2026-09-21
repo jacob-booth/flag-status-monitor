@@ -25,6 +25,7 @@ export class FlagStatusApp {
     this.isOnline = navigator.onLine;
     this.updateInterval = null;
     this.retryTimeout = null;
+    this.verificationInterval = null;
 
     this.flagDisplay = null;
     this.notifications = null;
@@ -95,6 +96,15 @@ export class FlagStatusApp {
       statChanges: document.getElementById('stat-changes'),
       statStreak: document.getElementById('stat-streak'),
       statHoliday: document.getElementById('stat-holiday'),
+      healthPill: document.getElementById('health-pill'),
+      healthPillText: document.getElementById('health-pill-text'),
+      verificationPanel: document.getElementById('verification-panel'),
+      verificationLabel: document.getElementById('verification-label'),
+      verificationSummary: document.getElementById('verification-summary'),
+      verificationAge: document.getElementById('verification-age'),
+      orderWindow: document.getElementById('order-window'),
+      sourceChecks: document.getElementById('source-checks'),
+      sourceCheckCount: document.getElementById('source-check-count'),
       tributeBanner: document.getElementById('tribute-banner'),
       tributeMessage: document.getElementById('tribute-message'),
       tributeSource: document.getElementById('tribute-source')
@@ -236,6 +246,7 @@ export class FlagStatusApp {
 
     await this.flagDisplay.updateStatus(status, animate);
     this.updateStatusText(status);
+    this.updateVerification(status);
     this.updateTribute(status);
     this.updateEnhancedStatusDisplay(status);
     await this.updateHeroStats();
@@ -264,7 +275,14 @@ export class FlagStatusApp {
       this.elements.lastChecked.textContent = this.formatDate(checkedAt);
       this.elements.lastChecked.setAttribute('datetime', checkedAt || '');
     }
-    this.elements.source.textContent = status.source || '';
+    this.elements.source.textContent = status.source || 'Source unavailable';
+    if (status.source_url) {
+      this.elements.source.href = status.source_url;
+      this.elements.source.removeAttribute('aria-disabled');
+    } else {
+      this.elements.source.removeAttribute('href');
+      this.elements.source.setAttribute('aria-disabled', 'true');
+    }
 
     this.elements.statusText.className = 'status-card__status';
     this.elements.statusText.classList.add(
@@ -276,6 +294,126 @@ export class FlagStatusApp {
     );
 
     this.updateConnectionStatus();
+  }
+
+  updateVerification(status) {
+    const confidence = status.confidence || this.legacyConfidence(status);
+    if (this.elements.verificationPanel) {
+      this.elements.verificationPanel.dataset.level = confidence.level;
+    }
+    if (this.elements.verificationLabel) {
+      this.elements.verificationLabel.textContent = confidence.label;
+    }
+    if (this.elements.verificationSummary) {
+      this.elements.verificationSummary.textContent = confidence.summary;
+    }
+
+    if (this.elements.orderWindow) {
+      this.elements.orderWindow.textContent =
+        status.status === 'half-staff' && status.expires
+          ? `Through ${this.formatEasternDate(status.expires)}`
+          : 'No active federal order';
+    }
+
+    this.renderSourceChecks(status.checked_sources || []);
+    this.renderVerificationAge(status);
+    if (this.verificationInterval) clearInterval(this.verificationInterval);
+    this.verificationInterval = setInterval(() => this.renderVerificationAge(status), 60000);
+  }
+
+  legacyConfidence(status) {
+    if (status.verification === 'official-presidential-action') {
+      return {
+        level: 'official',
+        label: 'Official order verified',
+        summary: 'Matched to an official presidential action.'
+      };
+    }
+    return {
+      level: 'provider',
+      label: 'Provider reported',
+      summary: 'Showing the strongest currently available status signal.'
+    };
+  }
+
+  renderVerificationAge(status) {
+    const checkedAt = new Date(status.last_checked || status.last_updated);
+    const ageMs = Date.now() - checkedAt.getTime();
+    const valid = !Number.isNaN(ageMs);
+    const freshness =
+      !valid || ageMs > 8 * 60 * 60 * 1000 ? 'stale' : ageMs > 90 * 60 * 1000 ? 'delayed' : 'fresh';
+    const label = valid ? this.formatRelativeAge(checkedAt) : 'Verification time unavailable';
+
+    if (this.elements.verificationAge) {
+      this.elements.verificationAge.textContent = label;
+    }
+    if (this.elements.healthPill) {
+      this.elements.healthPill.dataset.freshness = freshness;
+    }
+    if (this.elements.healthPillText) {
+      this.elements.healthPillText.textContent =
+        freshness === 'fresh'
+          ? 'Verified'
+          : freshness === 'delayed'
+            ? 'Check delayed'
+            : 'Data stale';
+    }
+  }
+
+  formatRelativeAge(date) {
+    const minutes = Math.max(0, Math.floor((Date.now() - date.getTime()) / 60000));
+    if (minutes < 1) return 'just now';
+    if (minutes < 60) return `${minutes} min ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hr${hours === 1 ? '' : 's'} ago`;
+    const days = Math.floor(hours / 24);
+    return `${days} day${days === 1 ? '' : 's'} ago`;
+  }
+
+  renderSourceChecks(sources) {
+    if (!this.elements.sourceChecks) return;
+    const names = {
+      'known-orders': 'Reviewed orders',
+      'verified-schedule': 'Verified schedule',
+      'white-house': 'White House',
+      'breaking-news': 'Breaking reports',
+      'halfstaff-org': 'HalfStaff.org'
+    };
+    const labels = {
+      'active-order': 'Active order',
+      clear: 'Clear',
+      unavailable: 'Unavailable'
+    };
+
+    this.elements.sourceChecks.replaceChildren();
+    sources.forEach((source) => {
+      const result = source.result || (source.available ? 'clear' : 'unavailable');
+      const item = document.createElement('li');
+      item.className = 'source-checks__item';
+      item.dataset.result = result;
+
+      const indicator = document.createElement('span');
+      indicator.className = 'source-checks__indicator';
+      indicator.setAttribute('aria-hidden', 'true');
+
+      const name = document.createElement('span');
+      name.className = 'source-checks__name';
+      name.textContent = names[source.name] || source.name;
+
+      const resultLabel = document.createElement('span');
+      resultLabel.className = 'source-checks__result';
+      resultLabel.textContent = labels[result] || result;
+      item.append(indicator, name, resultLabel);
+      this.elements.sourceChecks.append(item);
+    });
+
+    if (this.elements.sourceCheckCount) {
+      const responding = sources.filter(
+        (source) =>
+          (source.result || (source.available ? 'clear' : 'unavailable')) !== 'unavailable'
+      ).length;
+      this.elements.sourceCheckCount.textContent = `${responding}/${sources.length} responding`;
+    }
   }
 
   updateConnectionStatus() {
@@ -432,7 +570,7 @@ export class FlagStatusApp {
       const stats = calculateHistoryStats(normalizeHistory(response.history));
 
       if (this.elements.statChanges) {
-        this.elements.statChanges.textContent = stats.verifiedRecords;
+        this.elements.statChanges.textContent = stats.officialOrders;
       }
       if (this.elements.statStreak) {
         this.elements.statStreak.textContent =
@@ -472,8 +610,9 @@ export class FlagStatusApp {
   }
 
   getUpdateInterval() {
-    const hour = new Date().getHours();
-    return hour >= 8 && hour <= 18 ? UPDATE_INTERVALS.NORMAL : UPDATE_INTERVALS.SLOW;
+    return this.currentStatus?.status === 'half-staff' || this.currentStatus?.upcoming_order
+      ? UPDATE_INTERVALS.FAST
+      : UPDATE_INTERVALS.NORMAL;
   }
 
   scheduleRetry() {
@@ -664,6 +803,7 @@ export class FlagStatusApp {
   destroy() {
     this.stopUpdateCycle();
     if (this.retryTimeout) clearTimeout(this.retryTimeout);
+    if (this.verificationInterval) clearInterval(this.verificationInterval);
     if (this.dateInterval) clearInterval(this.dateInterval);
     this.flagDisplay?.destroy();
   }

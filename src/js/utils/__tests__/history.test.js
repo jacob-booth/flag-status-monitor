@@ -8,7 +8,8 @@ const verifiedHistory = [
     ends: '2026-07-18T22:00:00Z',
     status: 'half-staff',
     reason: 'Honoring Senator Lindsey Graham',
-    source: 'The White House'
+    source: 'The White House',
+    verification: 'official-presidential-action'
   },
   {
     id: 'charlie-kirk-2025',
@@ -16,7 +17,8 @@ const verifiedHistory = [
     ends: '2025-09-14',
     status: 'half-staff',
     reason: 'Honoring Charlie Kirk',
-    source: 'The White House'
+    source: 'The White House',
+    verification: 'official-presidential-action'
   }
 ];
 
@@ -47,6 +49,7 @@ describe('verified history statistics', () => {
 
     const stats = calculateHistoryStats(verifiedHistory, new Date('2026-07-14T18:11:50Z'));
     expect(stats.verifiedRecords).toBe(2);
+    expect(stats.officialOrders).toBe(2);
     expect(stats.orderedDays).toBe(12);
     expect(stats.currentRunDays).toBe(2);
   });

@@ -149,16 +149,38 @@ async function makeRequest(endpoint, options = {}, useCache = true) {
 /**
  * Map HalfStaff.org widget response to app status format
  * @param {Object} data
+ * @param {string} sourceUrl
+ * @param {string} scope
  * @returns {Object}
  */
-function mapHalfStaffResponse(data) {
+function mapHalfStaffResponse(data, sourceUrl, scope) {
   const isHalfStaff = data?.type && data.type !== 'none';
+  const checkedAt = new Date().toISOString();
   return {
     status: isHalfStaff ? 'half-staff' : 'full-staff',
-    last_updated: new Date().toISOString(),
+    last_updated: checkedAt,
+    last_checked: checkedAt,
     source: 'HalfStaff.org',
+    source_url: sourceUrl,
     reason: data?.title || data?.reason || (isHalfStaff ? '' : 'No active half-staff notices'),
-    expires: null
+    expires: data?.expires || null,
+    verification: 'state-provider-signal',
+    scope,
+    confidence: {
+      level: 'provider',
+      label: 'State provider reported',
+      summary:
+        'State notices are reported directly by HalfStaff.org and are separate from federal status.'
+    },
+    checked_sources: [
+      {
+        name: 'halfstaff-org',
+        result: isHalfStaff ? 'active-order' : 'clear',
+        authoritative: false
+      }
+    ],
+    upcoming_order: null,
+    recent_order: null
   };
 }
 
@@ -196,7 +218,7 @@ export const api = {
     }
 
     const data = await response.json();
-    return mapHalfStaffResponse(data);
+    return mapHalfStaffResponse(data, url, `state:${state}`);
   },
 
   /**

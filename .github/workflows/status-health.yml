@@ -1,0 +1,93 @@
+name: Production Status Health
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['Update Flag Status']
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-status-health
+  cancel-in-progress: true
+
+jobs:
+  verify-live-data:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v5
+        with:
+          ref: main
+
+      - name: Verify repository freshness and live deployment
+        env:
+          LIVE_BASE_URL: https://jacob-booth.github.io/flag-status-monitor
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import time
+          import urllib.request
+          from datetime import datetime, timezone
+
+          with open("public/api/status.json", encoding="utf-8") as handle:
+              expected_status = json.load(handle)
+          with open("public/api/history.json", encoding="utf-8") as handle:
+              expected_history = json.load(handle)
+
+          checked_at = datetime.fromisoformat(
+              expected_status["last_checked"].replace("Z", "+00:00")
+          )
+          age = datetime.now(timezone.utc) - checked_at.astimezone(timezone.utc)
+          if age.total_seconds() > 8 * 60 * 60:
+              raise SystemExit(f"Repository status is stale: last checked {age} ago")
+
+          def fetch_json(path):
+              url = f"{os.environ['LIVE_BASE_URL']}/{path}?health={time.time_ns()}"
+              request = urllib.request.Request(
+                  url,
+                  headers={"Cache-Control": "no-cache", "User-Agent": "flag-status-health/1.0"},
+              )
+              with urllib.request.urlopen(request, timeout=20) as response:
+                  return json.load(response)
+
+          for attempt in range(4):
+              try:
+                  live_status = fetch_json("api/status.json")
+                  live_history = fetch_json("api/history.json")
+                  expected_signature = (
+                      expected_status["status"],
+                      expected_status.get("order_id"),
+                      expected_status["last_checked"],
+                  )
+                  live_signature = (
+                      live_status["status"],
+                      live_status.get("order_id"),
+                      live_status["last_checked"],
+                  )
+                  if live_signature != expected_signature:
+                      raise RuntimeError(
+                          f"Live status {live_signature!r} does not match main {expected_signature!r}"
+                      )
+                  if live_history.get("total") != expected_history.get("total"):
+                      raise RuntimeError(
+                          f"Live history total {live_history.get('total')} does not match "
+                          f"main {expected_history.get('total')}"
+                      )
+                  print(
+                      f"Healthy: {live_status['status']}, "
+                      f"{live_history['total']} history records, checked {age} ago"
+                  )
+                  break
+              except Exception as error:
+                  print(f"Attempt {attempt + 1} failed: {error}")
+                  if attempt == 3:
+                      raise
+                  time.sleep(15)
+          PY

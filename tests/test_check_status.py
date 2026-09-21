@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
-from src.api.check_status import FlagStatusChecker, parse_datetime
+from src.api.check_status import FlagStatusChecker, parse_datetime, parse_order_boundary
 
 
 UTC = timezone.utc
@@ -120,6 +120,37 @@ class KnownOrderTests(unittest.TestCase):
             self.assertEqual(upcoming["id"], "upcoming-tribute")
             self.assertEqual(upcoming["starts"], "2026-08-25T22:00:00Z")
 
+    def test_date_only_reviewed_order_remains_active_through_its_end_day(self):
+        with tempfile.TemporaryDirectory() as directory:
+            history_file = Path(directory) / "verified-history.json"
+            history_file.write_text(
+                json.dumps(
+                    {
+                        "history": [
+                            {
+                                "id": "patriot-day",
+                                "date": "2026-09-11",
+                                "ends": "2026-09-11",
+                                "status": "half-staff",
+                                "reason": "Patriot Day",
+                                "source": "The White House",
+                                "source_url": "https://example.gov/order",
+                                "verification": "official-presidential-action",
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+            checker = FlagStatusChecker(now=datetime(2026, 9, 11, 20, 0, tzinfo=UTC))
+            checker.verified_history_file = str(history_file)
+
+            signal = checker.check_verified_schedule()
+
+            self.assertEqual(signal["order_id"], "patriot-day")
+            self.assertEqual(signal["status"], "half-staff")
+            self.assertEqual(checker.source_health["verified-schedule"], "active-order")
+
 
 class BreakingNewsTests(unittest.TestCase):
     def test_detects_only_explicit_nationwide_order_and_parses_expiry(self):
@@ -162,6 +193,7 @@ class FailureSafetyTests(unittest.TestCase):
     def test_refuses_to_invent_full_staff_when_every_source_is_down(self):
         checker = FlagStatusChecker(now=NOW)
         checker.check_known_orders = lambda: None
+        checker.check_verified_schedule = lambda: None
         checker.check_whitehouse_actions = lambda: None
         checker.check_news_orders = lambda: None
         checker.check_halfstaff_api = lambda: None
@@ -173,6 +205,7 @@ class FailureSafetyTests(unittest.TestCase):
     def test_retains_unexpired_half_staff_order_during_source_outage(self):
         checker = FlagStatusChecker(now=NOW)
         checker.check_known_orders = lambda: None
+        checker.check_verified_schedule = lambda: None
         checker.check_whitehouse_actions = lambda: None
         checker.check_news_orders = lambda: None
         checker.check_halfstaff_api = lambda: None
@@ -191,6 +224,7 @@ class FailureSafetyTests(unittest.TestCase):
     def test_does_not_retain_an_order_without_an_expiration(self):
         checker = FlagStatusChecker(now=NOW)
         checker.check_known_orders = lambda: None
+        checker.check_verified_schedule = lambda: None
         checker.check_whitehouse_actions = lambda: None
         checker.check_news_orders = lambda: None
         checker.check_halfstaff_api = lambda: checker._signal(
@@ -350,6 +384,99 @@ class HistoryTests(unittest.TestCase):
             order = next(entry for entry in history if entry.get("id") == "verified-order")
             self.assertEqual(order["source"], "The White House")
             self.assertEqual(order["date"], "2026-07-12T17:00:00Z")
+
+    def test_consecutive_half_staff_orders_are_both_preserved(self):
+        with tempfile.TemporaryDirectory() as directory:
+            checker = FlagStatusChecker(now=NOW)
+            checker.history_file = str(Path(directory) / "history.json")
+            checker.verified_history_file = str(Path(directory) / "verified-history.json")
+            Path(checker.verified_history_file).write_text(
+                json.dumps({"history": []}), encoding="utf-8"
+            )
+            Path(checker.history_file).write_text(
+                json.dumps(
+                    {
+                        "history": [
+                            {
+                                "id": "first-order",
+                                "date": "2026-07-10T12:00:00Z",
+                                "status": "half-staff",
+                                "reason": "First order",
+                                "source": "The White House",
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            checker._append_history(
+                {
+                    "order_id": "second-order",
+                    "last_updated": "2026-07-12T18:00:00Z",
+                    "status": "half-staff",
+                    "reason": "Second order",
+                    "source": "The White House",
+                    "source_url": "https://example.gov/second",
+                    "expires": "2026-07-14T00:00:00Z",
+                    "verification": "official-presidential-action",
+                }
+            )
+
+            history = json.loads(Path(checker.history_file).read_text(encoding="utf-8"))["history"]
+            self.assertEqual([entry["id"] for entry in history], ["second-order", "first-order"])
+
+    def test_unchanged_heartbeat_never_moves_last_checked_backward(self):
+        with tempfile.TemporaryDirectory() as directory:
+            checker = FlagStatusChecker(now=datetime(2026, 9, 21, 19, 50, tzinfo=UTC))
+            checker.api_status_file = str(Path(directory) / "status.json")
+            checker.history_file = str(Path(directory) / "history.json")
+            checker.badge_file = str(Path(directory) / "badge.json")
+            checker.verified_history_file = str(Path(directory) / "verified-history.json")
+            Path(checker.verified_history_file).write_text(
+                json.dumps({"history": []}), encoding="utf-8"
+            )
+            existing = {
+                "status": "full-staff",
+                "reason": "No active order",
+                "source": "Provider",
+                "source_url": "https://example.gov",
+                "expires": None,
+                "verification": "negative-provider-signal",
+                "order_id": None,
+                "upcoming_order": None,
+                "recent_order": None,
+                "confidence": {"level": "cross-checked"},
+                "last_updated": "2026-09-20T00:00:00Z",
+                "last_checked": "2026-09-21T19:43:00Z",
+                "checked_sources": [],
+            }
+            Path(checker.api_status_file).write_text(json.dumps(existing), encoding="utf-8")
+
+            checker._write_status(dict(existing))
+
+            written = json.loads(Path(checker.api_status_file).read_text(encoding="utf-8"))
+            self.assertEqual(written["last_checked"], "2026-09-21T19:43:00+00:00")
+
+
+class RegistryIntegrityTests(unittest.TestCase):
+    def test_reviewed_history_has_unique_sourced_time_bounded_orders(self):
+        registry = json.loads(
+            Path("src/api/verified_history.json").read_text(encoding="utf-8")
+        )["history"]
+        identifiers = [entry["id"] for entry in registry]
+
+        self.assertGreaterEqual(len(registry), 16)
+        self.assertEqual(len(identifiers), len(set(identifiers)))
+        for entry in registry:
+            with self.subTest(order=entry["id"]):
+                self.assertEqual(entry["status"], "half-staff")
+                self.assertTrue(entry["source_url"].startswith("https://"))
+                self.assertEqual(entry["verification"], "official-presidential-action")
+                self.assertLess(
+                    parse_order_boundary(entry["date"]),
+                    parse_order_boundary(entry["ends"], end=True),
+                )
 
 
 if __name__ == "__main__":

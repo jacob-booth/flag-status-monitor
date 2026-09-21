@@ -49,6 +49,18 @@ def parse_datetime(value: Optional[str]) -> Optional[datetime]:
         return None
 
 
+def parse_order_boundary(value: Optional[str], *, end: bool = False) -> Optional[datetime]:
+    """Parse an order boundary, treating date-only endings as inclusive."""
+    if not value:
+        return None
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+        parsed = datetime.strptime(value, "%Y-%m-%d").replace(tzinfo=EASTERN)
+        if end:
+            parsed += timedelta(days=1)
+        return parsed.astimezone(UTC)
+    return parse_datetime(value)
+
+
 def direct_news_url(url: str) -> str:
     """Unwrap Bing's RSS redirect URL without making another request."""
     query = urllib.parse.parse_qs(urllib.parse.urlparse(url).query)
@@ -67,6 +79,7 @@ class FlagStatusChecker:
         self.whitehouse_url = "https://www.whitehouse.gov/presidential-actions/proclamations/"
         self.news_url = "https://www.bing.com/news/search"
         self.max_history_entries = 200
+        self.source_health: Dict[str, str] = {}
         self.headers = {
             "User-Agent": (
                 "FlagStatusMonitor/3.1 "
@@ -130,19 +143,22 @@ class FlagStatusChecker:
                 orders = json.load(handle).get("orders", [])
         except (OSError, json.JSONDecodeError) as error:
             logger.warning("Known-order registry unavailable: %s", error)
+            self.source_health["known-orders"] = "unavailable"
             return None
 
         active = []
         for order in orders:
-            starts = parse_datetime(order.get("starts"))
-            expires = parse_datetime(order.get("expires"))
+            starts = parse_order_boundary(order.get("starts"))
+            expires = parse_order_boundary(order.get("expires"), end=True)
             if starts and starts <= self.now and expires and expires > self.now:
                 active.append(order)
 
         if not active:
+            self.source_health["known-orders"] = "clear"
             return None
 
         order = max(active, key=lambda item: parse_datetime(item["starts"]))
+        self.source_health["known-orders"] = "active-order"
         return self._signal(
             "half-staff",
             order["reason"],
@@ -157,6 +173,42 @@ class FlagStatusChecker:
                 else "verified-order"
             ),
             order_id=order.get("id"),
+        )
+
+    def check_verified_schedule(self) -> Optional[Dict]:
+        """Resolve reviewed recurring and historical orders when currently active."""
+        try:
+            with open(self.verified_history_file, encoding="utf-8") as handle:
+                entries = json.load(handle).get("history", [])
+        except (OSError, json.JSONDecodeError) as error:
+            logger.warning("Verified schedule unavailable: %s", error)
+            self.source_health["verified-schedule"] = "unavailable"
+            return None
+
+        active = []
+        for entry in entries:
+            if entry.get("status") != "half-staff":
+                continue
+            starts = parse_order_boundary(entry.get("date"))
+            expires = parse_order_boundary(entry.get("ends"), end=True)
+            if starts and starts <= self.now and expires and expires > self.now:
+                active.append((starts, expires, entry))
+
+        if not active:
+            self.source_health["verified-schedule"] = "clear"
+            return None
+
+        _, expires, entry = max(active, key=lambda item: item[0])
+        self.source_health["verified-schedule"] = "active-order"
+        return self._signal(
+            "half-staff",
+            entry["reason"],
+            entry["source"],
+            entry["source_url"],
+            expires.isoformat(),
+            priority=98,
+            verification=entry.get("verification", "official-presidential-action"),
+            order_id=entry.get("id"),
         )
 
     def check_upcoming_order(self) -> Optional[Dict]:
@@ -215,6 +267,7 @@ class FlagStatusChecker:
             data = self._get(self.halfstaff_url).json()
             notice_type = data.get("type")
             if notice_type and notice_type != "none":
+                self.source_health["halfstaff-org"] = "active-order"
                 return self._signal(
                     "half-staff",
                     data.get("title") or data.get("reason") or "Active half-staff notice",
@@ -223,6 +276,7 @@ class FlagStatusChecker:
                     data.get("expires"),
                     priority=70,
                 )
+            self.source_health["halfstaff-org"] = "clear"
             return self._signal(
                 "full-staff",
                 "No active notice reported by HalfStaff.org",
@@ -233,6 +287,7 @@ class FlagStatusChecker:
             )
         except (requests.RequestException, ValueError) as error:
             logger.error("HalfStaff.org check failed: %s", error)
+            self.source_health["halfstaff-org"] = "unavailable"
             return None
 
     def _parse_expiration(self, text: str, published: Optional[datetime] = None) -> Optional[str]:
@@ -324,6 +379,7 @@ class FlagStatusChecker:
         """
         candidates = []
         items = []
+        successful_queries = 0
         queries = (
             "all American flags lowered half mast",
             "all American flags lowered half staff",
@@ -335,6 +391,7 @@ class FlagStatusChecker:
                     self.news_url,
                     params={"q": query, "format": "rss"},
                 )
+                successful_queries += 1
                 items.extend(ET.fromstring(response.content).findall(".//item"))
             except (requests.RequestException, ET.ParseError) as error:
                 logger.error("Breaking-order news query failed (%s): %s", query, error)
@@ -375,7 +432,11 @@ class FlagStatusChecker:
                 )
             )
 
-        return max(candidates, key=lambda signal: signal["expires"], default=None)
+        result = max(candidates, key=lambda signal: signal["expires"], default=None)
+        self.source_health["breaking-news"] = (
+            "active-order" if result else "clear" if successful_queries else "unavailable"
+        )
+        return result
 
     def _whitehouse_article_signal(self, url: str) -> Optional[Dict]:
         try:
@@ -410,6 +471,7 @@ class FlagStatusChecker:
             soup = BeautifulSoup(self._get(self.whitehouse_url).text, "html.parser")
         except requests.RequestException as error:
             logger.error("White House check failed: %s", error)
+            self.source_health["white-house"] = "unavailable"
             return None
 
         links = []
@@ -422,12 +484,44 @@ class FlagStatusChecker:
 
         with ThreadPoolExecutor(max_workers=6) as pool:
             signals = [signal for signal in pool.map(self._whitehouse_article_signal, links) if signal]
-        return max(signals, key=lambda signal: signal.get("expires") or "", default=None)
+        result = max(signals, key=lambda signal: signal.get("expires") or "", default=None)
+        self.source_health["white-house"] = "active-order" if result else "clear"
+        return result
+
+    def _confidence(self, chosen: Dict) -> Dict:
+        verification = chosen.get("verification")
+        clear_sources = sum(status == "clear" for status in self.source_health.values())
+        unavailable = sum(status == "unavailable" for status in self.source_health.values())
+
+        if verification == "official-presidential-action":
+            return {
+                "level": "official",
+                "label": "Official order verified",
+                "summary": "Matched to a reviewed White House presidential action.",
+            }
+        if verification in {"retained-source-outage", "retained-active-order"} or unavailable >= 3:
+            return {
+                "level": "degraded",
+                "label": "Verification degraded",
+                "summary": "Some upstream checks are unavailable; the last time-bounded result is retained.",
+            }
+        if chosen.get("status") == "full-staff" and clear_sources >= 2:
+            return {
+                "level": "cross-checked",
+                "label": "Cross-checked",
+                "summary": f"{clear_sources} monitored sources report no active federal order.",
+            }
+        return {
+            "level": "provider",
+            "label": "Provider reported",
+            "summary": "Current status is based on the strongest available provider signal.",
+        }
 
     def get_current_status(self) -> Dict:
         """Resolve positive signals before considering a full-staff signal."""
         checks = [
             ("known-orders", self.check_known_orders),
+            ("verified-schedule", self.check_verified_schedule),
             ("white-house", self.check_whitehouse_actions),
             ("breaking-news", self.check_news_orders),
             ("halfstaff-org", self.check_halfstaff_api),
@@ -436,7 +530,14 @@ class FlagStatusChecker:
         checked_sources = []
         for name, check in checks:
             signal = check()
-            checked_sources.append({"name": name, "available": signal is not None})
+            checked_sources.append(
+                {
+                    "name": name,
+                    "result": self.source_health.get(name, "unavailable"),
+                    "authoritative": name
+                    in {"known-orders", "verified-schedule", "white-house"},
+                }
+            )
             if signal:
                 signals.append(signal)
 
@@ -465,8 +566,11 @@ class FlagStatusChecker:
                     raise RuntimeError("No status source available; refusing to invent full-staff")
 
         chosen.pop("priority", None)
+        chosen["schema_version"] = 2
+        chosen["scope"] = "federal"
         chosen["upcoming_order"] = self.check_upcoming_order()
         chosen["recent_order"] = self.check_recent_order()
+        chosen["confidence"] = self._confidence(chosen)
         chosen["last_checked"] = self.now.isoformat()
         chosen["checked_sources"] = checked_sources
         return chosen
@@ -495,7 +599,18 @@ class FlagStatusChecker:
         }
         history_entry = {key: value for key, value in history_entry.items() if value is not None}
 
-        if not last_entry or last_entry.get("status") != status.get("status"):
+        new_half_staff_order = bool(
+            last_entry
+            and status.get("status") == "half-staff"
+            and last_entry.get("id")
+            and status.get("order_id")
+            and status.get("order_id") != last_entry.get("id")
+        )
+        if (
+            not last_entry
+            or last_entry.get("status") != status.get("status")
+            or new_half_staff_order
+        ):
             history.insert(
                 0,
                 history_entry,
@@ -539,6 +654,11 @@ class FlagStatusChecker:
                 {
                     "history": history,
                     "total": len(history),
+                    "coverage_start": history[-1].get("date") if history else None,
+                    "official_order_count": sum(
+                        entry.get("verification") == "official-presidential-action"
+                        for entry in history
+                    ),
                     "page": 1,
                     "per_page": len(history),
                 },
@@ -558,10 +678,14 @@ class FlagStatusChecker:
             "verification",
             "upcoming_order",
             "recent_order",
+            "confidence",
         )
         changed = any(existing.get(field) != status.get(field) for field in semantic_fields)
-        status_changed = existing.get("status") != status.get("status")
-        status["last_updated"] = self.now.isoformat() if status_changed else existing.get(
+        transition_changed = (
+            existing.get("status") != status.get("status")
+            or existing.get("order_id") != status.get("order_id")
+        )
+        status["last_updated"] = self.now.isoformat() if transition_changed else existing.get(
             "last_updated", self.now.isoformat()
         )
 
@@ -569,7 +693,11 @@ class FlagStatusChecker:
         # commits immediately, while routine 15-minute checks create at most
         # one heartbeat/deploy commit per hour.
         if not changed:
-            status["last_checked"] = self.now.replace(minute=0, second=0, microsecond=0).isoformat()
+            rounded_check = self.now.replace(minute=0, second=0, microsecond=0)
+            previous_check = parse_datetime(existing.get("last_checked"))
+            status["last_checked"] = max(
+                rounded_check, previous_check or rounded_check
+            ).isoformat()
 
         os.makedirs(os.path.dirname(self.api_status_file), exist_ok=True)
         with open(self.api_status_file, "w", encoding="utf-8") as handle:
