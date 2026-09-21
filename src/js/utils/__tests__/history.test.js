@@ -50,4 +50,31 @@ describe('verified history statistics', () => {
     expect(stats.orderedDays).toBe(12);
     expect(stats.currentRunDays).toBe(2);
   });
+
+  it('does not double-count overlapping orders and starts the full-staff run after both end', () => {
+    const overlapping = [
+      {
+        id: 'memorial-order',
+        date: '2025-09-10',
+        ends: '2025-09-14',
+        status: 'half-staff',
+        reason: 'Multi-day memorial order',
+        source: 'The White House'
+      },
+      {
+        id: 'patriot-day',
+        date: '2025-09-11',
+        ends: '2025-09-11',
+        status: 'half-staff',
+        reason: 'Patriot Day',
+        source: 'The White House'
+      }
+    ];
+
+    const stats = calculateHistoryStats(overlapping, new Date('2025-09-21T12:00:00Z'));
+
+    expect(stats.orderedDays).toBe(5);
+    expect(stats.currentRunDays).toBe(6);
+    expect(stats.lastChangeDate).toBe('2025-09-15T00:00:00.000Z');
+  });
 });

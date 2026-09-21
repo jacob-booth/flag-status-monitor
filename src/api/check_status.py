@@ -62,6 +62,7 @@ class FlagStatusChecker:
         self.history_file = os.path.join("public", "api", "history.json")
         self.badge_file = os.path.join("public", "badge.json")
         self.known_orders_file = os.path.join("src", "api", "known_orders.json")
+        self.verified_history_file = os.path.join("src", "api", "verified_history.json")
         self.halfstaff_url = "https://halfstaff.org/wp-json/halfstaff/v1/widget"
         self.whitehouse_url = "https://www.whitehouse.gov/presidential-actions/proclamations/"
         self.news_url = "https://www.bing.com/news/search"
@@ -177,6 +178,31 @@ class FlagStatusChecker:
             return None
 
         _, order = min(upcoming, key=lambda item: item[0])
+        return {
+            key: order.get(key)
+            for key in ("id", "starts", "expires", "reason", "source", "source_url")
+            if order.get(key) is not None
+        }
+
+    def check_recent_order(self) -> Optional[Dict]:
+        """Return the most recently completed reviewed order for context."""
+        try:
+            with open(self.known_orders_file, encoding="utf-8") as handle:
+                orders = json.load(handle).get("orders", [])
+        except (OSError, json.JSONDecodeError):
+            return None
+
+        completed = []
+        for order in orders:
+            starts = parse_datetime(order.get("starts"))
+            expires = parse_datetime(order.get("expires"))
+            if starts and expires and starts < expires <= self.now:
+                completed.append((expires, order))
+
+        if not completed:
+            return None
+
+        _, order = max(completed, key=lambda item: item[0])
         return {
             key: order.get(key)
             for key in ("id", "starts", "expires", "reason", "source", "source_url")
@@ -440,6 +466,7 @@ class FlagStatusChecker:
 
         chosen.pop("priority", None)
         chosen["upcoming_order"] = self.check_upcoming_order()
+        chosen["recent_order"] = self.check_recent_order()
         chosen["last_checked"] = self.now.isoformat()
         chosen["checked_sources"] = checked_sources
         return chosen
@@ -478,6 +505,16 @@ class FlagStatusChecker:
             # do not manufacture a second event or move its original date.
             history[0] = {**last_entry, **history_entry, "date": last_entry["date"]}
 
+        try:
+            with open(self.verified_history_file, encoding="utf-8") as handle:
+                reviewed_history = json.load(handle).get("history", [])
+        except (OSError, json.JSONDecodeError) as error:
+            logger.warning("Verified history registry unavailable: %s", error)
+            reviewed_history = []
+
+        # Reviewed records come first so their official source and corrected
+        # dates replace weaker versions of the same event captured in real time.
+        history = [*reviewed_history, *history]
         deduplicated = []
         seen = set()
         for entry in history:
@@ -491,7 +528,11 @@ class FlagStatusChecker:
                 continue
             seen.add(fingerprint)
             deduplicated.append(entry)
-        history = deduplicated[: self.max_history_entries]
+        history = sorted(
+            deduplicated,
+            key=lambda entry: parse_datetime(entry.get("date")) or datetime.min.replace(tzinfo=UTC),
+            reverse=True,
+        )[: self.max_history_entries]
 
         with open(self.history_file, "w", encoding="utf-8") as handle:
             json.dump(
@@ -516,6 +557,7 @@ class FlagStatusChecker:
             "expires",
             "verification",
             "upcoming_order",
+            "recent_order",
         )
         changed = any(existing.get(field) != status.get(field) for field in semantic_fields)
         status_changed = existing.get("status") != status.get("status")
