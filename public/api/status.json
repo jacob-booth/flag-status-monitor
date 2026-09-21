@@ -6,6 +6,8 @@
   "expires": null,
   "verification": "negative-provider-signal",
   "order_id": null,
+  "schema_version": 2,
+  "scope": "federal",
   "upcoming_order": null,
   "recent_order": {
     "id": "dolly-parton-2026",
@@ -15,23 +17,37 @@
     "source": "The White House",
     "source_url": "https://www.whitehouse.gov/presidential-actions/2026/08/honoring-the-memory-of-dolly-parton/"
   },
-  "last_checked": "2026-09-21T19:43:36.169024+00:00",
+  "confidence": {
+    "level": "cross-checked",
+    "label": "Cross-checked",
+    "summary": "5 monitored sources report no active federal order."
+  },
+  "last_checked": "2026-09-21T20:10:27.204559+00:00",
   "checked_sources": [
     {
       "name": "known-orders",
-      "available": false
+      "result": "clear",
+      "authoritative": true
+    },
+    {
+      "name": "verified-schedule",
+      "result": "clear",
+      "authoritative": true
     },
     {
       "name": "white-house",
-      "available": false
+      "result": "clear",
+      "authoritative": true
     },
     {
       "name": "breaking-news",
-      "available": false
+      "result": "clear",
+      "authoritative": false
     },
     {
       "name": "halfstaff-org",
-      "available": true
+      "result": "clear",
+      "authoritative": false
     }
   ],
   "last_updated": "2026-09-02T05:09:46.756210+00:00"
