@@ -289,10 +289,12 @@ export class FlagStatusApp {
 
   updateTribute(status) {
     const upcoming = status.upcoming_order;
+    const recent = status.recent_order;
     const activeDollyOrder =
       status.status === 'half-staff' && status.reason?.toLowerCase().includes('dolly parton');
     const upcomingDollyOrder = upcoming?.reason?.toLowerCase().includes('dolly parton');
-    const showTribute = activeDollyOrder || upcomingDollyOrder;
+    const recentDollyOrder = recent?.reason?.toLowerCase().includes('dolly parton');
+    const showTribute = activeDollyOrder || upcomingDollyOrder || recentDollyOrder;
 
     document.body.classList.toggle('tribute-dolly', Boolean(showTribute));
     if (!this.elements.tributeBanner) return;
@@ -300,11 +302,15 @@ export class FlagStatusApp {
     this.elements.tributeBanner.hidden = !showTribute;
     if (!showTribute) return;
 
-    const order = activeDollyOrder ? status : upcoming;
+    const order = activeDollyOrder ? status : upcomingDollyOrder ? upcoming : recent;
     if (this.elements.tributeMessage) {
-      this.elements.tributeMessage.textContent = activeDollyOrder
-        ? `The flag is lowered nationwide through ${this.formatEasternDate(order.expires)}.`
-        : `The flag will be lowered nationwide from ${this.formatEasternDate(order.starts)} through ${this.formatEasternDate(order.expires)}.`;
+      if (activeDollyOrder) {
+        this.elements.tributeMessage.textContent = `The flag is lowered nationwide through ${this.formatEasternDate(order.expires)}.`;
+      } else if (upcomingDollyOrder) {
+        this.elements.tributeMessage.textContent = `The flag will be lowered nationwide from ${this.formatEasternDate(order.starts)} through ${this.formatEasternDate(order.expires)}.`;
+      } else {
+        this.elements.tributeMessage.textContent = `Flags were lowered nationwide from ${this.formatEasternDate(order.starts)} through ${this.formatEasternDate(order.expires)} in her memory.`;
+      }
     }
 
     if (this.elements.tributeSource) {

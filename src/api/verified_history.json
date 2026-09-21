@@ -4,20 +4,12 @@
       "id": "patriot-day-2026",
       "date": "2026-09-11",
       "status": "half-staff",
-      "reason": "Patriot Day \u2014 honoring the victims of the September 11 terrorist attacks",
+      "reason": "Patriot Day — honoring the victims of the September 11 terrorist attacks",
       "source": "The White House",
       "source_url": "https://www.whitehouse.gov/presidential-actions/2026/09/patriot-day-2026-the-25th-anniversary-of-the-september-11-terrorist-attacks/",
       "ends": "2026-09-11",
       "end_label": "For Patriot Day, September 11, 2026",
       "verification": "official-presidential-action"
-    },
-    {
-      "date": "2026-09-02T05:09:46.756210+00:00",
-      "status": "full-staff",
-      "reason": "No active notice reported by HalfStaff.org",
-      "source": "HalfStaff.org",
-      "source_url": "https://halfstaff.org/wp-json/halfstaff/v1/widget",
-      "verification": "negative-provider-signal"
     },
     {
       "id": "dolly-parton-2026",
@@ -31,14 +23,6 @@
       "verification": "official-presidential-action"
     },
     {
-      "date": "2026-08-25T18:43:04.555658+00:00",
-      "status": "full-staff",
-      "reason": "No active notice reported by HalfStaff.org",
-      "source": "HalfStaff.org",
-      "source_url": "https://halfstaff.org/wp-json/halfstaff/v1/widget",
-      "verification": "negative-provider-signal"
-    },
-    {
       "id": "lindsey-graham-2026",
       "date": "2026-07-12T17:29:00Z",
       "status": "half-staff",
@@ -50,16 +34,10 @@
       "verification": "official-presidential-action"
     },
     {
-      "date": "2026-06-30T20:15:07.248349+00:00",
-      "status": "full-staff",
-      "reason": "No active half-staff notices",
-      "source": "HalfStaff.org"
-    },
-    {
       "id": "memorial-day-2026",
       "date": "2026-05-25",
       "status": "half-staff",
-      "reason": "Memorial Day \u2014 honoring America\u2019s fallen service members",
+      "reason": "Memorial Day — honoring America’s fallen service members",
       "source": "The White House",
       "source_url": "https://www.whitehouse.gov/presidential-actions/2026/05/memorial-day-2026/",
       "ends": "2026-05-25T12:00:00-04:00",
@@ -111,17 +89,6 @@
       "verification": "official-presidential-action"
     },
     {
-      "id": "patriot-day-2025",
-      "date": "2025-09-11",
-      "status": "half-staff",
-      "reason": "Patriot Day \u2014 honoring the victims of the September 11 terrorist attacks",
-      "source": "The White House",
-      "source_url": "https://www.whitehouse.gov/presidential-actions/2025/09/patriot-day-2025-the-24th-annivresary-of-the-september-11-terrorist-attacks/",
-      "ends": "2025-09-11",
-      "end_label": "For Patriot Day, September 11, 2025",
-      "verification": "official-presidential-action"
-    },
-    {
       "id": "charlie-kirk-2025",
       "date": "2025-09-10",
       "status": "half-staff",
@@ -130,6 +97,17 @@
       "source_url": "https://www.whitehouse.gov/presidential-actions/2025/09/honoring-the-memory-of-charlie-kirk/",
       "ends": "2025-09-14",
       "end_label": "Through sunset, September 14, 2025",
+      "verification": "official-presidential-action"
+    },
+    {
+      "id": "patriot-day-2025",
+      "date": "2025-09-11",
+      "status": "half-staff",
+      "reason": "Patriot Day — honoring the victims of the September 11 terrorist attacks",
+      "source": "The White House",
+      "source_url": "https://www.whitehouse.gov/presidential-actions/2025/09/patriot-day-2025-the-24th-annivresary-of-the-september-11-terrorist-attacks/",
+      "ends": "2025-09-11",
+      "end_label": "For Patriot Day, September 11, 2025",
       "verification": "official-presidential-action"
     },
     {
@@ -147,7 +125,7 @@
       "id": "memorial-day-2025",
       "date": "2025-05-26",
       "status": "half-staff",
-      "reason": "Memorial Day \u2014 honoring America\u2019s fallen service members",
+      "reason": "Memorial Day — honoring America’s fallen service members",
       "source": "The White House",
       "source_url": "https://www.whitehouse.gov/presidential-actions/2025/05/prayer-for-peace-memorial-day-2025/",
       "ends": "2025-05-26T12:00:00-04:00",
@@ -198,8 +176,5 @@
       "end_label": "Through sunset, January 28, 2025",
       "verification": "official-presidential-action"
     }
-  ],
-  "total": 19,
-  "page": 1,
-  "per_page": 19
+  ]
 }

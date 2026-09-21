@@ -46,12 +46,66 @@ export function elapsedDaysSince(value, now = new Date()) {
   return Math.max(0, Math.floor((now - start) / DAY_MS));
 }
 
+function uniqueOrderedCalendarDays(entries, now) {
+  const days = new Set();
+
+  entries
+    .filter((entry) => entry.status === 'half-staff')
+    .forEach((entry) => {
+      const start = utcCalendarDay(entry.date);
+      const end = utcCalendarDay(entry.ends || now);
+      if (start === null || end === null || end < start) return;
+      for (let day = start; day <= end; day += DAY_MS) days.add(day);
+    });
+
+  return days.size;
+}
+
+function currentRunStart(history, now) {
+  const intervals = history
+    .filter((entry) => entry.status === 'half-staff')
+    .map((entry) => {
+      const start = asDate(entry.date);
+      const parsedEnd = asDate(entry.ends);
+      const end =
+        parsedEnd && /^\d{4}-\d{2}-\d{2}$/.test(entry.ends)
+          ? new Date(parsedEnd.getTime() + DAY_MS)
+          : parsedEnd || new Date(now.getTime() + 1);
+      return start && end >= start ? { start, end } : null;
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.start - b.start);
+
+  const merged = [];
+  intervals.forEach((interval) => {
+    const previous = merged.at(-1);
+    if (previous && interval.start <= previous.end) {
+      if (interval.end > previous.end) previous.end = interval.end;
+    } else {
+      merged.push({ ...interval });
+    }
+  });
+
+  const active = merged.find(({ start, end }) => start <= now && now < end);
+  if (active) return active.start;
+
+  const boundaries = [
+    ...history.filter((entry) => entry.status === 'full-staff').map((entry) => asDate(entry.date)),
+    ...merged.map((interval) => interval.end)
+  ].filter((date) => date && date <= now);
+
+  return boundaries.length
+    ? new Date(Math.max(...boundaries.map((date) => date.getTime())))
+    : asDate(history[0]?.date);
+}
+
 export function calculateHistoryStats(entries, now = new Date()) {
   const history = normalizeHistory(entries);
+  const runStart = currentRunStart(history, now);
   return {
     verifiedRecords: history.length,
-    orderedDays: history.reduce((total, entry) => total + orderedCalendarDays(entry, now), 0),
-    currentRunDays: history.length ? elapsedDaysSince(history[0].date, now) : 0,
-    lastChangeDate: history[0]?.date || null
+    orderedDays: uniqueOrderedCalendarDays(history, now),
+    currentRunDays: runStart ? elapsedDaysSince(runStart, now) : 0,
+    lastChangeDate: runStart?.toISOString() || null
   };
 }
