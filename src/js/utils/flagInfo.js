@@ -8,6 +8,18 @@ function toISODate(year, month, day) {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
+/** Returns the Eastern Time calendar date for a point in time. */
+function easternCalendarDate(value = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(value);
+  const part = (type) => parts.find((item) => item.type === type)?.value;
+  return `${part('year')}-${part('month')}-${part('day')}`;
+}
+
 /** Returns the date of the nth occurrence of `weekday` (0=Sun..6=Sat) in `month` of `year`. */
 function nthWeekdayOfMonth(year, month, weekday, n) {
   const first = new Date(year, month, 1);
@@ -136,9 +148,9 @@ export const HALF_STAFF_PERIODS = {
  * @returns {Object} Nearest holiday information
  */
 export function getNearestFederalHoliday(currentDate = new Date()) {
-  const today = new Date(currentDate);
-  today.setHours(0, 0, 0, 0);
-  const year = today.getFullYear();
+  const todayKey = easternCalendarDate(currentDate);
+  const today = new Date(`${todayKey}T00:00:00Z`);
+  const year = Number(todayKey.slice(0, 4));
 
   // Pull from the surrounding years too so "nearest" stays correct right
   // at the start/end of the calendar (e.g. looking for the next holiday
@@ -147,7 +159,7 @@ export function getNearestFederalHoliday(currentDate = new Date()) {
     .flatMap((y) => [...getFederalHolidaysForYear(y), ...getSpecialObservancesForYear(y)])
     .map((holiday) => ({
       ...holiday,
-      dateObj: new Date(holiday.date + 'T00:00:00')
+      dateObj: new Date(`${holiday.date}T00:00:00Z`)
     }))
     .sort((a, b) => a.dateObj - b.dateObj);
 
@@ -187,8 +199,8 @@ export function getNearestFederalHoliday(currentDate = new Date()) {
  * @returns {Object|null} Today's observance or null
  */
 export function getTodaysObservance(currentDate = new Date()) {
-  const today = currentDate.toISOString().split('T')[0];
-  const year = currentDate.getFullYear();
+  const today = easternCalendarDate(currentDate);
+  const year = Number(today.slice(0, 4));
 
   const todayHoliday = getFederalHolidaysForYear(year).find((holiday) => holiday.date === today);
   if (todayHoliday) return { ...todayHoliday, category: 'federal' };
@@ -290,8 +302,7 @@ function getFlagCodeReference(status) {
  * @returns {string|null} Historical note
  */
 function getHistoricalNote(currentDate) {
-  const month = currentDate.getMonth() + 1;
-  const day = currentDate.getDate();
+  const [, month, day] = easternCalendarDate(currentDate).split('-').map(Number);
 
   const historicalNotes = {
     '6-14':
@@ -338,11 +349,12 @@ function getNextSignificantDate(holidays) {
  * @returns {string} Formatted date
  */
 export function formatHolidayDate(dateString) {
-  const date = new Date(dateString + 'T00:00:00');
+  const date = new Date(`${dateString}T12:00:00Z`);
   return new Intl.DateTimeFormat('en-US', {
     weekday: 'long',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
+    timeZone: 'UTC'
   }).format(date);
 }
 

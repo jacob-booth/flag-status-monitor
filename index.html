@@ -415,7 +415,13 @@
     </footer>
 
     <!-- Loading overlay -->
-    <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
+    <div
+      id="loading-overlay"
+      class="loading-overlay"
+      role="status"
+      aria-live="polite"
+      aria-hidden="true"
+    >
       <div class="loading-spinner" aria-hidden="true"></div>
       <p class="loading-text">Loading flag status…</p>
     </div>
@@ -424,9 +430,16 @@
     <div class="notification-container" aria-live="polite" aria-atomic="false"></div>
 
     <!-- Install prompt for PWA -->
-    <div id="install-prompt" class="install-prompt" hidden>
+    <div
+      id="install-prompt"
+      class="install-prompt"
+      role="dialog"
+      aria-modal="false"
+      aria-labelledby="install-prompt-title"
+      hidden
+    >
       <div class="install-prompt__content">
-        <h3 class="install-prompt__title">Install Flag Monitor</h3>
+        <h3 id="install-prompt-title" class="install-prompt__title">Install Flag Monitor</h3>
         <p class="install-prompt__text">
           Get instant notifications and offline access by installing this app.
         </p>
