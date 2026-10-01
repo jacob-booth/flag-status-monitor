@@ -285,6 +285,13 @@ class WhiteHouseTests(unittest.TestCase):
         )
         self.assertEqual(parse_datetime(expires), datetime(2026, 7, 18, 22, 0, tzinfo=UTC))
 
+    def test_same_weekday_expiration_uses_today_when_time_is_still_ahead(self):
+        checker = FlagStatusChecker(now=NOW)
+
+        expires = checker._parse_expiration("Flags remain lowered until Sunday at 6:00 p.m.")
+
+        self.assertEqual(parse_datetime(expires), datetime(2026, 7, 12, 22, 0, tzinfo=UTC))
+
 
 class HistoryTests(unittest.TestCase):
     def test_same_status_enriches_existing_record_without_duplication(self):

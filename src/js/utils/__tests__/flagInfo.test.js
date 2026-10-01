@@ -59,8 +59,13 @@ describe('getNearestFederalHoliday (year-agnostic)', () => {
 
 describe('getTodaysObservance', () => {
   it('returns the matching federal holiday when the date matches exactly', () => {
-    const observance = getTodaysObservance(new Date('2025-07-04T00:00:00Z'));
+    const observance = getTodaysObservance(new Date('2025-07-04T16:00:00Z'));
     expect(observance).toMatchObject({ name: 'Independence Day', category: 'federal' });
+  });
+
+  it('uses the Eastern calendar date near the UTC day boundary', () => {
+    const observance = getTodaysObservance(new Date('2026-09-12T02:00:00Z'));
+    expect(observance).toMatchObject({ name: 'Patriot Day', category: 'observance' });
   });
 
   it('returns null on a day with no observance', () => {
