@@ -22,7 +22,7 @@
     "label": "Cross-checked",
     "summary": "5 monitored sources report no active federal order."
   },
-  "last_checked": "2026-10-05T13:00:00+00:00",
+  "last_checked": "2026-10-06T01:00:00+00:00",
   "checked_sources": [
     {
       "name": "known-orders",
