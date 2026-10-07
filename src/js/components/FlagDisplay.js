@@ -37,9 +37,9 @@ export class FlagDisplay {
    */
   createFlagStructure() {
     this.container.innerHTML = `
-      <div class="flag-container" role="img" aria-label="${ARIA_LABELS.FLAG}">
+      <div class="flag-container" role="img" aria-label="${ARIA_LABELS.FLAG}" aria-describedby="flag-status-live">
         <div class="pole" aria-hidden="true"></div>
-        <div class="flag" id="flag" aria-describedby="flag-status">
+        <div class="flag" id="flag">
           <div class="stripes" aria-hidden="true">
             ${Array.from({ length: 13 }, () => '<div class="stripe"></div>').join('')}
           </div>

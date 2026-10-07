@@ -18,42 +18,6 @@ export class APIError extends Error {
 }
 
 /**
- * Simple in-memory cache for API responses
- */
-class APICache {
-  constructor() {
-    this.cache = new Map();
-    this.timestamps = new Map();
-  }
-
-  set(key, data, ttl = 300000) {
-    // 5 minutes default TTL
-    this.cache.set(key, data);
-    this.timestamps.set(key, Date.now() + ttl);
-  }
-
-  get(key) {
-    if (!this.cache.has(key)) return null;
-
-    const expiry = this.timestamps.get(key);
-    if (Date.now() > expiry) {
-      this.cache.delete(key);
-      this.timestamps.delete(key);
-      return null;
-    }
-
-    return this.cache.get(key);
-  }
-
-  clear() {
-    this.cache.clear();
-    this.timestamps.clear();
-  }
-}
-
-const cache = new APICache();
-
-/**
  * Sleep utility for retry delays
  * @param {number} ms - Milliseconds to sleep
  * @returns {Promise<void>}
@@ -88,20 +52,13 @@ async function withRetry(fn, attempts = API_CONFIG.RETRY_ATTEMPTS, delay = API_C
  * Make HTTP request with modern fetch API
  * @param {string} endpoint - API endpoint
  * @param {Object} options - Fetch options
- * @param {boolean} useCache - Whether to use cache
  * @returns {Promise<any>}
  */
-async function makeRequest(endpoint, options = {}, useCache = true) {
+async function makeRequest(endpoint, options = {}) {
   const isGet = !options.method || options.method === 'GET';
   const cacheBuster = isGet ? `t=${Date.now()}` : '';
   const separator = endpoint.includes('?') ? '&' : '?';
   const url = `${API_CONFIG.BASE_URL}${endpoint}${cacheBuster ? separator + cacheBuster : ''}`;
-  const cacheKey = `${url}:${JSON.stringify(options)}`;
-
-  if (useCache && isGet) {
-    const cached = cache.get(cacheKey);
-    if (cached) return cached;
-  }
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
@@ -128,13 +85,7 @@ async function makeRequest(endpoint, options = {}, useCache = true) {
       );
     }
 
-    const data = await response.json();
-
-    if (useCache && isGet) {
-      cache.set(cacheKey, data);
-    }
-
-    return data;
+    return response.json();
   } catch (error) {
     clearTimeout(timeoutId);
 
@@ -230,12 +181,5 @@ export const api = {
     const queryString = new URLSearchParams(params).toString();
     const endpoint = `${API_CONFIG.ENDPOINTS.HISTORY}${queryString ? `?${queryString}` : ''}`;
     return withRetry(() => makeRequest(endpoint));
-  },
-
-  /**
-   * Clear API cache
-   */
-  clearCache() {
-    cache.clear();
   }
 };

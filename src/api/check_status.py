@@ -348,8 +348,6 @@ class FlagStatusChecker:
             }
             target = weekdays[weekday_time.group(1).lower()]
             days_ahead = (target - base.weekday()) % 7
-            if days_ahead == 0:
-                days_ahead = 7
             hour = int(weekday_time.group(2))
             if "p" in weekday_time.group(4).lower() and hour != 12:
                 hour += 12
@@ -361,6 +359,8 @@ class FlagStatusChecker:
                 second=0,
                 microsecond=0,
             )
+            if end <= base:
+                end += timedelta(days=7)
             return end.astimezone(UTC).isoformat()
 
         return None

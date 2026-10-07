@@ -7,7 +7,7 @@
  *   is cached the first time it is requested ("cache as you go").
  */
 
-const VERSION = 'v5';
+const VERSION = 'v6';
 const STATIC_CACHE = `flag-status-static-${VERSION}`;
 const API_CACHE = `flag-status-api-${VERSION}`;
 const API_CACHE_MAX_AGE = 60 * 60 * 1000; // 1 hour
@@ -45,6 +45,8 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(networkFirstNavigation(request));
   } else if (url.pathname.includes('/api/')) {
     event.respondWith(networkFirstWithExpiry(request, API_CACHE, API_CACHE_MAX_AGE));
+  } else if (url.pathname.endsWith('/manifest.json')) {
+    event.respondWith(networkFirstStatic(request));
   } else if (url.origin === self.location.origin) {
     event.respondWith(cacheFirst(request, STATIC_CACHE));
   }
@@ -70,6 +72,18 @@ async function networkFirstNavigation(request) {
   }
 }
 
+/** Refresh unhashed metadata while retaining an offline fallback. */
+async function networkFirstStatic(request) {
+  const cache = await caches.open(STATIC_CACHE);
+  try {
+    const response = await fetch(request, { cache: 'no-store' });
+    if (response.ok) cache.put(request, response.clone());
+    return response;
+  } catch {
+    return (await cache.match(request)) || Response.error();
+  }
+}
+
 /** Cache-first for same-origin static assets (HTML/CSS/JS/icons). */
 async function cacheFirst(request, cacheName) {
   const cache = await caches.open(cacheName);
@@ -92,6 +106,11 @@ async function cacheFirst(request, cacheName) {
 /** Network-first for the JSON API data, with a time-boxed cache fallback when offline. */
 async function networkFirstWithExpiry(request, cacheName, maxAge) {
   const cache = await caches.open(cacheName);
+  const url = new URL(request.url);
+  // The browser adds a cache-busting query to every poll. Normalize to the
+  // resource pathname so repeated checks replace one fallback entry instead
+  // of growing the service-worker cache without bound.
+  const cacheKey = `${url.origin}${url.pathname}`;
 
   try {
     const response = await fetch(request);
@@ -102,11 +121,11 @@ async function networkFirstWithExpiry(request, cacheName, maxAge) {
         status: response.status,
         headers
       });
-      cache.put(request, stamped);
+      cache.put(cacheKey, stamped);
     }
     return response;
   } catch {
-    const cached = await cache.match(request);
+    const cached = await cache.match(cacheKey);
     if (cached) {
       const cachedAt = Number(cached.headers.get('sw-cached-at') || 0);
       if (Date.now() - cachedAt < maxAge) return cached;

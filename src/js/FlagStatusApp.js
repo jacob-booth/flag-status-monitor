@@ -760,11 +760,15 @@ export class FlagStatusApp {
 
   showLoading() {
     this.elements.loadingOverlay?.classList.add('is-visible');
+    this.elements.loadingOverlay?.setAttribute('aria-hidden', 'false');
+    document.getElementById('main-content')?.setAttribute('aria-busy', 'true');
     this.flagDisplay?.showLoading();
   }
 
   hideLoading() {
     this.elements.loadingOverlay?.classList.remove('is-visible');
+    this.elements.loadingOverlay?.setAttribute('aria-hidden', 'true');
+    document.getElementById('main-content')?.setAttribute('aria-busy', 'false');
     this.flagDisplay?.hideLoading();
   }
 
