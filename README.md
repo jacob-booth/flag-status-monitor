@@ -25,6 +25,16 @@ The U.S. flag is flown at half-staff on specific, often unannounced occasions �
 
 It's built as a fully static site — no server to provision, no database to manage — yet behaves like a real product: multi-source verification, visible data freshness, automatic deployments, status-change notifications while the app is open, keyboard shortcuts, and an accessible UI in both light and dark mode.
 
+## Data sources
+
+Status is assembled by `src/api/check_status.py` on a GitHub Actions schedule, then written to static JSON under `public/api/` so the PWA can stay serverless.
+
+1. **HalfStaff.org** — primary feed for current staff position and proclamation context.
+2. **usa.gov / Flag Code references** — fallback and etiquette text when the primary feed is unavailable or incomplete.
+3. **Federal holiday calendar** — used only for nearby-holiday context, not as the source of truth for half-staff orders.
+
+When a source fails, the checker records the last successful payload rather than inventing a new status. The live badge and in-app timestamp both reflect that last successful run.
+
 ## ✨ Features
 
 |                                  |                                                                                                                                                |
